@@ -2,7 +2,7 @@ import os
 import json
 from typing import List
 from fastapi import APIRouter, BackgroundTasks, Request, Form
-from fastapi import File, UploadFile
+from fastapi import File, UploadFile, Depends
 import requests
 
 import utilities
@@ -13,13 +13,13 @@ router = APIRouter()
 import_processes = {}
 
 @router.get("/status/{process_id}", tags=["Imports"])
-def status(process_id: str):
+def status(process_id: str, user_id: int=Depends(utilities.get_token_header)):
     if process_id not in import_processes:
         return {"status": "UNKNOWN", "error": "This process_id does not exist."}
     return import_processes[process_id]
 
 @router.post("/arcgis_service/", tags=["Imports"], response_model=models.BaseResponseModel)
-async def import_arcgis_service(info: models.ArcgisModel, request: Request, background_tasks: BackgroundTasks):
+async def import_arcgis_service(info: models.ArcgisModel, request: Request, background_tasks: BackgroundTasks, user_id: int=Depends(utilities.get_token_header)):
     new_table_id = utilities.get_new_table_id()
 
     process_id = utilities.get_new_process_id()
@@ -51,7 +51,8 @@ async def import_geographic_data_from_geographic_file(
         request: Request,
         background_tasks: BackgroundTasks,
         database: str = Form(...),
-        files: List[UploadFile] = File(...)
+        files: List[UploadFile] = File(...),
+        user_id: int=Depends(utilities.get_token_header)
     ):
     new_table_id = utilities.get_new_table_id()
 
@@ -105,7 +106,8 @@ async def import_geographic_data_from_csv(
         map_columns: List = Form(...),
         table_column: str = Form(...),
         table_columns: List = Form(...),
-        files: List[UploadFile] = File(...)
+        files: List[UploadFile] = File(...),
+        user_id: int=Depends(utilities.get_token_header)
     ):
     new_table_id = utilities.get_new_table_id()
 
@@ -163,7 +165,8 @@ async def import_point_data_from_csv(
         latitude: str = Form(...),
         longitude: str = Form(...),
         table_columns: List = Form(...),
-        files: List[UploadFile] = File(...)
+        files: List[UploadFile] = File(...),
+        user_id: int=Depends(utilities.get_token_header)
     ):
     new_table_id = utilities.get_new_table_id()
 
@@ -221,7 +224,8 @@ async def import_geographic_data_from_json_file(
         map_columns: List = Form(...),
         table_column: str = Form(...),
         table_columns: List = Form(...),
-        files: List[UploadFile] = File(...)
+        files: List[UploadFile] = File(...),
+        user_id: int=Depends(utilities.get_token_header)
     ):
     new_table_id = utilities.get_new_table_id()
 
@@ -279,7 +283,8 @@ async def import_point_data_from_json_file(
         latitude: str = Form(...),
         longitude: str = Form(...),
         table_columns: List = Form(...),
-        files: List[UploadFile] = File(...)
+        files: List[UploadFile] = File(...),
+        user_id: int=Depends(utilities.get_token_header)
     ):
     new_table_id = utilities.get_new_table_id()
 
@@ -331,7 +336,8 @@ async def import_point_data_from_json_file(
 async def import_geographic_data_from_json_url(
         request: Request,
         background_tasks: BackgroundTasks,
-        info: models.GeographicJsonUrl
+        info: models.GeographicJsonUrl,
+        user_id: int=Depends(utilities.get_token_header)
     ):
     new_table_id = utilities.get_new_table_id()
 
@@ -375,7 +381,8 @@ async def import_geographic_data_from_json_url(
 async def import_point_data_from_json_url(
         request: Request,
         background_tasks: BackgroundTasks,
-        info: models.PointJsonUrl
+        info: models.PointJsonUrl,
+        user_id: int=Depends(utilities.get_token_header)
     ):
     new_table_id = utilities.get_new_table_id()
 
@@ -417,7 +424,8 @@ async def import_point_data_from_json_url(
 async def import_geojson_from_url(
         request: Request,
         background_tasks: BackgroundTasks,
-        info: models.GeojsonUrl
+        info: models.GeojsonUrl,
+        user_id: int=Depends(utilities.get_token_header)
     ):
     new_table_id = utilities.get_new_table_id()
 

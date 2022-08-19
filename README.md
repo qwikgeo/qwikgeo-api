@@ -1,6 +1,6 @@
 # FastGeoPortal
 
-FastGeoPortal is a enterprise scale GIS portal. FastGeoPortal is written in [Python](https://www.python.org/) using the [FastAPI](https://fastapi.tiangolo.com/) web framework. 
+FastGeoPortal is a enterprise scale api for a GIS portal. FastGeoPortal is written in [Python](https://www.python.org/) using the [FastAPI](https://fastapi.tiangolo.com/) web framework. 
 
 ---
 

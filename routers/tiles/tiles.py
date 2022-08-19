@@ -2,7 +2,7 @@ from typing import Optional
 import os
 import shutil
 from starlette.responses import FileResponse
-from fastapi import Response, status, Request, APIRouter
+from fastapi import Response, status, Request, APIRouter, Depends
 
 router = APIRouter()
 
@@ -11,7 +11,8 @@ import config
 
 @router.get("/{database}/{scheme}/{table}/{z}/{x}/{y}.pbf", tags=["Tiles"])
 async def tiles(database: str, scheme: str, table: str, z: int, x: int,
-    y: int, request: Request,fields: Optional[str] = None, cql_filter: Optional[str] = None):
+    y: int, request: Request,fields: Optional[str] = None, cql_filter: Optional[str] = None,
+    user_id: int=Depends(utilities.get_token_header)):
     """
     Method used to return a vector of tiles for a given table.
     """
@@ -63,7 +64,7 @@ async def tiles(database: str, scheme: str, table: str, z: int, x: int,
     )
 
 @router.get("/{database}/{scheme}/{table}.json", tags=["Tiles"])
-async def tiles_json(database: str, scheme: str, table: str, request: Request):
+async def tiles_json(database: str, scheme: str, table: str, request: Request, user_id: int=Depends(utilities.get_token_header)):
     """
     Method used to return a tilejson information for a given table.
     """
@@ -95,7 +96,7 @@ async def tiles_json(database: str, scheme: str, table: str, request: Request):
     }
 
 @router.get("/cache_size", tags=["Tiles"])
-async def get_tile_cache_size():
+async def get_tile_cache_size(user_id: int=Depends(utilities.get_token_header)):
     """
     Method used to a list of cache sizes for each table that has cache.
     """
@@ -125,7 +126,7 @@ async def get_tile_cache_size():
     return cache_sizes
 
 @router.delete("/cache", tags=["Tiles"])
-async def delete_tile_cache(database: str, scheme: str, table: str):
+async def delete_tile_cache(database: str, scheme: str, table: str, user_id: int=Depends(utilities.get_token_header)):
     """
     Method used to delete cache for a table.
     """

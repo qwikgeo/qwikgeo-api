@@ -1,5 +1,5 @@
 import json
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Request, HTTPException, Depends
 
 import routers.tables.models as models
 import utilities
@@ -9,7 +9,8 @@ router = APIRouter()
 @router.post("/edit_row_attributes/", tags=["Tables"])
 async def edit_row_attributes(
         request: Request,
-        info: models.EditRowAttributes
+        info: models.EditRowAttributes,
+        user_id: int=Depends(utilities.get_token_header)
     ):
 
     pool = request.app.state.databases[f'{info.database}_pool']
@@ -60,7 +61,8 @@ async def edit_row_attributes(
 @router.post("/edit_row_geometry/", tags=["Tables"])
 async def edit_row_geometry(
         request: Request,
-        info: models.EditRowGeometry
+        info: models.EditRowGeometry,
+        user_id: int=Depends(utilities.get_token_header)
     ):
 
     pool = request.app.state.databases[f'{info.database}_pool']
@@ -85,7 +87,8 @@ async def edit_row_geometry(
 @router.post("/add_column/", tags=["Tables"])
 async def add_column(
         request: Request,
-        info: models.AddColumn
+        info: models.AddColumn,
+        user_id: int=Depends(utilities.get_token_header)
     ):
 
     pool = request.app.state.databases[f'{info.database}_pool']
@@ -104,7 +107,8 @@ async def add_column(
 @router.delete("/delete_column/", tags=["Tables"])
 async def delete_column(
         request: Request,
-        info: models.DeleteColumn
+        info: models.DeleteColumn,
+        user_id: int=Depends(utilities.get_token_header)
     ):
 
     pool = request.app.state.databases[f'{info.database}_pool']
@@ -123,7 +127,8 @@ async def delete_column(
 @router.post("/add_row/", tags=["Tables"])
 async def add_row(
         request: Request,
-        info: models.AddRow
+        info: models.AddRow,
+        user_id: int=Depends(utilities.get_token_header)
     ):
 
     pool = request.app.state.databases[f'{info.database}_pool']
@@ -193,7 +198,8 @@ async def add_row(
 @router.delete("/delete_row/", tags=["Tables"])
 async def delete_row(
         request: Request,
-        info: models.DeleteRow
+        info: models.DeleteRow,
+        user_id: int=Depends(utilities.get_token_header)
     ):
 
     pool = request.app.state.databases[f'{info.database}_pool']
@@ -212,7 +218,8 @@ async def delete_row(
 @router.post("/create_table/", tags=["Tables"])
 async def create_table(
         request: Request,
-        info: models.CreateTable
+        info: models.CreateTable,
+        user_id: int=Depends(utilities.get_token_header)
     ):
 
     pool = request.app.state.databases[f'{info.database}_pool']
@@ -242,7 +249,8 @@ async def create_table(
 @router.delete("/delete_table/", tags=["Tables"])
 async def delete_table(
         request: Request,
-        info: models.DeleteTable
+        info: models.DeleteTable,
+        user_id: int=Depends(utilities.get_token_header)
     ):
 
     pool = request.app.state.databases[f'{info.database}_pool']
@@ -258,7 +266,7 @@ async def delete_table(
         return {"status": True}
 
 @router.get("/tables.json", tags=["Tables"])
-async def tables(request: Request):
+async def tables(request: Request, user_id: int=Depends(utilities.get_token_header)):
     """
     Method used to return a list of tables available to query for vector tiles.
     """
@@ -281,7 +289,7 @@ async def tables(request: Request):
     return db_tables
 
 @router.get("/{database}/{scheme}/{table}.json", tags=["Tables"])
-async def table_json(database: str, scheme: str, table: str, request: Request):
+async def table_json(database: str, scheme: str, table: str, request: Request, user_id: int=Depends(utilities.get_token_header)):
     """
     Method used to return a information for a given table.
     """
@@ -316,7 +324,7 @@ async def table_json(database: str, scheme: str, table: str, request: Request):
     }
 
 @router.post("/statistics/", tags=["Tables"])
-async def statistics(info: models.StatisticsModel, request: Request):
+async def statistics(info: models.StatisticsModel, request: Request, user_id: int=Depends(utilities.get_token_header)):
 
     pool = request.app.state.databases[f'{info.database}_pool']
 
@@ -369,7 +377,7 @@ async def statistics(info: models.StatisticsModel, request: Request):
         }
 
 @router.post("/bins/", tags=["Tables"])
-async def bins(info: models.BinsModel, request: Request):
+async def bins(info: models.BinsModel, request: Request, user_id: int=Depends(utilities.get_token_header)):
 
     pool = request.app.state.databases[f'{info.database}_pool']
 
@@ -418,7 +426,7 @@ async def bins(info: models.BinsModel, request: Request):
         }
 
 @router.post("/numeric_breaks/", tags=["Tables"])
-async def numeric_breaks(info: models.NumericBreaksModel, request: Request):
+async def numeric_breaks(info: models.NumericBreaksModel, request: Request, user_id: int=Depends(utilities.get_token_header)):
 
     pool = request.app.state.databases[f'{info.database}_pool']
 
@@ -481,7 +489,7 @@ async def numeric_breaks(info: models.NumericBreaksModel, request: Request):
         }
 
 @router.post("/custom_break_values/", tags=["Tables"])
-async def custom_break_values(info: models.CustomBreaksModel, request: Request):
+async def custom_break_values(info: models.CustomBreaksModel, request: Request, user_id: int=Depends(utilities.get_token_header)):
 
     pool = request.app.state.databases[f'{info.database}_pool']
 

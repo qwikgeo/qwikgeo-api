@@ -1,4 +1,4 @@
-from fastapi import Request, APIRouter
+from fastapi import Request, APIRouter, Depends
 from pygeofilter.backends.sql import to_sql_where
 from pygeofilter.parsers.ecql import parse
 
@@ -7,7 +7,7 @@ import utilities
 router = APIRouter()
 
 @router.get("/", tags=["Collections"])
-async def collections(request: Request):
+async def collections(request: Request, user_id: int=Depends(utilities.get_token_header)):
     """
     Method used to return a list of tables available to query.
 
@@ -18,7 +18,7 @@ async def collections(request: Request):
     return db_tables
 
 @router.get("/{database}.{scheme}.{table}", tags=["Collections"])
-async def collection(database: str, scheme: str, table: str, request: Request):
+async def collection(database: str, scheme: str, table: str, request: Request, user_id: int=Depends(utilities.get_token_header)):
     """
     Method used to return information about a collection.
 
@@ -56,7 +56,7 @@ async def collection(database: str, scheme: str, table: str, request: Request):
 @router.get("/{database}.{scheme}.{table}/items", tags=["Collections"])
 async def items(database: str, scheme: str, table: str, request: Request,
     bbox: str=None, limit: int=200000, offset: int=0, properties: str="*",
-    sortby :str="gid", filter :str=None, srid: int=4326):
+    sortby :str="gid", filter :str=None, srid: int=4326, user_id: int=Depends(utilities.get_token_header)):
     """
     Method used to return geojson from a collection.
 
@@ -135,7 +135,7 @@ async def items(database: str, scheme: str, table: str, request: Request,
 
 @router.get("/{database}.{scheme}.{table}/items/{id}", tags=["Collections"])
 async def item(database: str, scheme: str, table: str, id:str, request: Request,
-    properties: str="*", srid: int=4326):
+    properties: str="*", srid: int=4326, user_id: int=Depends(utilities.get_token_header)):
     """
     Method used to return geojson for one item of a collection.
 
