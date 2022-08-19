@@ -3,3 +3,6 @@ asyncpg==0.25.0
 uvicorn==0.17.6
 prometheus_fastapi_instrumentator==5.8.2
 aerich==0.6.3
+aiohttp==3.8.1
+pandas==1.4.2
+requests==2.27.1

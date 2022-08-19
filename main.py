@@ -9,6 +9,7 @@ import db
 from routers.authentication import authentication
 from routers.tables import tables
 from routers.tiles import tiles
+from routers.imports import imports
 
 DESCRIPTION = """
 A python api to create a geoportal.
@@ -52,6 +53,12 @@ app.include_router(
     tiles.router,
     prefix="/api/v1/tiles",
     tags=["Tiles"],
+)
+
+app.include_router(
+    imports.router,
+    prefix="/api/v1/imports",
+    tags=["Imports"],
 )
 
 # Register Start/Stop application event handler to setup/stop the database connection
