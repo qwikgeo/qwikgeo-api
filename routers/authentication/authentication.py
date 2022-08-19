@@ -2,11 +2,11 @@ import jwt
 from passlib.hash import bcrypt
 from tortoise.contrib.fastapi import HTTPNotFoundError
 from fastapi import APIRouter, HTTPException, Depends, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm
 from tortoise import exceptions
 
 import db_models
-import models
+import routers.authentication.models as models
 import utilities
 
 router = APIRouter()

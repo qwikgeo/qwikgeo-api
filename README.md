@@ -31,7 +31,7 @@ DB_CONFIG = {
 }
 ```
 
-In order for the api to work you will need to edit the `config.py` file with your database connections.
+You will also need to edit the `config.py` file with your database connections.
 ```python
 DATABASES = {
     "data": {

@@ -5,7 +5,9 @@ from tortoise.contrib.fastapi import register_tortoise
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 
-from routers import authentication
+import db
+from routers.authentication import authentication
+from routers.tables import tables
 
 DESCRIPTION = """
 A python api to create a geoportal.
@@ -38,6 +40,23 @@ app.include_router(
     prefix="/api/v1/authentication",
     tags=["Authentication"],
 )
+
+app.include_router(
+    tables.router,
+    prefix="/api/v1/tables",
+    tags=["Tables"],
+)
+
+# Register Start/Stop application event handler to setup/stop the database connection
+@app.on_event("startup")
+async def startup_event():
+    """Application startup: register the database connection and create table list."""
+    await db.connect_to_db(app)
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Application shutdown: de-register the database connection."""
+    await db.close_db_connection(app)
 
 @app.get("/api/v1/health_check", tags=["Health"])
 async def health():
