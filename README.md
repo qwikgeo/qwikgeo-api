@@ -14,9 +14,8 @@ FastGeoPortal requires PostGIS >= 2.4.0.
 
 ## Configuration
 
-In order for the api to work you will need to edit the  DB_CONFIG variable in `main.py` file with your database connections.
+In order for the api to work you will need to edit the DB_CONFIG variable in `main.py` file with your database to host the GeoPortal.
 
-Example
 ```python
 DB_CONFIG = {
     "connections": {

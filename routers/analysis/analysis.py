@@ -8,13 +8,13 @@ router = APIRouter()
 
 analysis_processes = {}
 
-@router.get("/status/{process_id}", tags=["analysis"])
+@router.get("/status/{process_id}", tags=["Analysis"])
 def status(process_id: str):
     if process_id not in analysis_processes:
         return {"status": "UNKNOWN", "error": "This process_id does not exist."}
     return analysis_processes[process_id]
 
-@router.post("/buffer/", tags=["analysis"], response_model=models.BaseResponseModel)
+@router.post("/buffer/", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def buffer(info: models.BufferModel, request: Request, background_tasks: BackgroundTasks):
     new_table_id = utilities.get_new_table_id()
 
@@ -42,7 +42,7 @@ async def buffer(info: models.BufferModel, request: Request, background_tasks: B
         "url": process_url
     }
 
-@router.post("/dissolve/", tags=["analysis"], response_model=models.BaseResponseModel)
+@router.post("/dissolve/", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def dissolve(info: models.BaseAnalysisModel, request: Request, background_tasks: BackgroundTasks):
     new_table_id = utilities.get_new_table_id()
 
@@ -69,7 +69,7 @@ async def dissolve(info: models.BaseAnalysisModel, request: Request, background_
         "url": process_url
     }
 
-@router.post("/dissolve_by_value/", tags=["analysis"], response_model=models.BaseResponseModel)
+@router.post("/dissolve_by_value/", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def dissolve_by_value(info: models.DissolveByValueModel, request: Request, background_tasks: BackgroundTasks):
     new_table_id = utilities.get_new_table_id()
 
@@ -97,7 +97,7 @@ async def dissolve_by_value(info: models.DissolveByValueModel, request: Request,
         "url": process_url
     }
 
-@router.post("/square_grids/", tags=["analysis"], response_model=models.BaseResponseModel)
+@router.post("/square_grids/", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def square_grids(info: models.GridModel, request: Request, background_tasks: BackgroundTasks):
     new_table_id = utilities.get_new_table_id()
 
@@ -125,7 +125,7 @@ async def square_grids(info: models.GridModel, request: Request, background_task
         "url": process_url
     }
 
-@router.post("/hexagon_grids/", tags=["analysis"], response_model=models.BaseResponseModel)
+@router.post("/hexagon_grids/", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def hexagon_grids(info: models.GridModel, request: Request, background_tasks: BackgroundTasks):
     new_table_id = utilities.get_new_table_id()
 
@@ -153,7 +153,7 @@ async def hexagon_grids(info: models.GridModel, request: Request, background_tas
         "url": process_url
     }
 
-@router.post("/bounding_box/", tags=["analysis"], response_model=models.BaseResponseModel)
+@router.post("/bounding_box/", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def bounding_box(info: models.BaseAnalysisModel, request: Request, background_tasks: BackgroundTasks):
     new_table_id = utilities.get_new_table_id()
 
@@ -180,7 +180,7 @@ async def bounding_box(info: models.BaseAnalysisModel, request: Request, backgro
         "url": process_url
     }
 
-@router.post("/k_means_cluster/", tags=["analysis"], response_model=models.BaseResponseModel)
+@router.post("/k_means_cluster/", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def k_means_cluster(info: models.KMeansModel, request: Request, background_tasks: BackgroundTasks):
     new_table_id = utilities.get_new_table_id()
 
@@ -208,7 +208,7 @@ async def k_means_cluster(info: models.KMeansModel, request: Request, background
         "url": process_url
     }
 
-@router.post("/center_of_each_polygon/", tags=["analysis"], response_model=models.BaseResponseModel)
+@router.post("/center_of_each_polygon/", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def center_of_each_polygon(info: models.BaseAnalysisModel, request: Request, background_tasks: BackgroundTasks):
     new_table_id = utilities.get_new_table_id()
 
@@ -235,7 +235,7 @@ async def center_of_each_polygon(info: models.BaseAnalysisModel, request: Reques
         "url": process_url
     }
 
-@router.post("/center_of_dataset/", tags=["analysis"], response_model=models.BaseResponseModel)
+@router.post("/center_of_dataset/", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def center_of_dataset(info: models.BaseAnalysisModel, request: Request, background_tasks: BackgroundTasks):
     new_table_id = utilities.get_new_table_id()
 
@@ -262,7 +262,7 @@ async def center_of_dataset(info: models.BaseAnalysisModel, request: Request, ba
         "url": process_url
     }
 
-@router.post("/find_within_distance/", tags=["analysis"], response_model=models.BaseResponseModel)
+@router.post("/find_within_distance/", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def find_within_distance(info: models.FindWithinDistanceModel, request: Request, background_tasks: BackgroundTasks):
     new_table_id = utilities.get_new_table_id()
 
@@ -292,7 +292,7 @@ async def find_within_distance(info: models.FindWithinDistanceModel, request: Re
         "url": process_url
     }
 
-@router.post("/convex_hull/", tags=["analysis"], response_model=models.BaseResponseModel)
+@router.post("/convex_hull/", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def convex_hull(info: models.BaseAnalysisModel, request: Request, background_tasks: BackgroundTasks):
     new_table_id = utilities.get_new_table_id()
 
@@ -319,7 +319,7 @@ async def convex_hull(info: models.BaseAnalysisModel, request: Request, backgrou
         "url": process_url
     }
 
-@router.post("/aggregate_points_by_grids/", tags=["analysis"], response_model=models.BaseResponseModel)
+@router.post("/aggregate_points_by_grids/", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def aggregate_points_by_grids(info: models.AggregatePointsByGridsModel, request: Request, background_tasks: BackgroundTasks):
     new_table_id = utilities.get_new_table_id()
 
@@ -348,7 +348,7 @@ async def aggregate_points_by_grids(info: models.AggregatePointsByGridsModel, re
         "url": process_url
     }
 
-@router.post("/aggregate_points_by_polygons/", tags=["analysis"], response_model=models.BaseResponseModel)
+@router.post("/aggregate_points_by_polygons/", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def aggregate_points_by_polygons(info: models.PolygonsModel, request: Request, background_tasks: BackgroundTasks):
     new_table_id = utilities.get_new_table_id()
 
@@ -376,7 +376,7 @@ async def aggregate_points_by_polygons(info: models.PolygonsModel, request: Requ
         "url": process_url
     }
 
-@router.post("/select_inside/", tags=["analysis"], response_model=models.BaseResponseModel)
+@router.post("/select_inside/", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def select_inside(info: models.PolygonsModel, request: Request, background_tasks: BackgroundTasks):
     new_table_id = utilities.get_new_table_id()
 
@@ -404,7 +404,7 @@ async def select_inside(info: models.PolygonsModel, request: Request, background
         "url": process_url
     }
 
-@router.post("/select_outside/", tags=["analysis"], response_model=models.BaseResponseModel)
+@router.post("/select_outside/", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def select_outside(info: models.PolygonsModel, request: Request, background_tasks: BackgroundTasks):
     new_table_id = utilities.get_new_table_id()
 
@@ -432,7 +432,7 @@ async def select_outside(info: models.PolygonsModel, request: Request, backgroun
         "url": process_url
     }
 
-@router.post("/clip/", tags=["analysis"], response_model=models.BaseResponseModel)
+@router.post("/clip/", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def clip(info: models.PolygonsModel, request: Request, background_tasks: BackgroundTasks):
     new_table_id = utilities.get_new_table_id()
 
