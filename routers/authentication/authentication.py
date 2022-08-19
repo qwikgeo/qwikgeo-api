@@ -45,6 +45,7 @@ async def get_user(user_id: int=Depends(utilities.get_token_header)):
 
 @router.put("/user/", response_model=models.User_Pydantic, responses={404: {"model": HTTPNotFoundError}}, dependencies=[Depends(utilities.get_token_header)])
 async def update_user(user: models.UserIn_Pydantic, user_id: int=Depends(utilities.get_token_header)):
+    # TODO
     await db_models.User.filter(id=user_id).update(**user.dict(exclude_unset=True))
     return await models.User_Pydantic.from_queryset_single(db_models.User.get(id=user_id))
 

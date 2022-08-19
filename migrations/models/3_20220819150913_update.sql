@@ -1,0 +1,34 @@
+-- upgrade --
+ALTER TABLE "map" RENAME COLUMN "created_at" TO "created_time";
+ALTER TABLE "map" RENAME COLUMN "modified_at" TO "modified_time";
+ALTER TABLE "table" ADD "description" TEXT NOT NULL;
+ALTER TABLE "table" ADD "table_id" VARCHAR(50) NOT NULL UNIQUE;
+ALTER TABLE "table" ADD "tags" JSONB NOT NULL;
+ALTER TABLE "table" RENAME COLUMN "modified_at" TO "modified_time";
+ALTER TABLE "table" ADD "notification_access_list" JSONB NOT NULL;
+ALTER TABLE "table" ADD "searchable" BOOL NOT NULL  DEFAULT True;
+ALTER TABLE "table" RENAME COLUMN "created_at" TO "created_time";
+ALTER TABLE "table" ADD "views" INT NOT NULL;
+ALTER TABLE "table" ADD "read_access_list" JSONB NOT NULL;
+ALTER TABLE "table" ADD "geometry_type" VARCHAR(50) NOT NULL;
+ALTER TABLE "table" ADD "write_access_list" JSONB NOT NULL;
+ALTER TABLE "table" ADD "title" VARCHAR(500) NOT NULL;
+ALTER TABLE "user" RENAME COLUMN "created_at" TO "created_time";
+ALTER TABLE "user" RENAME COLUMN "modified_at" TO "modified_time";
+-- downgrade --
+ALTER TABLE "map" RENAME COLUMN "modified_time" TO "modified_at";
+ALTER TABLE "map" RENAME COLUMN "created_time" TO "created_at";
+ALTER TABLE "user" RENAME COLUMN "modified_time" TO "modified_at";
+ALTER TABLE "user" RENAME COLUMN "created_time" TO "created_at";
+ALTER TABLE "table" RENAME COLUMN "modified_time" TO "modified_at";
+ALTER TABLE "table" RENAME COLUMN "created_time" TO "created_at";
+ALTER TABLE "table" DROP COLUMN "description";
+ALTER TABLE "table" DROP COLUMN "table_id";
+ALTER TABLE "table" DROP COLUMN "tags";
+ALTER TABLE "table" DROP COLUMN "notification_access_list";
+ALTER TABLE "table" DROP COLUMN "searchable";
+ALTER TABLE "table" DROP COLUMN "views";
+ALTER TABLE "table" DROP COLUMN "read_access_list";
+ALTER TABLE "table" DROP COLUMN "geometry_type";
+ALTER TABLE "table" DROP COLUMN "write_access_list";
+ALTER TABLE "table" DROP COLUMN "title";
