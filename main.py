@@ -8,6 +8,7 @@ from prometheus_fastapi_instrumentator import Instrumentator
 import db
 from routers.authentication import authentication
 from routers.tables import tables
+from routers.tiles import tiles
 
 DESCRIPTION = """
 A python api to create a geoportal.
@@ -45,6 +46,12 @@ app.include_router(
     tables.router,
     prefix="/api/v1/tables",
     tags=["Tables"],
+)
+
+app.include_router(
+    tiles.router,
+    prefix="/api/v1/tiles",
+    tags=["Tiles"],
 )
 
 # Register Start/Stop application event handler to setup/stop the database connection
