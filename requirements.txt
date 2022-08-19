@@ -1,0 +1,5 @@
+fastapi==0.68.2
+asyncpg==0.25.0
+uvicorn==0.17.6
+prometheus_fastapi_instrumentator==5.8.2
+aerich==0.6.3
