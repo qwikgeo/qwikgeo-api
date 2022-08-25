@@ -22,6 +22,25 @@ async def tables(
 
     return tables
 
+@router.get("/table/{table_id}/", tags=["Tables"])
+async def table(
+        table_id: str,
+        request: Request,
+        user_name: int=Depends(utilities.get_token_header)
+    ):
+
+    await utilities.validate_table_access(
+        table=table_id,
+        user_name=user_name,
+        app=request.app
+    )
+
+    table = await db_models.Table_Pydantic.from_queryset_single(db_models.Table.get(table_id=table_id))
+
+    await db_models.Table.filter(table_id=table_id).update(views=table.views+1)
+
+    return table
+
 @router.post("/edit_row_attributes/", tags=["Tables"])
 async def edit_row_attributes(
         request: Request,
