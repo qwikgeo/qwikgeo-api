@@ -67,7 +67,6 @@ async def collection(database: str, scheme: str, table: str, request: Request, u
         "extent": {
             "spatial": {
                 "bbox": await utilities.get_table_bounds(
-                    database=database,
                     scheme=scheme,
                     table=table,
                     app=request.app
@@ -149,7 +148,6 @@ async def items(database: str, scheme: str, table: str, request: Request,
             filter = column_where_parameters
             
         results = await utilities.get_table_geojson(
-            database=database,
             scheme=scheme,
             table=table,
             limit=limit,
@@ -199,7 +197,6 @@ async def item(database: str, scheme: str, table: str, id:str, request: Request,
             properties = properties[:-1]
 
         results = await utilities.get_table_geojson(
-            database=database,
             scheme=scheme,
             table=table,
             filter=f"gid = '{id}'",

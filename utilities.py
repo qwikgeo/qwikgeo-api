@@ -108,7 +108,7 @@ async def create_table(username: str, table_id: str, title: str,
     return table
 
 async def get_token_header(token: str=Depends(oauth2_scheme)):
-    user = jwt.decode(token, SECRET_KEY, algorithm='sha256')
+    user = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
     return user['username']
 
 async def get_user_groups(username: str) -> list:
