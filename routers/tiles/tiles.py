@@ -7,20 +7,23 @@ from fastapi import Response, status, Request, APIRouter, Depends
 router = APIRouter()
 
 import utilities
-import config
+import db
 
 @router.get("/{database}/{scheme}/{table}/{z}/{x}/{y}.pbf", tags=["Tiles"])
 async def tiles(database: str, scheme: str, table: str, z: int, x: int,
     y: int, request: Request,fields: Optional[str] = None, cql_filter: Optional[str] = None,
-    user_id: int=Depends(utilities.get_token_header)):
+    user_name: int=Depends(utilities.get_token_header)):
     """
     Method used to return a vector of tiles for a given table.
     """
 
-    db_settings = config.DATABASES[database]
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name,
+        app=request.app
+    )
 
     pbf, tile_cache = await utilities.get_tile(
-        database=database,
         scheme=scheme,
         table=table,
         z=z,
@@ -28,13 +31,12 @@ async def tiles(database: str, scheme: str, table: str, z: int, x: int,
         y=y,
         fields=fields,
         cql_filter=cql_filter,
-        db_settings=db_settings,
         app=request.app
     )
 
     response_code = status.HTTP_200_OK
 
-    max_cache_age = db_settings['cache_age_in_seconds']
+    max_cache_age = db.CACHE_AGE_IN_SECONDS
 
     if fields is not None and cql_filter is not None:
         max_cache_age = 0
@@ -64,10 +66,16 @@ async def tiles(database: str, scheme: str, table: str, z: int, x: int,
     )
 
 @router.get("/{database}/{scheme}/{table}.json", tags=["Tiles"])
-async def tiles_json(database: str, scheme: str, table: str, request: Request, user_id: int=Depends(utilities.get_token_header)):
+async def tiles_json(database: str, scheme: str, table: str, request: Request, user_name: int=Depends(utilities.get_token_header)):
     """
     Method used to return a tilejson information for a given table.
     """
+
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name,
+        app=request.app
+    )
 
     def get_tile_url() -> str:
         """Return tile url for layer """
@@ -96,7 +104,7 @@ async def tiles_json(database: str, scheme: str, table: str, request: Request, u
     }
 
 @router.get("/cache_size", tags=["Tiles"])
-async def get_tile_cache_size(user_id: int=Depends(utilities.get_token_header)):
+async def get_tile_cache_size(user_name: int=Depends(utilities.get_token_header)):
     """
     Method used to a list of cache sizes for each table that has cache.
     """
@@ -126,10 +134,16 @@ async def get_tile_cache_size(user_id: int=Depends(utilities.get_token_header)):
     return cache_sizes
 
 @router.delete("/cache", tags=["Tiles"])
-async def delete_tile_cache(database: str, scheme: str, table: str, user_id: int=Depends(utilities.get_token_header)):
+async def delete_tile_cache(database: str, scheme: str, table: str, request: Request, user_name: int=Depends(utilities.get_token_header)):
     """
     Method used to delete cache for a table.
     """
+
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name,
+        app=request.app
+    )
 
     if os.path.exists(f'{os.getcwd()}/cache/{database}_{scheme}_{table}'):
         shutil.rmtree(f'{os.getcwd()}/cache/{database}_{scheme}_{table}')

@@ -1,28 +1,53 @@
-from fastapi import Request, APIRouter, Depends
+from functools import reduce
+from fastapi import Request, APIRouter, Depends, HTTPException, status
 from pygeofilter.backends.sql import to_sql_where
 from pygeofilter.parsers.ecql import parse
+from tortoise.expressions import Q
 
 import utilities
+import db_models
+import db
 
 router = APIRouter()
 
 @router.get("/", tags=["Collections"])
-async def collections(request: Request, user_id: int=Depends(utilities.get_token_header)):
+async def collections(request: Request, user_name: int=Depends(utilities.get_token_header)):
     """
     Method used to return a list of tables available to query.
 
     """
 
-    db_tables = await utilities.get_tables_metadata(request)
+    db_tables = []
+
+    user_groups = await utilities.get_user_groups(user_name)
+
+    tables = await db_models.Table_Pydantic.from_queryset(db_models.Table.filter(reduce(lambda x, y: x | y, [Q(read_access_list__contains=[group]) for group in user_groups])))
+
+    for table in tables:
+        db_tables.append(
+            {
+                "name" : table.table_id,
+                "schema" : "user_data",
+                "type" : "table",
+                "id" : f"user_data.{table.table_id}",
+                "database" : db.DB_DATABASE
+            }
+        )
 
     return db_tables
 
 @router.get("/{database}.{scheme}.{table}", tags=["Collections"])
-async def collection(database: str, scheme: str, table: str, request: Request, user_id: int=Depends(utilities.get_token_header)):
+async def collection(database: str, scheme: str, table: str, request: Request, user_name: int=Depends(utilities.get_token_header)):
     """
     Method used to return information about a collection.
 
     """
+
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name,
+        app=request.app
+    )
 
     url = str(request.base_url)
 
@@ -56,11 +81,17 @@ async def collection(database: str, scheme: str, table: str, request: Request, u
 @router.get("/{database}.{scheme}.{table}/items", tags=["Collections"])
 async def items(database: str, scheme: str, table: str, request: Request,
     bbox: str=None, limit: int=200000, offset: int=0, properties: str="*",
-    sortby :str="gid", filter :str=None, srid: int=4326, user_id: int=Depends(utilities.get_token_header)):
+    sortby :str="gid", filter :str=None, srid: int=4326, user_name: int=Depends(utilities.get_token_header)):
     """
     Method used to return geojson from a collection.
 
     """
+
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name,
+        app=request.app
+    )    
 
     blacklist_query_parameters = ["bbox","limit","offset","properties","sortby","filter"]
 
@@ -72,7 +103,7 @@ async def items(database: str, scheme: str, table: str, request: Request,
 
     column_where_parameters = ""
 
-    pool = request.app.state.databases[f'{database}_pool']
+    pool = request.app.state.database
 
     async with pool.acquire() as con:
 
@@ -135,13 +166,19 @@ async def items(database: str, scheme: str, table: str, request: Request,
 
 @router.get("/{database}.{scheme}.{table}/items/{id}", tags=["Collections"])
 async def item(database: str, scheme: str, table: str, id:str, request: Request,
-    properties: str="*", srid: int=4326, user_id: int=Depends(utilities.get_token_header)):
+    properties: str="*", srid: int=4326, user_name: int=Depends(utilities.get_token_header)):
     """
     Method used to return geojson for one item of a collection.
 
-    """
+    """    
 
-    pool = request.app.state.databases[f'{database}_pool']
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name,
+        app=request.app
+    )    
+
+    pool = request.app.state.database
 
     async with pool.acquire() as con:
 

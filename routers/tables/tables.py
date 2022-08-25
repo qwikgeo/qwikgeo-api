@@ -1,19 +1,42 @@
 import json
+from functools import reduce
 from fastapi import APIRouter, Request, HTTPException, Depends
+from tortoise.expressions import Q
 
 import routers.tables.models as models
 import utilities
+import db_models
+import db
 
 router = APIRouter()
+
+@router.get("/", tags=["Tables"])
+async def tables(
+        request: Request,
+        user_name: int=Depends(utilities.get_token_header)
+    ):
+
+    user_groups = await utilities.get_user_groups(user_name)
+
+    tables = await db_models.Table_Pydantic.from_queryset(db_models.Table.filter(reduce(lambda x, y: x | y, [Q(read_access_list__contains=[group]) for group in user_groups])))
+
+    return tables
 
 @router.post("/edit_row_attributes/", tags=["Tables"])
 async def edit_row_attributes(
         request: Request,
         info: models.EditRowAttributes,
-        user_id: int=Depends(utilities.get_token_header)
+        user_name: int=Depends(utilities.get_token_header)
     ):
 
-    pool = request.app.state.databases[f'{info.database}_pool']
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name,
+        app=request.app,
+        write_access=True
+    )
+
+    pool = request.app.state.database
 
     async with pool.acquire() as con:
         sql_field_query = f"""
@@ -62,10 +85,17 @@ async def edit_row_attributes(
 async def edit_row_geometry(
         request: Request,
         info: models.EditRowGeometry,
-        user_id: int=Depends(utilities.get_token_header)
+        user_name: int=Depends(utilities.get_token_header)
     ):
 
-    pool = request.app.state.databases[f'{info.database}_pool']
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name,
+        app=request.app,
+        write_access=True
+    )
+
+    pool = request.app.state.database
 
     async with pool.acquire() as con:
 
@@ -88,10 +118,17 @@ async def edit_row_geometry(
 async def add_column(
         request: Request,
         info: models.AddColumn,
-        user_id: int=Depends(utilities.get_token_header)
+        user_name: int=Depends(utilities.get_token_header)
     ):
 
-    pool = request.app.state.databases[f'{info.database}_pool']
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name,
+        app=request.app,
+        write_access=True
+    )
+
+    pool = request.app.state.database
 
     async with pool.acquire() as con:
 
@@ -108,10 +145,10 @@ async def add_column(
 async def delete_column(
         request: Request,
         info: models.DeleteColumn,
-        user_id: int=Depends(utilities.get_token_header)
+        user_name: int=Depends(utilities.get_token_header)
     ):
 
-    pool = request.app.state.databases[f'{info.database}_pool']
+    pool = request.app.state.database
 
     async with pool.acquire() as con:
         
@@ -128,10 +165,17 @@ async def delete_column(
 async def add_row(
         request: Request,
         info: models.AddRow,
-        user_id: int=Depends(utilities.get_token_header)
+        user_name: int=Depends(utilities.get_token_header)
     ):
 
-    pool = request.app.state.databases[f'{info.database}_pool']
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name,
+        app=request.app,
+        write_access=True
+    )
+
+    pool = request.app.state.database
 
     async with pool.acquire() as con:
 
@@ -199,10 +243,17 @@ async def add_row(
 async def delete_row(
         request: Request,
         info: models.DeleteRow,
-        user_id: int=Depends(utilities.get_token_header)
+        user_name: int=Depends(utilities.get_token_header)
     ):
 
-    pool = request.app.state.databases[f'{info.database}_pool']
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name,
+        app=request.app,
+        write_access=True
+    )
+
+    pool = request.app.state.database
 
     async with pool.acquire() as con:
         
@@ -219,10 +270,10 @@ async def delete_row(
 async def create_table(
         request: Request,
         info: models.CreateTable,
-        user_id: int=Depends(utilities.get_token_header)
+        user_name: int=Depends(utilities.get_token_header)
     ):
 
-    pool = request.app.state.databases[f'{info.database}_pool']
+    pool = request.app.state.database
 
     async with pool.acquire() as con:
         
@@ -250,10 +301,17 @@ async def create_table(
 async def delete_table(
         request: Request,
         info: models.DeleteTable,
-        user_id: int=Depends(utilities.get_token_header)
+        user_name: int=Depends(utilities.get_token_header)
     ):
 
-    pool = request.app.state.databases[f'{info.database}_pool']
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name,
+        app=request.app,
+        write_access=True
+    )
+
+    pool = request.app.state.database
 
     async with pool.acquire() as con:
         
@@ -266,7 +324,7 @@ async def delete_table(
         return {"status": True}
 
 @router.get("/tables.json", tags=["Tables"])
-async def tables(request: Request, user_id: int=Depends(utilities.get_token_header)):
+async def tables(request: Request, user_name: int=Depends(utilities.get_token_header)):
     """
     Method used to return a list of tables available to query for vector tiles.
     """
@@ -274,25 +332,40 @@ async def tables(request: Request, user_id: int=Depends(utilities.get_token_head
     def get_detail_url(table: object) -> str:
         """Return tile url for layer """
         url = str(request.base_url)
-        url += f"api/v1/table/{table['database']}/{table['schema']}/{table['name']}.json"
+        url += f"api/v1/tables/{table['database']}/{table['schema']}/{table['name']}.json"
         return url
-    def get_viewer_url(table: object) -> str:
-        """Return tile url for layer """
-        url = str(request.base_url)
-        url += f"viewer/{table['database']}/{table['schema']}/{table['name']}"
-        return url
-    db_tables = await utilities.get_tables_metadata(request.app)
+    db_tables = []
+
+    user_groups = await utilities.get_user_groups(user_name)
+
+    tables = await db_models.Table_Pydantic.from_queryset(db_models.Table.filter(reduce(lambda x, y: x | y, [Q(read_access_list__contains=[group]) for group in user_groups])))
+
+    for table in tables:
+        db_tables.append(
+            {
+                "name" : table.table_id,
+                "schema" : "user_data",
+                "type" : "table",
+                "id" : f"user_data.{table.table_id}",
+                "database" : db.DB_DATABASE
+            }
+        )
     for table in db_tables:
         table['detailurl'] = get_detail_url(table)
-        table['viewerurl'] = get_viewer_url(table)
 
     return db_tables
 
 @router.get("/{database}/{scheme}/{table}.json", tags=["Tables"])
-async def table_json(database: str, scheme: str, table: str, request: Request, user_id: int=Depends(utilities.get_token_header)):
+async def table_json(database: str, scheme: str, table: str, request: Request, user_name: int=Depends(utilities.get_token_header)):
     """
     Method used to return a information for a given table.
     """
+
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name,
+        app=request.app
+    )
 
     def get_tile_url() -> str:
         """Return tile url for layer """
@@ -314,19 +387,25 @@ async def table_json(database: str, scheme: str, table: str, request: Request, u
         "schema": scheme,
         "tileurl": get_tile_url(),
         "viewerurl": get_viewer_url(),
-        "properties": await utilities.get_table_columns(database, scheme, table, request.app),
-        "geometrytype": await utilities.get_table_geometry_type(database, scheme, table, request.app),
+        "properties": await utilities.get_table_columns_list(scheme, table, request.app),
+        "geometrytype": await utilities.get_table_geometry_type(scheme, table, request.app),
         "type": "table",
         "minzoom": 0,
         "maxzoom": 22,
-        "bounds": await utilities.get_table_bounds(database, scheme, table, request.app),
-        "center": await utilities.get_table_center(database, scheme, table, request.app)
+        "bounds": await utilities.get_table_bounds(scheme, table, request.app),
+        "center": await utilities.get_table_center(scheme, table, request.app)
     }
 
 @router.post("/statistics/", tags=["Tables"])
-async def statistics(info: models.StatisticsModel, request: Request, user_id: int=Depends(utilities.get_token_header)):
+async def statistics(info: models.StatisticsModel, request: Request, user_name: int=Depends(utilities.get_token_header)):
 
-    pool = request.app.state.databases[f'{info.database}_pool']
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name,
+        app=request.app
+    )
+
+    pool = request.app.state.database
 
     async with pool.acquire() as con:
 
@@ -377,9 +456,15 @@ async def statistics(info: models.StatisticsModel, request: Request, user_id: in
         }
 
 @router.post("/bins/", tags=["Tables"])
-async def bins(info: models.BinsModel, request: Request, user_id: int=Depends(utilities.get_token_header)):
+async def bins(info: models.BinsModel, request: Request, user_name: int=Depends(utilities.get_token_header)):
 
-    pool = request.app.state.databases[f'{info.database}_pool']
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name,
+        app=request.app
+    )
+
+    pool = request.app.state.database
 
     async with pool.acquire() as con:
         results = [
@@ -426,9 +511,15 @@ async def bins(info: models.BinsModel, request: Request, user_id: int=Depends(ut
         }
 
 @router.post("/numeric_breaks/", tags=["Tables"])
-async def numeric_breaks(info: models.NumericBreaksModel, request: Request, user_id: int=Depends(utilities.get_token_header)):
+async def numeric_breaks(info: models.NumericBreaksModel, request: Request, user_name: int=Depends(utilities.get_token_header)):
 
-    pool = request.app.state.databases[f'{info.database}_pool']
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name,
+        app=request.app
+    )
+
+    pool = request.app.state.database
 
     async with pool.acquire() as con:
         results = [
@@ -489,9 +580,15 @@ async def numeric_breaks(info: models.NumericBreaksModel, request: Request, user
         }
 
 @router.post("/custom_break_values/", tags=["Tables"])
-async def custom_break_values(info: models.CustomBreaksModel, request: Request, user_id: int=Depends(utilities.get_token_header)):
+async def custom_break_values(info: models.CustomBreaksModel, request: Request, user_name: int=Depends(utilities.get_token_header)):
 
-    pool = request.app.state.databases[f'{info.database}_pool']
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name,
+        app=request.app
+    )
+
+    pool = request.app.state.database
 
     async with pool.acquire() as con:
         results = [

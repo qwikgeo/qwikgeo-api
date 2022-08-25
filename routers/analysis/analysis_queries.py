@@ -5,7 +5,7 @@ import utilities
 from routers import analysis
 
 
-async def buffer(table: str, database: str, distance_in_kilometers: float, new_table_id: str, process_id: str):
+async def buffer(table: str, distance_in_kilometers: float, new_table_id: str, process_id: str):
     """
     Method to buffer any geometric table
     """
@@ -14,11 +14,11 @@ async def buffer(table: str, database: str, distance_in_kilometers: float, new_t
 
     try:
 
-        pool = main.app.state.databases[f'{database}_pool']
+        pool = main.app.state.database
 
         fields = await utilities.get_table_columns(
             table=table,
-            database=database
+            app=main.app
         )
 
         fields = ','.join(fields)
@@ -50,7 +50,7 @@ async def buffer(table: str, database: str, distance_in_kilometers: float, new_t
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def dissolve(table: str, database: str, new_table_id: str, process_id: str):
+async def dissolve(table: str, new_table_id: str, process_id: str):
     """
     Method to dissolve any geometric table into one geometry.
     """
@@ -59,7 +59,7 @@ async def dissolve(table: str, database: str, new_table_id: str, process_id: str
 
     try:
 
-        pool = main.app.state.databases[f'{database}_pool']
+        pool = main.app.state.database
 
         async with pool.acquire() as con:
             sql_query = f"""
@@ -80,7 +80,7 @@ async def dissolve(table: str, database: str, new_table_id: str, process_id: str
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def dissolve_by_value(table: str, database: str, new_table_id: str, column: str, process_id: str):
+async def dissolve_by_value(table: str, new_table_id: str, column: str, process_id: str):
     """
     Method to dissolve any geometric table into one geometry based off a column.
     """
@@ -89,7 +89,7 @@ async def dissolve_by_value(table: str, database: str, new_table_id: str, column
 
     try:
 
-        pool = main.app.state.databases[f'{database}_pool']
+        pool = main.app.state.database
 
         async with pool.acquire() as con:
             sql_query = f"""
@@ -111,7 +111,7 @@ async def dissolve_by_value(table: str, database: str, new_table_id: str, column
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def square_grids(table: str, database: str, new_table_id: str, grid_size_in_kilometers: int, process_id: str):
+async def square_grids(table: str, new_table_id: str, grid_size_in_kilometers: int, process_id: str):
     """
     Method to genreate square grids based off a given table.
     """
@@ -120,7 +120,7 @@ async def square_grids(table: str, database: str, new_table_id: str, grid_size_i
 
     try:
 
-        pool = main.app.state.databases[f'{database}_pool']
+        pool = main.app.state.database
 
         async with pool.acquire() as con:
             sql_query = f"""
@@ -149,7 +149,7 @@ async def square_grids(table: str, database: str, new_table_id: str, grid_size_i
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def hexagon_grids(table: str, database: str, new_table_id: str, grid_size_in_kilometers: int, process_id: str):
+async def hexagon_grids(table: str, new_table_id: str, grid_size_in_kilometers: int, process_id: str):
     """
     Method to genreate hexagon grids based off a given table.
     """
@@ -158,7 +158,7 @@ async def hexagon_grids(table: str, database: str, new_table_id: str, grid_size_
 
     try:
 
-        pool = main.app.state.databases[f'{database}_pool']
+        pool = main.app.state.database
 
         async with pool.acquire() as con:
             sql_query = f"""
@@ -187,7 +187,7 @@ async def hexagon_grids(table: str, database: str, new_table_id: str, grid_size_
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def bounding_box(table: str, database: str, new_table_id: str, process_id: str):
+async def bounding_box(table: str, new_table_id: str, process_id: str):
     """
     Method to genreate a bounding box based off a given table.
     """
@@ -196,7 +196,7 @@ async def bounding_box(table: str, database: str, new_table_id: str, process_id:
 
     try:
 
-        pool = main.app.state.databases[f'{database}_pool']
+        pool = main.app.state.database
 
         async with pool.acquire() as con:
             sql_query = f"""
@@ -217,7 +217,7 @@ async def bounding_box(table: str, database: str, new_table_id: str, process_id:
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def k_means_cluster(table: str, database: str, new_table_id: str, number_of_clusters: int, process_id: str):
+async def k_means_cluster(table: str, new_table_id: str, number_of_clusters: int, process_id: str):
     """
     Method to genreate clusters based off a k means_clustering.
     """
@@ -226,11 +226,11 @@ async def k_means_cluster(table: str, database: str, new_table_id: str, number_o
 
     try:
 
-        pool = main.app.state.databases[f'{database}_pool']
+        pool = main.app.state.database
 
         fields = await utilities.get_table_columns(
             table=table,
-            database=database
+            app=main.app
         )
 
         fields = ','.join(fields)
@@ -254,7 +254,7 @@ async def k_means_cluster(table: str, database: str, new_table_id: str, number_o
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def center_of_each_polygon(table: str, database: str, new_table_id: str, process_id: str):
+async def center_of_each_polygon(table: str, new_table_id: str, process_id: str):
     """
     Method to find center of each polygon based off a given table.
     """
@@ -263,11 +263,11 @@ async def center_of_each_polygon(table: str, database: str, new_table_id: str, p
 
     try:
 
-        pool = main.app.state.databases[f'{database}_pool']
+        pool = main.app.state.database
 
         fields = await utilities.get_table_columns(
             table=table,
-            database=database
+            app=main.app
         )
 
         fields = ','.join(fields)
@@ -291,7 +291,7 @@ async def center_of_each_polygon(table: str, database: str, new_table_id: str, p
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def center_of_dataset(table: str, database: str, new_table_id: str, process_id: str):
+async def center_of_dataset(table: str, new_table_id: str, process_id: str):
     """
     Method to find center of all geometries based off a given table.
     """
@@ -300,7 +300,7 @@ async def center_of_dataset(table: str, database: str, new_table_id: str, proces
 
     try:
 
-        pool = main.app.state.databases[f'{database}_pool']
+        pool = main.app.state.database
 
         async with pool.acquire() as con:
             sql_query = f"""
@@ -321,7 +321,7 @@ async def center_of_dataset(table: str, database: str, new_table_id: str, proces
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def find_within_distance(table: str, database: str, new_table_id: str,
+async def find_within_distance(table: str, new_table_id: str,
     latitude: float, longitude: float, distance_in_kilometers: float, process_id: str):
     """
     Method to find all geometries within set distance of latitude and longitude.
@@ -331,7 +331,7 @@ async def find_within_distance(table: str, database: str, new_table_id: str,
 
     try:
 
-        pool = main.app.state.databases[f'{database}_pool']
+        pool = main.app.state.database
 
         async with pool.acquire() as con:
             sql_query = f"""
@@ -353,7 +353,7 @@ async def find_within_distance(table: str, database: str, new_table_id: str,
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def convex_hull(table: str, database: str, new_table_id: str, process_id: str):
+async def convex_hull(table: str, new_table_id: str, process_id: str):
     """
     Method to find the convex hull of all geometries based off a given table.
     """
@@ -362,7 +362,7 @@ async def convex_hull(table: str, database: str, new_table_id: str, process_id: 
 
     try:
 
-        pool = main.app.state.databases[f'{database}_pool']
+        pool = main.app.state.database
 
         async with pool.acquire() as con:
             sql_query = f"""
@@ -383,7 +383,7 @@ async def convex_hull(table: str, database: str, new_table_id: str, process_id: 
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def aggregate_points_by_grids(table: str, database: str, new_table_id: str, distance_in_kilometers: float, grid_type: str,process_id: str):
+async def aggregate_points_by_grids(table: str, new_table_id: str, distance_in_kilometers: float, grid_type: str,process_id: str):
     """
     Method to aggegate points into grids.
     """
@@ -392,7 +392,7 @@ async def aggregate_points_by_grids(table: str, database: str, new_table_id: str
 
     try:
 
-        pool = main.app.state.databases[f'{database}_pool']
+        pool = main.app.state.database
 
         async with pool.acquire() as con:
             sql_query = f"""
@@ -421,7 +421,7 @@ async def aggregate_points_by_grids(table: str, database: str, new_table_id: str
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def aggregate_points_by_polygons(table: str, database: str, new_table_id: str, polygons: str, process_id: str):
+async def aggregate_points_by_polygons(table: str, new_table_id: str, polygons: str, process_id: str):
     """
     Method to aggegate points into polygons.
     """
@@ -430,7 +430,7 @@ async def aggregate_points_by_polygons(table: str, database: str, new_table_id: 
 
     try:
 
-        pool = main.app.state.databases[f'{database}_pool']
+        pool = main.app.state.database
 
         async with pool.acquire() as con:
             sql_query = f"""
@@ -454,7 +454,7 @@ async def aggregate_points_by_polygons(table: str, database: str, new_table_id: 
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def select_inside(table: str, database: str, new_table_id: str, polygons: str, process_id: str):
+async def select_inside(table: str, new_table_id: str, polygons: str, process_id: str):
     """
     Method to find geometries within a given polygon table.
     """
@@ -463,7 +463,7 @@ async def select_inside(table: str, database: str, new_table_id: str, polygons: 
 
     try:
 
-        pool = main.app.state.databases[f'{database}_pool']
+        pool = main.app.state.database
 
         async with pool.acquire() as con:
             sql_query = f"""
@@ -486,7 +486,7 @@ async def select_inside(table: str, database: str, new_table_id: str, polygons: 
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def select_outside(table: str, database: str, new_table_id: str, polygons: str, process_id: str):
+async def select_outside(table: str, new_table_id: str, polygons: str, process_id: str):
     """
     Method to find geometries outside a given polygon table.
     """
@@ -495,7 +495,7 @@ async def select_outside(table: str, database: str, new_table_id: str, polygons:
 
     try:
 
-        pool = main.app.state.databases[f'{database}_pool']
+        pool = main.app.state.database
 
         async with pool.acquire() as con:
             sql_query = f"""
@@ -519,7 +519,7 @@ async def select_outside(table: str, database: str, new_table_id: str, polygons:
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def clip(table: str, database: str, new_table_id: str, polygons: str, process_id: str):
+async def clip(table: str, new_table_id: str, polygons: str, process_id: str):
     """
     Method to clip geometries given polygon table.
     """
@@ -528,12 +528,12 @@ async def clip(table: str, database: str, new_table_id: str, polygons: str, proc
 
     try:
 
-        pool = main.app.state.databases[f'{database}_pool']
+        pool = main.app.state.database
 
         fields = await utilities.get_table_columns(
             table=table,
-            database=database,
-            new_table_name="a"
+            new_table_name="a",
+            app=main.app
         )
 
         fields = ','.join(fields)

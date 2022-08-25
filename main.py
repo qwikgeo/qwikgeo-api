@@ -96,7 +96,7 @@ async def health():
 
 DB_CONFIG = {
     "connections": {
-        "default": "postgres://postgres:postgres@localhost:5432/geoportal"
+        "default": f"postgres://{db.DB_USERNAME}:{db.DB_PASSWORD}@{db.DB_HOST}:{db.DB_PORT}/{db.DB_DATABASE}"
     },
     "apps": {
         "models": {

@@ -10,28 +10,30 @@ class BaseResponseModel(BaseModel):
 
 class ArcgisModel(BaseModel):
     url: str = Field(
-        default=None, title="The url that contains the service to download."
+        title="The url that contains the service to download."
     )
     token: str = Field(
         default=None, title="If endpoint is authenticated, token will be used to download the service."
     )
-    database: str = Field(
-        default=None, title="Name of the database the table belongs to."
+    title: str = Field(
+        title="The name of the dataset within GeoPortal."
     )
+    tags: list=[]
+    description: str = Field(
+        title="A description about the dataset.",
+        default=""
+    )
+    read_access_list: list=[]
+    write_access_list: list=[]
+    searchable: bool=True
 
 class PointJsonUrl(BaseModel):
-    database: str = Field(
-        default=None, title="Name of the database the table belongs to."
-    )
     latitude: str
     longitude: str
     table_columns: list
     url: str
 
 class GeographicJsonUrl(BaseModel):
-    database: str = Field(
-        default=None, title="Name of the database the table belongs to."
-    )
     map: str
     map_column: str
     map_columns: list
@@ -40,7 +42,4 @@ class GeographicJsonUrl(BaseModel):
     url: str
 
 class GeojsonUrl(BaseModel):
-    database: str = Field(
-        default=None, title="Name of the database the table belongs to."
-    )
     url: str

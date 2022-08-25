@@ -14,33 +14,16 @@ FastGeoPortal requires PostGIS >= 2.4.0.
 
 ## Configuration
 
-In order for the api to work you will need to edit the DB_CONFIG variable in `main.py` file with your database to host the GeoPortal.
+In order for the api to work you will need to edit the .env with your database to host the GeoPortal.
 
-```python
-DB_CONFIG = {
-    "connections": {
-        "default": "postgres://postgres:postgres@localhost:5432/geoportal"
-    },
-    "apps": {
-        "models": {
-            "models": ["db_models", "aerich.models"],
-            "default_connection": "default",
-        },
-    }
-}
 ```
-
-You will also need to edit the `config.py` file with your database connections.
-```python
-DATABASES = {
-    "data": {
-        "host": "localhost", # Hostname of the server
-        "database": "data", # Name of the database
-        "username": "postgres", # Name of the user, ideally only SELECT rights
-        "password": "postgres", # Password of the user
-        "port": 5432, # Port number for PostgreSQL
-    }
-}
+DB_HOST=localhost
+DB_DATABASE=geoportal
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_PORT=5432
+CACHE_AGE_IN_SECONDS=0
+MAX_FEATURES_PER_TILE=100000
 ```
 
 ## Usage
@@ -51,3 +34,9 @@ To run the app locally `uvicorn main:app --reload`
 
 ### Production
 Build Dockerfile into a docker image to deploy to the cloud.
+
+## Aerich Commmands
+
+`aerich init -t main.DB_CONFIG --location migrations -s .`
+
+`aerich init-db`
