@@ -8,6 +8,10 @@ FastGeoPortal is a enterprise scale api for a GIS portal. FastGeoPortal is writt
 
 ---
 
+## Tech Docs
+
+Docs available at [this link](https://mkeller3.github.io/FastGeoportal/).
+
 ## Requirements
 
 FastGeoPortal requires PostGIS >= 2.4.0.
