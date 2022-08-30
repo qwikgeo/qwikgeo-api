@@ -1,10 +1,10 @@
-site_name: Hello World
-site_url: https://mkeller3.github.io/blog/
-site_description: Blog related to projects/ ideas I have wokred on.
+site_name: FastGeoportal Tech Docs
+site_url: https://mkeller3.github.io/FastGeoportal/
+site_description: Tech docs for FastGeoportal
 site_author: MkDocs Team
 
-repo_url: https://github.com/mkeller3/blog
-repo_name: Blog
+repo_url: https://github.com/mkeller3/FastGeoportal
+repo_name: FastGeoportal
 edit_uri: blob/main/docs/
 
 extra_css:
