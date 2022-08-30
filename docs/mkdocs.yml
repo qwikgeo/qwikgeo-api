@@ -1,0 +1,23 @@
+site_name: Hello World
+site_url: https://mkeller3.github.io/blog/
+site_description: Blog related to projects/ ideas I have wokred on.
+site_author: MkDocs Team
+
+repo_url: https://github.com/mkeller3/blog
+repo_name: Blog
+edit_uri: blob/main/docs/
+
+extra_css:
+  - stylesheets/extra.css
+
+theme:
+  name: material
+
+markdown_extensions:
+    - toc:
+        permalink: 
+    - attr_list
+    - def_list
+    - pymdownx.snippets
+
+dev_addr: '127.0.0.1:5000'

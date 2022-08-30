@@ -890,16 +890,20 @@ async def get_table_bounds(scheme: str, table: str, app: FastAPI) -> list:
     pool = app.state.database
 
     async with pool.acquire() as con:
+
         query = f"""
-        SELECT ARRAY[
-            ST_XMin(ST_Union(geom)),
-            ST_YMin(ST_Union(geom)),
-            ST_XMax(ST_Union(geom)),
-            ST_YMax(ST_Union(geom))
-        ]
+        SELECT ST_Extent(geom)
         FROM {scheme}.{table}
         """
+
+        table_extent = []
         
         extent = await con.fetchval(query)
 
-        return extent
+        extent = extent.replace('BOX(','').replace(')','')
+
+        for corner in extent.split(','):
+            table_extent.append(float(corner.split(' ')[0]))
+            table_extent.append(float(corner.split(' ')[1]))
+
+        return table_extent

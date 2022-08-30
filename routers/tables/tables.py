@@ -394,18 +394,10 @@ async def table_json(database: str, scheme: str, table: str, request: Request, u
 
         return url
 
-    def get_viewer_url() -> str:
-        """Return viewer url for layer """
-        url = str(request.base_url)
-        url += f"viewer/{database}/{scheme}/{table}"
-
-        return url
-
     return {
         "id": f"{scheme}.{table}",
         "schema": scheme,
         "tileurl": get_tile_url(),
-        "viewerurl": get_viewer_url(),
         "properties": await utilities.get_table_columns_list(scheme, table, request.app),
         "geometrytype": await utilities.get_table_geometry_type(scheme, table, request.app),
         "type": "table",
