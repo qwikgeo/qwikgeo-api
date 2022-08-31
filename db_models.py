@@ -17,7 +17,6 @@ class Group(models.Model):
     name = fields.CharField(50)
     users = fields.JSONField()
 
-
 class Table(models.Model):
 
     username = fields.CharField(50)

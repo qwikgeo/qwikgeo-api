@@ -375,16 +375,16 @@ async def upload_csv_to_db_with_latitude_and_longitude(file_path: str, new_table
 
     formatted_table_columns = formatted_table_columns[:-1]
 
-    create_table_sql = f"CREATE TABLE {new_table_id} ("
+    create_table_sql = f"""CREATE TABLE user_data."{new_table_id}" ("""
 
-    for name, dtype in df.dtypes.iteritems():
+    for name, data_type in df.dtypes.iteritems():
         columns += f"{remove_bad_characters(name)},"
         create_table_sql += f'"{remove_bad_characters(name)}"'
-        if dtype == "object" or dtype == "datetime64":
+        if data_type == "object" or data_type == "datetime64":
             create_table_sql += " text,"
-        if dtype == "int64":
+        if data_type == "int64":
             create_table_sql += " integer,"            
-        if dtype == "float64":
+        if data_type == "float64":
             create_table_sql += " double precision,"
 
     create_table_sql = create_table_sql[:-1]
@@ -396,11 +396,11 @@ async def upload_csv_to_db_with_latitude_and_longitude(file_path: str, new_table
     pool = app.state.database
 
     async with pool.acquire() as con:
-        await con.fetch(f"""DROP TABLE IF EXISTS "{new_table_id}";""")
+        await con.fetch(f"""DROP TABLE IF EXISTS user_data."{new_table_id}";""")
 
         await con.fetch(create_table_sql)
 
-        insert_sql = f"""COPY {new_table_id}({columns})
+        insert_sql = f"""COPY user_data."{new_table_id}"({columns})
         FROM '{file_path}'
         DELIMITER ','
         CSV HEADER;"""
@@ -408,26 +408,27 @@ async def upload_csv_to_db_with_latitude_and_longitude(file_path: str, new_table
         await con.fetch(insert_sql)
 
         add_geom_sql = f"""
-            SELECT AddGeometryColumn ('public','{new_table_id}','geom',4326,'POINT',2);                
+            SELECT AddGeometryColumn ('user_data','{new_table_id}','geom',4326,'POINT',2);                
         """
 
         await con.fetch(add_geom_sql)
 
         update_geom_sql = f"""
-            UPDATE "{new_table_id}" 
+            UPDATE user_data."{new_table_id}" 
             SET geom = ST_SetSRID(ST_MakePoint({longitude},{latitude}), 4326);
         """
 
         await con.fetch(update_geom_sql)
 
         delete_bad_geom_sql = f"""
-            DELETE FROM "{new_table_id}" WHERE geom IS NULL;
+            DELETE FROM user_data."{new_table_id}" WHERE geom IS NULL;
         """
 
         await con.fetch(delete_bad_geom_sql)
 
 async def upload_csv_to_db_with_geographic_data(file_path: str, new_table_id: str,
-    map: str, map_column: str, table_column: str, table_columns: list, map_columns: list, app: FastAPI):
+    map: str, map_column: str, table_column: str, table_columns: list, map_columns: list, 
+    app: FastAPI):
     """
     Method to upload data from from a csv file with geographic data into db.
 
@@ -450,16 +451,16 @@ async def upload_csv_to_db_with_geographic_data(file_path: str, new_table_id: st
     for column in map_columns:
         formatted_map_columns += f"b.{remove_bad_characters(column)},"
 
-    create_table_sql = f"CREATE TABLE {new_table_id}_temp ("
+    create_table_sql = f"""CREATE TABLE user_data."{new_table_id}_temp" ("""
 
-    for name, dtype in df.dtypes.iteritems():
+    for name, data_type in df.dtypes.iteritems():
         columns += f"{remove_bad_characters(name)},"
         create_table_sql += f'"{remove_bad_characters(name)}"'
-        if dtype == "object" or dtype == "datetime64":
+        if data_type == "object" or data_type == "datetime64":
             create_table_sql += " text,"
-        if dtype == "int64":
+        if data_type == "int64":
             create_table_sql += " integer,"            
-        if dtype == "float64":
+        if data_type == "float64":
             create_table_sql += " double precision,"
 
     create_table_sql = create_table_sql[:-1]
@@ -470,18 +471,18 @@ async def upload_csv_to_db_with_geographic_data(file_path: str, new_table_id: st
     pool = app.state.database
 
     async with pool.acquire() as con:
-        await con.fetch(f"""DROP TABLE IF EXISTS "{new_table_id}_temp";""")
+        await con.fetch(f"""DROP TABLE IF EXISTS user_data."{new_table_id}_temp";""")
 
         await con.fetch(create_table_sql)
 
-        insert_sql = f"""COPY {new_table_id}_temp({columns})
+        insert_sql = f"""COPY user_data."{new_table_id}_temp"({columns})
         FROM '{file_path}'
         DELIMITER ','
         CSV HEADER;"""
 
         await con.fetch(insert_sql)
 
-        join_sql = f"""CREATE TABLE "{new_table_id}" AS
+        join_sql = f"""CREATE TABLE user_data."{new_table_id}" AS
             SELECT {formatted_table_columns} {formatted_map_columns} geom
             FROM "{new_table_id}_temp" as a
             LEFT JOIN "{map}" as b
@@ -490,11 +491,11 @@ async def upload_csv_to_db_with_geographic_data(file_path: str, new_table_id: st
 
         await con.fetch(join_sql)
 
-        await con.fetch(f"""DROP TABLE IF EXISTS "{new_table_id}_temp";""")
+        await con.fetch(f"""DROP TABLE IF EXISTS user_data."{new_table_id}_temp";""")
 
 async def get_arcgis_data(url: str, new_table_id: str, process_id: str,
     username: str, title: str, tags: list, description: str, read_access_list: list,
-    write_access_list: list, searchable: bool, geometry_type: str,token: str=None):
+    write_access_list: list, searchable: bool, token: str=None):
     """
     Method get arcgis data from a given url and load it into a database.
     """
@@ -584,7 +585,7 @@ async def get_arcgis_data(url: str, new_table_id: str, process_id: str,
                     read_access_list=read_access_list,
                     write_access_list=write_access_list,
                     searchable=searchable,
-                    geometry_type=geometry_type
+                    geometry_type="test"
                 )
 
                 os.remove(f'{new_table_id}.geojson')
@@ -600,7 +601,9 @@ async def get_arcgis_data(url: str, new_table_id: str, process_id: str,
         import_processes[process_id]['completion_time'] = datetime.datetime.now()
         import_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def upload_geographic_file(file_path: str, new_table_id: str, process_id: str):
+async def upload_geographic_file(file_path: str, new_table_id: str, process_id: str,
+    username: str, title: str, tags: list, description: str, read_access_list: list,
+    write_access_list: list, searchable: bool):
     """
     Method to upload data from geographic file.
 
@@ -617,6 +620,17 @@ async def upload_geographic_file(file_path: str, new_table_id: str, process_id: 
         for file in media_directory:
             if new_table_id in file:
                 os.remove(f"{os.getcwd()}/media/{file}")  
+        await create_table(
+            username=username,
+            table_id=new_table_id,
+            title=title,
+            tags=tags,
+            description=description,
+            read_access_list=read_access_list,
+            write_access_list=write_access_list,
+            searchable=searchable,
+            geometry_type="test"
+        )
         import_processes[process_id]['status'] = "SUCCESS"
         import_processes[process_id]['new_table_id'] = new_table_id
         import_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -632,7 +646,9 @@ async def upload_geographic_file(file_path: str, new_table_id: str, process_id: 
         import_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
 async def import_geographic_data_from_csv(file_path: str, new_table_id: str, process_id: str,
-    map: str, map_column: str, table_column: str, table_columns: list, map_columns: list, app: FastAPI):
+    map: str, map_column: str, table_column: str, table_columns: list, map_columns: list, 
+    username: str, title: str, tags: list, description: str, read_access_list: list,
+    write_access_list: list, searchable: bool, app: FastAPI):
     """
     Method to upload data from from a csv file with geographic data.
 
@@ -656,6 +672,17 @@ async def import_geographic_data_from_csv(file_path: str, new_table_id: str, pro
         for file in media_directory:
             if new_table_id in file:
                 os.remove(f"{os.getcwd()}/media/{file}")  
+        await create_table(
+            username=username,
+            table_id=new_table_id,
+            title=title,
+            tags=tags,
+            description=description,
+            read_access_list=read_access_list,
+            write_access_list=write_access_list,
+            searchable=searchable,
+            geometry_type="test"
+        )
         import_processes[process_id]['status'] = "SUCCESS"
         import_processes[process_id]['new_table_id'] = new_table_id
         import_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -671,7 +698,9 @@ async def import_geographic_data_from_csv(file_path: str, new_table_id: str, pro
         import_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
 async def import_point_data_from_csv(file_path: str, new_table_id: str, process_id: str,
-    latitude: str, longitude: str, table_columns: list, app: FastAPI):
+    latitude: str, longitude: str, table_columns: list, 
+    username: str, title: str, tags: list, description: str, read_access_list: list,
+    write_access_list: list, searchable: bool, app: FastAPI):
     """
     Method to upload data from csv with lat lng columns.
 
@@ -693,7 +722,17 @@ async def import_point_data_from_csv(file_path: str, new_table_id: str, process_
         for file in media_directory:
             if new_table_id in file:
                 os.remove(f"{os.getcwd()}/media/{file}")  
-
+        await create_table(
+            username=username,
+            table_id=new_table_id,
+            title=title,
+            tags=tags,
+            description=description,
+            read_access_list=read_access_list,
+            write_access_list=write_access_list,
+            searchable=searchable,
+            geometry_type="test"
+        )
         import_processes[process_id]['status'] = "SUCCESS"
         import_processes[process_id]['new_table_id'] = new_table_id
         import_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -709,7 +748,9 @@ async def import_point_data_from_csv(file_path: str, new_table_id: str, process_
         import_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
 async def import_point_data_from_json_file(file_path: str, new_table_id: str, process_id: str,
-    latitude: str, longitude: str, table_columns: list, app: FastAPI):
+    latitude: str, longitude: str, table_columns: list, 
+    username: str, title: str, tags: list, description: str, read_access_list: list,
+    write_access_list: list, searchable: bool, app: FastAPI):
     """
     Method to upload data from csv with lat lng columns.
 
@@ -735,6 +776,17 @@ async def import_point_data_from_json_file(file_path: str, new_table_id: str, pr
         for file in media_directory:
             if new_table_id in file:
                 os.remove(f"{os.getcwd()}/media/{file}")  
+        await create_table(
+            username=username,
+            table_id=new_table_id,
+            title=title,
+            tags=tags,
+            description=description,
+            read_access_list=read_access_list,
+            write_access_list=write_access_list,
+            searchable=searchable,
+            geometry_type="test"
+        )
         import_processes[process_id]['status'] = "SUCCESS"
         import_processes[process_id]['new_table_id'] = new_table_id
         import_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -750,7 +802,9 @@ async def import_point_data_from_json_file(file_path: str, new_table_id: str, pr
         import_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
 async def import_geographic_data_from_json_file(file_path: str, new_table_id: str, process_id: str,
-    map: str, map_column: str, table_column: str, table_columns: list, map_columns: list, app: FastAPI):
+    map: str, map_column: str, table_column: str, table_columns: list, map_columns: list, 
+    username: str, title: str, tags: list, description: str, read_access_list: list,
+    write_access_list: list, searchable: bool, app: FastAPI):
     """
     Method to upload data from from a json file with geographic data.
 
@@ -778,6 +832,17 @@ async def import_geographic_data_from_json_file(file_path: str, new_table_id: st
         for file in media_directory:
             if new_table_id in file:
                 os.remove(f"{os.getcwd()}/media/{file}")  
+        await create_table(
+            username=username,
+            table_id=new_table_id,
+            title=title,
+            tags=tags,
+            description=description,
+            read_access_list=read_access_list,
+            write_access_list=write_access_list,
+            searchable=searchable,
+            geometry_type="test"
+        )
         import_processes[process_id]['status'] = "SUCCESS"
         import_processes[process_id]['new_table_id'] = new_table_id
         import_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -797,7 +862,7 @@ def load_geographic_data_to_server(table_id: str, file_path: str):
     username = db.DB_USERNAME
     password = db.DB_PASSWORD
     database = db.DB_DATABASE
-    subprocess.call(f'ogr2ogr -f "PostgreSQL" "PG:host={host} user={username} dbname={database} password={password}" "{file_path}" -lco GEOMETRY_NAME=geom -lco FID=gid -lco PRECISION=no -nln {table_id} -overwrite', shell=True)
+    subprocess.call(f'ogr2ogr -f "PostgreSQL" "PG:host={host} user={username} dbname={database} password={password}" "{file_path}" -lco GEOMETRY_NAME=geom -lco FID=gid -lco PRECISION=no -nln user_data.{table_id} -overwrite', shell=True)
 
 async def get_table_columns(table: str, app: FastAPI, new_table_name: str=None) -> list:
     """

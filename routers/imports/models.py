@@ -32,6 +32,17 @@ class PointJsonUrl(BaseModel):
     longitude: str
     table_columns: list
     url: str
+    title: str = Field(
+        title="The name of the dataset within GeoPortal."
+    )
+    tags: list=[]
+    description: str = Field(
+        title="A description about the dataset.",
+        default=""
+    )
+    read_access_list: list=[]
+    write_access_list: list=[]
+    searchable: bool=True
 
 class GeographicJsonUrl(BaseModel):
     map: str
@@ -40,6 +51,28 @@ class GeographicJsonUrl(BaseModel):
     table_columns: list
     table_column: str
     url: str
+    title: str = Field(
+        title="The name of the dataset within GeoPortal."
+    )
+    tags: list=[]
+    description: str = Field(
+        title="A description about the dataset.",
+        default=""
+    )
+    read_access_list: list=[]
+    write_access_list: list=[]
+    searchable: bool=True
 
 class GeojsonUrl(BaseModel):
     url: str
+    title: str = Field(
+        title="The name of the dataset within GeoPortal."
+    )
+    tags: list=[]
+    description: str = Field(
+        title="A description about the dataset.",
+        default=""
+    )
+    read_access_list: list=[]
+    write_access_list: list=[]
+    searchable: bool=True
