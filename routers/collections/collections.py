@@ -1,5 +1,5 @@
 from functools import reduce
-from fastapi import Request, APIRouter, Depends, HTTPException, status
+from fastapi import Request, APIRouter, Depends
 from pygeofilter.backends.sql import to_sql_where
 from pygeofilter.parsers.ecql import parse
 from tortoise.expressions import Q

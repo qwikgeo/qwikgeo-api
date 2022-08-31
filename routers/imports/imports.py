@@ -4,11 +4,9 @@ from typing import List
 from fastapi import APIRouter, BackgroundTasks, Request, Form
 from fastapi import File, UploadFile, Depends
 import requests
-from pydantic import Field
 
 import utilities
 import routers.imports.models as models
-import db_models
 
 router = APIRouter()
 
