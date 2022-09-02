@@ -1,21 +1,9 @@
 """FastGeoportal App - Database Setup"""
-import os
-from dotenv import load_dotenv
 from fastapi import FastAPI
 import asyncpg
 
-
+import config
 import bins_sql
-
-load_dotenv()
-
-DB_HOST = os.getenv('DB_HOST')
-DB_DATABASE = os.getenv('DB_DATABASE')
-DB_USERNAME = os.getenv('DB_USERNAME')
-DB_PASSWORD = os.getenv('DB_PASSWORD')
-DB_PORT = os.getenv('DB_PORT')
-CACHE_AGE_IN_SECONDS = int(os.getenv('CACHE_AGE_IN_SECONDS'))
-MAX_FEATURES_PER_TILE = int(os.getenv('MAX_FEATURES_PER_TILE'))
 
 async def connect_to_db(app: FastAPI) -> None:
     """
@@ -24,7 +12,7 @@ async def connect_to_db(app: FastAPI) -> None:
     app.state.database = {}
     
     app.state.database = await asyncpg.create_pool(
-        dsn=f"postgres://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_DATABASE}",
+        dsn=f"postgres://{config.DB_USERNAME}:{config.DB_PASSWORD}@{config.DB_HOST}:{config.DB_PORT}/{config.DB_DATABASE}",
         min_size=1,
         max_size=10,
         max_queries=50000,

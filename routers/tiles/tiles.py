@@ -9,7 +9,11 @@ router = APIRouter()
 import utilities
 import db
 
-@router.get("/{database}/{scheme}/{table}/{z}/{x}/{y}.pbf", tags=["Tiles"])
+@router.get(
+    "/{database}/{scheme}/{table}/{z}/{x}/{y}.pbf",
+    tags=["Tiles"],
+    summary="Endpoint to return a vector of tiles for a given table"
+)
 async def tiles(database: str, scheme: str, table: str, z: int, x: int,
     y: int, request: Request,fields: Optional[str] = None, cql_filter: Optional[str] = None,
     user_name: int=Depends(utilities.get_token_header)):

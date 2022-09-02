@@ -1,11 +1,14 @@
 """FastGeoPortal App"""
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
 from tortoise.contrib.fastapi import register_tortoise
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
+from starlette.middleware.sessions import SessionMiddleware
 
 import db
+import config
 from routers.authentication import authentication
 from routers.tables import tables
 from routers.tiles import tiles
@@ -30,6 +33,8 @@ app = FastAPI(
         "url": "https://mit-license.org/",
     },
 )
+
+app.add_middleware(SessionMiddleware, secret_key=config.SECRET_KEY)
 
 app.add_middleware(
     CORSMiddleware,
@@ -94,9 +99,22 @@ async def health():
 
     return {"status": "UP"}
 
+@app.get('/')
+async def homepage(request: Request):
+    # user = request.session.get('user')
+    # if user:
+    #     data = json.dumps(user)
+    #     html = (
+    #         f'<pre>{data}</pre>'
+    #         '<a href="/logout">logout</a>'
+    #     )
+
+    #     return json.loads(data)
+    return HTMLResponse('<a href="api/v1/authentication/login">login</a>')
+
 DB_CONFIG = {
     "connections": {
-        "default": f"postgres://{db.DB_USERNAME}:{db.DB_PASSWORD}@{db.DB_HOST}:{db.DB_PORT}/{db.DB_DATABASE}"
+        "default": f"postgres://{config.DB_USERNAME}:{config.DB_PASSWORD}@{config.DB_HOST}:{config.DB_PORT}/{config.DB_DATABASE}"
     },
     "apps": {
         "models": {

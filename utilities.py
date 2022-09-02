@@ -15,15 +15,15 @@ import aiohttp
 import pandas as pd
 from tortoise.expressions import Q
 from functools import reduce
+from jwt.exceptions import ExpiredSignatureError
 
 import db_models
 import db
+import config
 
 import_processes = {}
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token')
-
-SECRET_KEY = "asdasasfakjh324fds876921vdas7tfv1uqw76fasd87g2q"
 
 async def get_all_tables_from_db(app: FastAPI) -> list:
     """
@@ -108,7 +108,15 @@ async def create_table(username: str, table_id: str, title: str,
     return table
 
 async def get_token_header(token: str=Depends(oauth2_scheme)):
-    user = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+    expired_credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Credentials expired",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        user = jwt.decode(token, config.SECRET_KEY, algorithms=["HS256"])
+    except ExpiredSignatureError:
+        raise expired_credentials_exception
     return user['username']
 
 async def get_user_groups(username: str) -> list:
@@ -858,10 +866,10 @@ async def import_geographic_data_from_json_file(file_path: str, new_table_id: st
         import_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
 def load_geographic_data_to_server(table_id: str, file_path: str):
-    host = db.DB_HOST
-    username = db.DB_USERNAME
-    password = db.DB_PASSWORD
-    database = db.DB_DATABASE
+    host = config.DB_HOST
+    username = config.DB_USERNAME
+    password = config.DB_PASSWORD
+    database = config.DB_DATABASE
     subprocess.call(f'ogr2ogr -f "PostgreSQL" "PG:host={host} user={username} dbname={database} password={password}" "{file_path}" -lco GEOMETRY_NAME=geom -lco FID=gid -lco PRECISION=no -nln user_data.{table_id} -overwrite', shell=True)
 
 async def get_table_columns(table: str, app: FastAPI, new_table_name: str=None) -> list:
