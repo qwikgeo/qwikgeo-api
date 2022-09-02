@@ -4,9 +4,12 @@ from typing import List
 from fastapi import APIRouter, BackgroundTasks, Request, Form
 from fastapi import File, UploadFile, Depends
 import requests
+import aiofiles
 
 import utilities
 import routers.imports.models as models
+
+DEFAULT_CHUNK_SIZE = 1024 * 1024 * 50  # 50 megabytes
 
 router = APIRouter()
 
@@ -77,8 +80,9 @@ async def import_geographic_data_from_geographic_file(
     for file in files:
         try:
             file_path = f"{os.getcwd()}/media/{new_table_id}_{file.filename}"
-            with open(file_path, 'wb') as f:
-                [f.write(chunk) for chunk in iter(lambda: file.file.read(1000), b'')]
+            async with aiofiles.open(file_path, "wb") as f:
+                while chunk := await file.read(DEFAULT_CHUNK_SIZE):
+                    await f.write(chunk)
         except Exception:
             media_directory = os.listdir(f"{os.getcwd()}/media/")
             for file in media_directory:
@@ -143,8 +147,9 @@ async def import_geographic_data_from_csv(
     for file in files:
         try:
             file_path = f"{os.getcwd()}/media/{new_table_id}_{file.filename}"
-            with open(file_path, 'wb') as f:
-                [f.write(chunk) for chunk in iter(lambda: file.file.read(1000), b'')]
+            async with aiofiles.open(file_path, "wb") as f:
+                while chunk := await file.read(DEFAULT_CHUNK_SIZE):
+                    await f.write(chunk)
         except Exception:
             media_directory = os.listdir(f"{os.getcwd()}/media/")
             for file in media_directory:
@@ -213,8 +218,9 @@ async def import_point_data_from_csv(
     for file in files:
         try:
             file_path = f"{os.getcwd()}/media/{new_table_id}_{file.filename}"
-            with open(file_path, 'wb') as f:
-                [f.write(chunk) for chunk in iter(lambda: file.file.read(1000), b'')]
+            async with aiofiles.open(file_path, "wb") as f:
+                while chunk := await file.read(DEFAULT_CHUNK_SIZE):
+                    await f.write(chunk)
         except Exception:
             media_directory = os.listdir(f"{os.getcwd()}/media/")
             for file in media_directory:
@@ -222,12 +228,13 @@ async def import_point_data_from_csv(
                     os.remove(f"{os.getcwd()}/media/{file}")  
 
             return {"message": "There was an error uploading the file(s)"}
-        finally:
-            await file.close()
+
 
     utilities.import_processes[process_id] = {
         "status": "PENDING"
     }
+
+    print(process_id)
 
     background_tasks.add_task(
         utilities.import_point_data_from_csv,
@@ -283,8 +290,9 @@ async def import_geographic_data_from_json_file(
     for file in files:
         try:
             file_path = f"{os.getcwd()}/media/{new_table_id}_{file.filename}"
-            with open(file_path, 'wb') as f:
-                [f.write(chunk) for chunk in iter(lambda: file.file.read(1000), b'')]
+            async with aiofiles.open(file_path, "wb") as f:
+                while chunk := await file.read(DEFAULT_CHUNK_SIZE):
+                    await f.write(chunk)
         except Exception:
             media_directory = os.listdir(f"{os.getcwd()}/media/")
             for file in media_directory:
@@ -353,8 +361,9 @@ async def import_point_data_from_json_file(
     for file in files:
         try:
             file_path = f"{os.getcwd()}/media/{new_table_id}_{file.filename}"
-            with open(file_path, 'wb') as f:
-                [f.write(chunk) for chunk in iter(lambda: file.file.read(1000), b'')]
+            async with aiofiles.open(file_path, "wb") as f:
+                while chunk := await file.read(DEFAULT_CHUNK_SIZE):
+                    await f.write(chunk)
         except Exception:
             media_directory = os.listdir(f"{os.getcwd()}/media/")
             for file in media_directory:
