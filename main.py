@@ -4,7 +4,6 @@ from fastapi import FastAPI
 from tortoise.contrib.fastapi import register_tortoise
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
-from starlette.middleware.sessions import SessionMiddleware
 
 import db
 import config
@@ -32,8 +31,6 @@ app = FastAPI(
         "url": "https://mit-license.org/",
     },
 )
-
-app.add_middleware(SessionMiddleware, secret_key=config.SECRET_KEY)
 
 app.add_middleware(
     CORSMiddleware,

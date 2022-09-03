@@ -9,7 +9,7 @@ class User(models.Model):
     first_name = fields.CharField(max_length=300)
     last_name = fields.CharField(max_length=300)
     photo_url = fields.CharField(max_length=1000, null=True)
-    email = fields.CharField(max_length=300, null=True)
+    email = fields.CharField(max_length=500)
     created_time = fields.DatetimeField(auto_now_add=True)
     modified_time = fields.DatetimeField(auto_now=True)
 

@@ -1,0 +1,6 @@
+-- upgrade --
+ALTER TABLE "user" ALTER COLUMN "email" SET NOT NULL;
+ALTER TABLE "user" ALTER COLUMN "email" TYPE VARCHAR(500) USING "email"::VARCHAR(500);
+-- downgrade --
+ALTER TABLE "user" ALTER COLUMN "email" DROP NOT NULL;
+ALTER TABLE "user" ALTER COLUMN "email" TYPE VARCHAR(300) USING "email"::VARCHAR(300);

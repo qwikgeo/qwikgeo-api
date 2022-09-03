@@ -26,7 +26,7 @@ async def generate_token(form_data: OAuth2PasswordRequestForm = Depends()):
         )
     user_obj = await models.User_Pydantic.from_tortoise_orm(user)
 
-    expire = datetime.utcnow() + timedelta(minutes=60)
+    expire = datetime.utcnow() + timedelta(minutes=6000)
     token = jwt.encode({
         "username": user_obj.id,
         "exp": expire
@@ -41,7 +41,7 @@ async def google_token_authenticate(info: models.GoogleTokenAuthenticate):
 
     try:
         user_obj = db_models.User(
-            username=user['email'],
+            username=user['email'].split("@")[0],
             first_name=user['given_name'],
             last_name=user['family_name'],
             photo_url=user['picture'],
@@ -52,9 +52,9 @@ async def google_token_authenticate(info: models.GoogleTokenAuthenticate):
     except exceptions.IntegrityError:
         pass
 
-    expire = datetime.utcnow() + timedelta(minutes=60)
+    expire = datetime.utcnow() + timedelta(minutes=6000)
     token = jwt.encode({
-        "username": user['email'],
+        "username": user['email'].split("@")[0],
         "exp": expire
         }, config.SECRET_KEY
     )
@@ -73,7 +73,7 @@ async def create_user(user: models.UserIn_Pydantic):
 @router.get("/user/")
 async def get_user(user_name: int=Depends(utilities.get_token_header)):
     try:
-        user = await models.User_Pydantic.from_queryset_single(db_models.User.get(id=user_id))
+        user = await models.User_Pydantic.from_queryset_single(db_models.User.get(username=user_name))
         return user
     except exceptions.DoesNotExist:
         raise HTTPException(status_code=404, detail=f"User not found")
@@ -81,12 +81,12 @@ async def get_user(user_name: int=Depends(utilities.get_token_header)):
 @router.put("/user/", response_model=models.User_Pydantic, responses={404: {"model": HTTPNotFoundError}}, dependencies=[Depends(utilities.get_token_header)])
 async def update_user(user: models.UserIn_Pydantic, user_name: int=Depends(utilities.get_token_header)):
     # TODO
-    await db_models.User.filter(id=user_id).update(**user.dict(exclude_unset=True))
-    return await models.User_Pydantic.from_queryset_single(db_models.User.get(id=user_id))
+    await db_models.User.filter(username=user_name).update(**user.dict(exclude_unset=True))
+    return await models.User_Pydantic.from_queryset_single(db_models.User.get(username=user_name))
 
 @router.delete("/user/", response_model=models.Status, responses={404: {"model": HTTPNotFoundError}}, dependencies=[Depends(utilities.get_token_header)])
 async def delete_user(user_name: int=Depends(utilities.get_token_header)):
-    deleted_count = await db_models.User.filter(id=user_id).delete()
+    deleted_count = await db_models.User.filter(username=user_name).delete()
     if not deleted_count:
-        raise HTTPException(status_code=404, detail=f"User {user_id} not found")
-    return models.Status(message=f"Deleted user {user_id}")
+        raise HTTPException(status_code=404, detail=f"User {user_name} not found")
+    return models.Status(message=f"Deleted user {user_name}")
