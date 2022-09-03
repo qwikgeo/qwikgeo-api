@@ -5,13 +5,13 @@ from tortoise.contrib.pydantic import pydantic_model_creator
 class User(models.Model):
     id = fields.IntField(pk=True)
     username = fields.CharField(50, unique=True)
-    password_hash = fields.CharField(128)
-    name = fields.CharField(max_length=50, null=True)
+    password_hash = fields.CharField(max_length=300, null=True)
+    first_name = fields.CharField(max_length=300)
+    last_name = fields.CharField(max_length=300)
+    photo_url = fields.CharField(max_length=1000, null=True)
+    email = fields.CharField(max_length=300, null=True)
     created_time = fields.DatetimeField(auto_now_add=True)
     modified_time = fields.DatetimeField(auto_now=True)
-
-    def verify_password(self, password):
-        return bcrypt.verify(password, self.password_hash)
 
 class Group(models.Model):
     name = fields.CharField(50)

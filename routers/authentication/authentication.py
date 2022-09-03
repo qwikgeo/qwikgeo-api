@@ -1,58 +1,63 @@
 from passlib.hash import bcrypt
 from tortoise.contrib.fastapi import HTTPNotFoundError
-from fastapi import APIRouter, HTTPException, Depends, Request
+from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi.security import OAuth2PasswordRequestForm
 from tortoise import exceptions
-from starlette.config import Config
-from starlette.responses import HTMLResponse, RedirectResponse
-from authlib.integrations.starlette_client import OAuth, OAuthError
 import jwt
 from datetime import datetime, timedelta
+from google.oauth2 import id_token
+from google.auth.transport import requests
 
 import db_models
 import routers.authentication.models as models
 import utilities
 import config
 
-env_config = Config('.env')
-oauth = OAuth(env_config)
-
-CONF_URL = 'https://accounts.google.com/.well-known/openid-configuration'
-oauth.register(
-    name='google',
-    server_metadata_url=CONF_URL,
-    client_kwargs={
-        'scope': 'openid email profile'
-    }
-)
-
 router = APIRouter()
 
-@router.get('/login')
-async def login(request: Request):
-    redirect_uri = request.url_for('auth')
-    return await oauth.google.authorize_redirect(request, redirect_uri)
+@router.post('/token')
+async def generate_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = await utilities.authenticate_user(form_data.username, form_data.password)
 
-@router.get('/logout')
-async def logout(request: Request):
-    request.session.pop('user', None)
-    return RedirectResponse(url='/')
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail='Invalid username or password'
+        )
+    user_obj = await models.User_Pydantic.from_tortoise_orm(user)
 
-@router.get('/authenticate')
-async def auth(request: Request):
+    expire = datetime.utcnow() + timedelta(minutes=60)
+    token = jwt.encode({
+        "username": user_obj.id,
+        "exp": expire
+        }, config.SECRET_KEY
+    )
+
+    return {'access_token' : token, 'token_type' : 'bearer'}
+
+@router.post('/google_token_authenticate')
+async def google_token_authenticate(info: models.GoogleTokenAuthenticate):
+    user = id_token.verify_oauth2_token(info.token, requests.Request(), config.GOOGLE_CLIENT_ID)
+
     try:
-        token = await oauth.google.authorize_access_token(request)
-    except OAuthError as error:
-        return HTMLResponse(f'<h1>{error.error}</h1>')
-    user = token.get('userinfo')
-    if user:
-        request.session['user'] = dict(user)
-        request.session['test'] = 'nice'
+        user_obj = db_models.User(
+            username=user['email'],
+            first_name=user['given_name'],
+            last_name=user['family_name'],
+            photo_url=user['picture'],
+            email=user['email']
+        )
+        await user_obj.save()
 
-    expire = datetime.utcnow() + timedelta(minutes=1)
+    except exceptions.IntegrityError:
+        pass
+
+    expire = datetime.utcnow() + timedelta(minutes=60)
     token = jwt.encode({
         "username": user['email'],
         "exp": expire
-        }, config.SECRET_KEY)
+        }, config.SECRET_KEY
+    )
 
     return {'access_token' : token, 'token_type' : 'bearer'}
 
@@ -67,16 +72,11 @@ async def create_user(user: models.UserIn_Pydantic):
 
 @router.get("/user/")
 async def get_user(user_name: int=Depends(utilities.get_token_header)):
-    # try:
-    #     user = await models.User_Pydantic.from_queryset_single(db_models.User.get(id=user_id))
-    #     return user
-    # except exceptions.DoesNotExist:
-    #     raise HTTPException(status_code=404, detail=f"User not found")
-    # user = request.session.get('user')
-    # data = json.dumps(user)
-    # return json.loads(data)
-    # print(user_name)
-    return {"user_name": user_name}
+    try:
+        user = await models.User_Pydantic.from_queryset_single(db_models.User.get(id=user_id))
+        return user
+    except exceptions.DoesNotExist:
+        raise HTTPException(status_code=404, detail=f"User not found")
 
 @router.put("/user/", response_model=models.User_Pydantic, responses={404: {"model": HTTPNotFoundError}}, dependencies=[Depends(utilities.get_token_header)])
 async def update_user(user: models.UserIn_Pydantic, user_name: int=Depends(utilities.get_token_header)):

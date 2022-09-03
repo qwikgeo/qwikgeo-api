@@ -1,7 +1,6 @@
 """FastGeoPortal App"""
 
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI
 from tortoise.contrib.fastapi import register_tortoise
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
@@ -98,19 +97,6 @@ async def health():
     """
 
     return {"status": "UP"}
-
-@app.get('/')
-async def homepage(request: Request):
-    # user = request.session.get('user')
-    # if user:
-    #     data = json.dumps(user)
-    #     html = (
-    #         f'<pre>{data}</pre>'
-    #         '<a href="/logout">logout</a>'
-    #     )
-
-    #     return json.loads(data)
-    return HTMLResponse('<a href="api/v1/authentication/login">login</a>')
 
 DB_CONFIG = {
     "connections": {

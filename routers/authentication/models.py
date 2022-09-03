@@ -3,6 +3,9 @@ from pydantic import BaseModel
 
 import db_models
 
+class GoogleTokenAuthenticate(BaseModel):
+    token: str
+
 class Status(BaseModel):
     message: str
 
