@@ -107,17 +107,29 @@ async def create_table(username: str, table_id: str, title: str,
 
     return table
 
-async def get_token_header(token: str=Depends(oauth2_scheme)):
+# async def get_token_header(token: str=Depends(oauth2_scheme)):
+#     expired_credentials_exception = HTTPException(
+#         status_code=status.HTTP_401_UNAUTHORIZED,
+#         detail="Credentials expired",
+#         headers={"WWW-Authenticate": "Bearer"},
+#     )
+#     try:
+#         user = jwt.decode(token, config.SECRET_KEY, algorithms=["HS256"])
+#     except ExpiredSignatureError:
+#         raise expired_credentials_exception
+#     return user['username']
+
+async def get_token_header():
     expired_credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Credentials expired",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    try:
-        user = jwt.decode(token, config.SECRET_KEY, algorithms=["HS256"])
-    except ExpiredSignatureError:
-        raise expired_credentials_exception
-    return user['username']
+    # try:
+    #     user = jwt.decode(token, config.SECRET_KEY, algorithms=["HS256"])
+    # except ExpiredSignatureError:
+    #     raise expired_credentials_exception
+    return 23
 
 async def get_user_groups(username: str) -> list:
     groups_plus_username = [username]

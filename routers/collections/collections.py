@@ -59,7 +59,7 @@ async def collections(request: Request, user_name: int=Depends(utilities.get_tok
             }
         )
 
-    return db_tables
+    return {"collections": db_tables}
 
 @router.get("/{scheme}.{table}", tags=["Collections"])
 async def collection(scheme: str, table: str, request: Request, user_name: int=Depends(utilities.get_token_header)):
