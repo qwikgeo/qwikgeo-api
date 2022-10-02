@@ -166,7 +166,7 @@ async def queryables(scheme: str, table: str, request: Request,
 
 @router.get("/{scheme}.{table}/items", tags=["Collections"])
 async def items(scheme: str, table: str, request: Request,
-    bbox: str=None, limit: int=200000, offset: int=0, properties: str="*",
+    bbox: str=None, limit: int=100, offset: int=0, properties: str="*",
     sortby :str="gid", filter :str=None, srid: int=4326, user_name: int=Depends(utilities.get_token_header)):
     """
     Method used to return geojson from a collection.
@@ -344,15 +344,18 @@ async def tiles(scheme: str, table: str, request: Request,
         table=table,
         user_name=user_name,
         app=request.app
-    )    
+    )
+
+    table_metadata = await db_models.Table_Pydantic.from_queryset_single(db_models.Table.get(table_id=table))
 
     url = str(request.base_url)
 
-    mvt_path = "{tileMatrixSetId}/{tileMatrix}/{tileRow}/{tileCol}?f=mvt"
+    mvt_path = "{tileMatrixSetId}/{tileMatrix}/{tileRow}/{tileCol}"
 
     tile_info = {
-        "title": f"{scheme}.{table}",
-        "description": f"{scheme}.{table}",
+        "id": f"{scheme}.{table}",
+        "title": table_metadata.title,
+        "description": table_metadata.description,
         "links": [
             {
                 "type": "application/json",
