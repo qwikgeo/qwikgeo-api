@@ -1,12 +1,16 @@
+import os
+import shutil
+from typing import Optional
 from functools import reduce
-from fastapi import Request, APIRouter, Depends
+from fastapi import Request, APIRouter, Depends, status, Response
+from starlette.responses import FileResponse
 from pygeofilter.backends.sql import to_sql_where
 from pygeofilter.parsers.ecql import parse
 from tortoise.expressions import Q
 
 import utilities
 import db_models
-import db
+import config
 
 router = APIRouter()
 
@@ -17,6 +21,8 @@ async def collections(request: Request, user_name: int=Depends(utilities.get_tok
 
     """
 
+    url = str(request.base_url)
+
     db_tables = []
 
     user_groups = await utilities.get_user_groups(user_name)
@@ -24,20 +30,39 @@ async def collections(request: Request, user_name: int=Depends(utilities.get_tok
     tables = await db_models.Table_Pydantic.from_queryset(db_models.Table.filter(reduce(lambda x, y: x | y, [Q(read_access_list__contains=[group]) for group in user_groups])))
 
     for table in tables:
+        table_metadata = await db_models.Table_Pydantic.from_queryset_single(db_models.Table.get(table_id=table.table_id))
         db_tables.append(
             {
-                "name" : table.table_id,
-                "schema" : "user_data",
-                "type" : "table",
                 "id" : f"user_data.{table.table_id}",
-                "database" : db.DB_DATABASE
+                "title" : table_metadata.title,
+                "description" : table_metadata.description,
+                "keywords": table_metadata.tags,
+                "links": [
+                    {
+                        "type": "application/json",
+                        "rel": "self",
+                        "title": "This document as JSON",
+                        "href": f"{url}api/v1/collections/user_data.{table.table_id}"
+                    }
+                ],
+                "extent": {
+                    "spatial": {
+                        "bbox": await utilities.get_table_bounds(
+                            scheme="user_data",
+                            table=table.table_id,
+                            app=request.app
+                        ),
+                        "crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+                    }
+                },
+                "itemType": "feature"
             }
         )
 
     return db_tables
 
-@router.get("/{database}.{scheme}.{table}", tags=["Collections"])
-async def collection(database: str, scheme: str, table: str, request: Request, user_name: int=Depends(utilities.get_token_header)):
+@router.get("/{scheme}.{table}", tags=["Collections"])
+async def collection(scheme: str, table: str, request: Request, user_name: int=Depends(utilities.get_token_header)):
     """
     Method used to return information about a collection.
 
@@ -49,19 +74,33 @@ async def collection(database: str, scheme: str, table: str, request: Request, u
         app=request.app
     )
 
+    table_metadata = await db_models.Table_Pydantic.from_queryset_single(db_models.Table.get(table_id=table))
+
     url = str(request.base_url)
 
     return {
-        "id": f"{database}.{scheme}.{table}",
-        "title": f"{database}.{scheme}.{table}",
-        "description": f"{database}.{scheme}.{table}",
-        "keywords": [f"{database}.{scheme}.{table}"],
+        "id": f"{scheme}.{table}",
+        "title" : table_metadata.title,
+        "description" : table_metadata.description,
+        "keywords": table_metadata.tags,
         "links": [
             {
                 "type": "application/json",
                 "rel": "self",
                 "title": "Items as GeoJSON",
-                "href": f"{url}api/v1/collections/{database}.{scheme}.{table}/items"
+                "href": f"{url}api/v1/collections/{scheme}.{table}/items"
+            },
+            {
+                "type": "application/json",
+                "rel": "queryables",
+                "title": "Queryables for this collection as JSON",
+                "href": f"{url}api/v1/collections/{scheme}.{table}/queryables"
+            },
+            {
+                "type": "application/json",
+                "rel": "tiles",
+                "title": "Tiles as JSON",
+                "href": f"{url}api/v1/collections/{scheme}.{table}/tiles"
             }
         ],
         "extent": {
@@ -77,14 +116,64 @@ async def collection(database: str, scheme: str, table: str, request: Request, u
         "itemType": "feature"
     }
 
-@router.get("/{database}.{scheme}.{table}/items", tags=["Collections"])
-async def items(database: str, scheme: str, table: str, request: Request,
+@router.get("/{scheme}.{table}/queryables", tags=["Collections"])
+async def queryables(scheme: str, table: str, request: Request,
+    user_name: int=Depends(utilities.get_token_header)):
+    """
+    Method used to return queryable information about a collection.
+
+    """
+
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name,
+        app=request.app
+    )    
+
+    url = str(request.base_url)
+
+    queryable = {
+        "$id": f"{url}api/v1/collections/{scheme}.{table}/queryables",
+        "title": f"{scheme}.{table}",
+        "type": "object",
+        "$schema": "http://json-schema.org/draft/2019-09/schema",
+        "properties": {}
+    }
+
+    pool = request.app.state.database
+
+    async with pool.acquire() as con:
+
+        sql_field_query = f"""
+            SELECT column_name, data_type
+            FROM information_schema.columns
+            WHERE table_name = '{table}'
+            AND column_name != 'geom';
+        """
+
+        db_fields = await con.fetch(sql_field_query)
+
+        for field in db_fields:
+            data_type = 'string'
+            if field['data_type'] in config.NUMERIC_FIELDS:
+                data_type = 'numeric'
+            queryable['properties'][field['column_name']] = {
+                "title": field['column_name'],
+                "type": data_type
+            }
+
+        return queryable
+
+@router.get("/{scheme}.{table}/items", tags=["Collections"])
+async def items(scheme: str, table: str, request: Request,
     bbox: str=None, limit: int=200000, offset: int=0, properties: str="*",
     sortby :str="gid", filter :str=None, srid: int=4326, user_name: int=Depends(utilities.get_token_header)):
     """
     Method used to return geojson from a collection.
 
     """
+
+    url = str(request.base_url)
 
     await utilities.validate_table_access(
         table=table,
@@ -138,9 +227,7 @@ async def items(database: str, scheme: str, table: str, request: Request,
                 field_mapping[field['column_name']] = field['column_name']
 
             ast = parse(filter)
-            filter = to_sql_where(ast, field_mapping)
-
-            
+            filter = to_sql_where(ast, field_mapping)            
     
         if filter is not None and column_where_parameters != "":
             filter += f" AND {column_where_parameters}"
@@ -160,15 +247,32 @@ async def items(database: str, scheme: str, table: str, request: Request,
             app=request.app
         )
 
+        results['links'] = [
+            {
+                "type": "application/json",
+                "rel": "self",
+                "title": "This document as GeoJSON",
+                "href": request.url._url
+            },
+            {
+                "type": "application/json",
+                "title": f"{scheme}.{table}",
+                "rel": "collection",
+                "href": f"{url}api/v1/collections/{scheme}.{table}"
+            }
+        ]
+
         return results
 
-@router.get("/{database}.{scheme}.{table}/items/{id}", tags=["Collections"])
-async def item(database: str, scheme: str, table: str, id:str, request: Request,
+@router.get("/{scheme}.{table}/items/{id}", tags=["Collections"])
+async def item(scheme: str, table: str, id:str, request: Request,
     properties: str="*", srid: int=4326, user_name: int=Depends(utilities.get_token_header)):
     """
     Method used to return geojson for one item of a collection.
 
-    """    
+    """
+
+    url = str(request.base_url)
 
     await utilities.validate_table_access(
         table=table,
@@ -205,4 +309,241 @@ async def item(database: str, scheme: str, table: str, id:str, request: Request,
             app=request.app
         )
 
-        return results
+        results['features'][0]['links'] = [
+            {
+                "type": "application/json",
+                "rel": "self",
+                "title": "This document as GeoJSON",
+                "href": request.url._url
+            },
+            {
+                "type": "application/json",
+                "title": "items as GeoJSON",
+                "rel": "items",
+                "href": f"{url}api/v1/collections/{scheme}.{table}/items"
+            },
+            {
+                "type": "application/json",
+                "title": f"{scheme}.{table}",
+                "rel": "collection",
+                "href": f"{url}api/v1/collections/{scheme}.{table}"
+            }
+        ]
+
+        return results['features'][0]
+
+@router.get("/{scheme}.{table}/tiles", tags=["Collections"])
+async def tiles(scheme: str, table: str, request: Request,
+    user_name: int=Depends(utilities.get_token_header)):
+    """
+    Method used to return queryable information about a collection.
+
+    """
+
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name,
+        app=request.app
+    )    
+
+    url = str(request.base_url)
+
+    mvt_path = "{tileMatrixSetId}/{tileMatrix}/{tileRow}/{tileCol}?f=mvt"
+
+    tile_info = {
+        "title": f"{scheme}.{table}",
+        "description": f"{scheme}.{table}",
+        "links": [
+            {
+                "type": "application/json",
+                "rel": "self",
+                "title": "This document as JSON",
+                "href": f"{url}api/v1/collections/{scheme}.{table}/tiles",
+            },
+            {
+                "type": "application/vnd.mapbox-vector-tile",
+                "rel": "item",
+                "title": "This collection as Mapbox vector tiles",
+                "href": f"{url}api/v1/collections/{scheme}.{table}/tiles/{mvt_path}",
+                "templated": True
+            },
+            {
+                "type": "application/json",
+                "rel": "describedby",
+                "title": "Metadata for this collection in the TileJSON format",
+                "href": f"{url}api/v1/collections/{scheme}.{table}/tiles/{{tileMatrixSetId}}/metadata",
+                "templated": True
+            }
+        ],
+        "tileMatrixSetLinks": [
+            {
+                "tileMatrixSet": "WorldCRS84Quad",
+                "tileMatrixSetURI": "http://schemas.opengis.net/tms/1.0/json/examples/WorldCRS84Quad.json"
+            }
+        ]
+    }   
+
+    return tile_info
+
+@router.get(
+    "/{scheme}.{table}/tiles/{tileMatrixSetId}/{tileMatrix}/{tileRow}/{tileCol}",
+    tags=["Collections"],
+    summary="Endpoint to return a vector of tiles for a given table"
+)
+async def tiles(scheme: str, table: str, tileMatrixSetId: str, tileMatrix: int, tileRow: int,
+    tileCol: int, request: Request,fields: Optional[str] = None, cql_filter: Optional[str] = None,
+    user_name: int=Depends(utilities.get_token_header)):
+    """
+    Method used to return a vector of tiles for a given table.
+    """
+
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name,
+        app=request.app
+    )
+
+    pbf, tile_cache = await utilities.get_tile(
+        scheme=scheme,
+        table=table,
+        tileMatrixSetId=tileMatrixSetId,
+        z=tileMatrix,
+        x=tileRow,
+        y=tileCol,
+        fields=fields,
+        cql_filter=cql_filter,
+        app=request.app
+    )
+
+    response_code = status.HTTP_200_OK
+
+    max_cache_age = config.CACHE_AGE_IN_SECONDS
+
+    if fields is not None and cql_filter is not None:
+        max_cache_age = 0
+
+    if tile_cache:
+        return FileResponse(
+            path=f'{os.getcwd()}/cache/{scheme}_{table}/{tileMatrixSetId}/{tileMatrix}/{tileRow}/{tileCol}',
+            media_type="application/vnd.mapbox-vector-tile",
+            status_code=response_code,
+            headers = {
+                "Cache-Control": f"max-age={max_cache_age}",
+                "tile-cache": 'true'
+            }
+        )
+
+    if pbf == b"":
+        response_code = status.HTTP_204_NO_CONTENT
+
+    return Response(
+        content=bytes(pbf),
+        media_type="application/vnd.mapbox-vector-tile",
+        status_code=response_code,
+        headers = {
+            "Cache-Control": f"max-age={max_cache_age}",
+            "tile-cache": 'false'
+        }
+    )
+
+@router.get("/{scheme}.{table}/tiles/{tileMatrixSetId}/metadata", tags=["Collections"])
+async def tiles_metadata(scheme: str, table: str, tileMatrixSetId: str, request: Request, user_name: int=Depends(utilities.get_token_header)):
+    """
+    Method used to return a tile metadata for a given table.
+    """
+
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name,
+        app=request.app
+    )
+
+    table_metadata = await db_models.Table_Pydantic.from_queryset_single(db_models.Table.get(table_id=table))
+
+    url = str(request.base_url)
+
+    mvt_path = f"{tileMatrixSetId}/{{tileMatrix}}/{{tileRow}}/{{tileCol}}?f=mvt"
+
+    metadata = {
+        "tilejson": "3.0.0",
+        "name": f"{scheme}.{table}",
+        "tiles": f"{url}api/v1/collections/{scheme}.{table}/tiles/{mvt_path}",
+        "minzoom": "0",
+        "maxzoom": "22",
+        # "bounds": "-124.953634,-16.536406,109.929807,66.969298",
+        # "center": "-84.375000,44.951199,5",
+        "attribution": None,
+        "description": table_metadata.description,
+        "vector_layers": [
+            {
+                "id": f"{scheme}.{table}",
+                "description": table_metadata.description,
+                "minzoom": 0,
+                "maxzoom": 22,
+                "fields": {}
+            }
+        ]
+    }
+
+    pool = request.app.state.database
+
+    async with pool.acquire() as con:
+
+        sql_field_query = f"""
+            SELECT column_name, data_type
+            FROM information_schema.columns
+            WHERE table_name = '{table}'
+            AND column_name != 'geom';
+        """
+
+        db_fields = await con.fetch(sql_field_query)
+
+        for field in db_fields:
+            data_type = 'string'
+            if field['data_type'] in config.NUMERIC_FIELDS:
+                data_type = 'numeric'
+            metadata['vector_layers'][0]['fields'][field['column_name']] = data_type
+
+        return metadata
+
+@router.get("/{scheme}.{table}/cache_size", tags=["Collections"])
+async def get_tile_cache_size(scheme: str, table: str, request: Request, user_name: int=Depends(utilities.get_token_header)):
+    """
+    Method used to a list size of cache for table.
+    """
+
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name,
+        app=request.app
+    )
+
+    size = 0
+
+    cache_path = f'{os.getcwd()}/cache/{scheme}_{table}'
+
+    if os.path.exists(cache_path):     
+        for path, dirs, files in os.walk(cache_path):
+            for f in files:
+                fp = os.path.join(path, f)
+                size += os.path.getsize(fp)
+
+    return {'size_in_gigabytes': size*.000000001}
+
+@router.delete("/cache", tags=["Collections"])
+async def delete_tile_cache(scheme: str, table: str, request: Request, user_name: int=Depends(utilities.get_token_header)):
+    """
+    Method used to delete cache for a table.
+    """
+
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name,
+        app=request.app
+    )
+
+    if os.path.exists(f'{os.getcwd()}/cache/{scheme}_{table}'):
+        shutil.rmtree(f'{os.getcwd()}/cache/{scheme}_{table}')
+        return {"status": "deleted"}
+    else:
+        return {"error": f"No cache at {os.getcwd()}/cache/{scheme}_{table}"}

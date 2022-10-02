@@ -234,8 +234,6 @@ async def import_point_data_from_csv(
         "status": "PENDING"
     }
 
-    print(process_id)
-
     background_tasks.add_task(
         utilities.import_point_data_from_csv,
         file_path=file_path,

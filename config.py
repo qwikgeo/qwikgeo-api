@@ -12,3 +12,5 @@ CACHE_AGE_IN_SECONDS = int(os.getenv('CACHE_AGE_IN_SECONDS'))
 MAX_FEATURES_PER_TILE = int(os.getenv('MAX_FEATURES_PER_TILE'))
 SECRET_KEY = os.getenv('SECRET_KEY')
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+
+NUMERIC_FIELDS = ['bigint','bigserial','double precision','integer','smallint','real','smallserial','serial','numeric','money']

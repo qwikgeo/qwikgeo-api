@@ -7,6 +7,7 @@ import routers.tables.models as models
 import utilities
 import db_models
 import db
+import config
 
 router = APIRouter()
 
@@ -82,7 +83,7 @@ async def edit_row_attributes(
             SET 
         """
 
-        numeric_field_types = ['integer','double precision']
+        numeric_field_types = config.NUMERIC_FIELDS
 
         for field in info.values:
             if field not in db_columns:
@@ -341,71 +342,6 @@ async def delete_table(
         await con.fetch(query)
         
         return {"status": True}
-
-@router.get("/tables.json", tags=["Tables"])
-async def tables(request: Request, user_name: int=Depends(utilities.get_token_header)):
-    """
-    Method used to return a list of tables available to query for vector tiles.
-    """
-
-    def get_detail_url(table: object) -> str:
-        """Return tile url for layer """
-        url = str(request.base_url)
-        url += f"api/v1/tables/{table['database']}/{table['schema']}/{table['name']}.json"
-        return url
-    db_tables = []
-
-    user_groups = await utilities.get_user_groups(user_name)
-
-    tables = await db_models.Table_Pydantic.from_queryset(db_models.Table.filter(reduce(lambda x, y: x | y, [Q(read_access_list__contains=[group]) for group in user_groups])))
-
-    for table in tables:
-        db_tables.append(
-            {
-                "name" : table.table_id,
-                "schema" : "user_data",
-                "type" : "table",
-                "id" : f"user_data.{table.table_id}",
-                "database" : db.DB_DATABASE
-            }
-        )
-    for table in db_tables:
-        table['detailurl'] = get_detail_url(table)
-
-    return db_tables
-
-@router.get("/{database}/{scheme}/{table}.json", tags=["Tables"])
-async def table_json(database: str, scheme: str, table: str, request: Request, user_name: int=Depends(utilities.get_token_header)):
-    """
-    Method used to return a information for a given table.
-    """
-
-    await utilities.validate_table_access(
-        table=table,
-        user_name=user_name,
-        app=request.app
-    )
-
-    def get_tile_url() -> str:
-        """Return tile url for layer """
-        url = str(request.base_url)
-        url += f"api/v1/tiles/{database}/{scheme}/{table}"
-        url += "/{z}/{x}/{y}.pbf"
-
-        return url
-
-    return {
-        "id": f"{scheme}.{table}",
-        "schema": scheme,
-        "tileurl": get_tile_url(),
-        "properties": await utilities.get_table_columns_list(scheme, table, request.app),
-        "geometrytype": await utilities.get_table_geometry_type(scheme, table, request.app),
-        "type": "table",
-        "minzoom": 0,
-        "maxzoom": 22,
-        "bounds": await utilities.get_table_bounds(scheme, table, request.app),
-        "center": await utilities.get_table_center(scheme, table, request.app)
-    }
 
 @router.post("/statistics/", tags=["Tables"])
 async def statistics(info: models.StatisticsModel, request: Request, user_name: int=Depends(utilities.get_token_header)):

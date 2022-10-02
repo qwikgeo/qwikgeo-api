@@ -137,13 +137,13 @@ async def authenticate_user(username: str, password: str):
         return False
     return user
 
-async def get_tile(scheme: str, table: str, z: int,
+async def get_tile(scheme: str, table: str, tileMatrixSetId: str, z: int,
     x: int, y: int, fields: str, cql_filter: str, app: FastAPI) -> bytes:
     """
     Method to return vector tile from database.
     """
 
-    cachefile = f'{os.getcwd()}/cache/{db.DB_DATABASE}_{scheme}_{table}/{z}/{x}/{y}'
+    cachefile = f'{os.getcwd()}/cache/{config.DB_DATABASE}_{scheme}_{table}/{tileMatrixSetId}/{z}/{x}/{y}'
 
     if os.path.exists(cachefile):
         return '', True
@@ -200,13 +200,13 @@ async def get_tile(scheme: str, table: str, z: int,
             where_statement = to_sql_where(ast, field_mapping)
             sql_vector_query += f" AND {where_statement}"
 
-        sql_vector_query += f"LIMIT {db.MAX_FEATURES_PER_TILE}) as tile"
+        sql_vector_query += f"LIMIT {config.MAX_FEATURES_PER_TILE}) as tile"
 
         tile = await con.fetchval(sql_vector_query)
 
-        if fields is None and cql_filter is None and db.CACHE_AGE_IN_SECONDS > 0:
+        if fields is None and cql_filter is None and config.CACHE_AGE_IN_SECONDS > 0:
 
-            cachefile_dir = f'{os.getcwd()}/cache/{db.DB_DATABASE}_{scheme}_{table}/{z}/{x}'
+            cachefile_dir = f'{os.getcwd()}/cache/{config.DB_DATABASE}_{scheme}_{table}/{tileMatrixSetId}/{z}/{x}'
 
             if not os.path.exists(cachefile_dir):
                 try:
@@ -287,14 +287,15 @@ async def get_table_bounds(scheme: str, table: str, app: FastAPI) -> list:
 
     async with pool.acquire() as con:
         query = f"""
-        SELECT ARRAY[
-            ST_XMin(ST_Union(geom)),
-            ST_YMin(ST_Union(geom)),
-            ST_XMax(ST_Union(geom)),
-            ST_YMax(ST_Union(geom))
-        ]
-        FROM {scheme}.{table}
+            SELECT ARRAY[
+                ST_XMin(ST_Union(geom)),
+                ST_YMin(ST_Union(geom)),
+                ST_XMax(ST_Union(geom)),
+                ST_YMax(ST_Union(geom))
+            ]
+            FROM {scheme}.{table}
         """
+
         extent = await con.fetchval(query)
 
         return extent
@@ -503,7 +504,7 @@ async def upload_csv_to_db_with_geographic_data(file_path: str, new_table_id: st
 
 async def get_arcgis_data(url: str, new_table_id: str, process_id: str,
     username: str, title: str, tags: list, description: str, read_access_list: list,
-    write_access_list: list, searchable: bool, token: str=None):
+    write_access_list: list, searchable: bool, app: FastAPI, token: str=None):
     """
     Method get arcgis data from a given url and load it into a database.
     """
@@ -611,7 +612,7 @@ async def get_arcgis_data(url: str, new_table_id: str, process_id: str,
 
 async def upload_geographic_file(file_path: str, new_table_id: str, process_id: str,
     username: str, title: str, tags: list, description: str, read_access_list: list,
-    write_access_list: list, searchable: bool):
+    write_access_list: list, searchable: bool, app: FastAPI):
     """
     Method to upload data from geographic file.
 
@@ -870,7 +871,7 @@ def load_geographic_data_to_server(table_id: str, file_path: str):
     username = config.DB_USERNAME
     password = config.DB_PASSWORD
     database = config.DB_DATABASE
-    subprocess.call(f'ogr2ogr -f "PostgreSQL" "PG:host={host} user={username} dbname={database} password={password}" "{file_path}" -lco GEOMETRY_NAME=geom -lco FID=gid -lco PRECISION=no -nln user_data.{table_id} -overwrite', shell=True)
+    subprocess.call(f'ogr2ogr -f "PostgreSQL" "PG:host={host} user={username} dbname={database} password={password}" "{file_path}" -lco GEOMETRY_NAME=geom -lco FID=gid -lco PRECISION=no -nln {table_id} -overwrite', shell=True)
 
 async def get_table_columns(table: str, app: FastAPI, new_table_name: str=None) -> list:
     """
@@ -903,7 +904,7 @@ async def get_table_columns(table: str, app: FastAPI, new_table_name: str=None) 
         return fields
 
 async def get_table_geojson(scheme: str, table: str,
-    app: FastAPI, filter: str=None, bbox :str=None,limit: int=200000,
+    app: FastAPI, filter: str=None, bbox :str=None, limit: int=200000,
     offset: int=0, properties: str="*", sort_by: str="gid", srid: int=4326) -> list:
     """
     Method used to retrieve the table geojson.
@@ -922,24 +923,30 @@ async def get_table_geojson(scheme: str, table: str,
         FROM (
         """
 
-        if len(properties) > 0:
+        if properties != '*':
             query += f"SELECT {properties},ST_Transform(geom,{srid})"
         else:
-            query += f"SELECT geom"
+            query += f"SELECT ST_Transform(geom,{srid})"
 
         query += f" FROM {scheme}.{table} "
 
+        count_query = f"""SELECT COUNT(*) FROM {scheme}.{table} """
+
         if filter != "" :
             query += f"WHERE {filter}"
-
+            count_query += f"WHERE {filter}"
+        
         if bbox is not None:
-            if filter is not None:
+            if filter != "":
                 query += f" AND "
+                count_query += f" AND "
             else:
                 query += f" WHERE "
+                count_query += f" WHERE "
             coords = bbox.split(',')
-            query += f" ST_INTERSECTS(geom,ST_SetSRID(ST_PolygonFromText('POLYGON(({coords[3]} {coords[0]}, {coords[1]} {coords[0]}, {coords[1]} {coords[2]}, {coords[3]} {coords[2]}, {coords[3]} {coords[0]}))'),4326))"
-
+            query += f" ST_INTERSECTS(geom,ST_MakeEnvelope({coords[0]}, {coords[1]}, {coords[2]}, {coords[3]}, 4326)) "
+            count_query += f" ST_INTERSECTS(geom,ST_MakeEnvelope({coords[0]}, {coords[1]}, {coords[2]}, {coords[3]}, 4326)) "
+        
         if sort_by != "gid":
             order = sort_by.split(':')
             sort = "asc"
@@ -952,8 +959,20 @@ async def get_table_geojson(scheme: str, table: str,
         query += ") AS t;"
         
         geojson = await con.fetchrow(query)
+        count = await con.fetchrow(count_query)
         
-        return json.loads(geojson['json_build_object'])
+        formatted_geojson = json.loads(geojson['json_build_object'])
+
+        if formatted_geojson['features'] != None:
+            for feature in formatted_geojson['features']:
+                feature['id'] = feature['properties']['gid']
+
+        formatted_geojson['numberMatched'] = count['count']
+        formatted_geojson['numberReturned'] = 0
+        if formatted_geojson['features'] != None:
+            formatted_geojson['numberReturned'] = len(formatted_geojson['features'])
+        
+        return formatted_geojson
 
 async def get_table_bounds(scheme: str, table: str, app: FastAPI) -> list:
     """

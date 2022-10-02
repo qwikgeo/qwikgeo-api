@@ -63,8 +63,15 @@ async def google_token_authenticate(info: models.GoogleTokenAuthenticate):
 
 @router.post("/user/", response_model=models.User_Pydantic)
 async def create_user(user: models.UserIn_Pydantic):
+    print(user)
     try:
-        user_obj = db_models.User(username=user.username, password_hash=bcrypt.hash(user.password_hash))
+        user_obj = db_models.User(
+            username=user.username,
+            password_hash=bcrypt.hash(user.password_hash),
+            first_name=user.first_name,
+            last_name=user.last_name,
+            email=user.email,
+        )
         await user_obj.save()
         return await models.User_Pydantic.from_tortoise_orm(user_obj)
     except exceptions.IntegrityError:

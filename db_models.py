@@ -13,6 +13,9 @@ class User(models.Model):
     created_time = fields.DatetimeField(auto_now_add=True)
     modified_time = fields.DatetimeField(auto_now=True)
 
+    def verify_password(self, password):
+        return bcrypt.verify(password, self.password_hash)
+
 class Group(models.Model):
     name = fields.CharField(50)
     users = fields.JSONField()

@@ -1,6 +1,6 @@
 """FastGeoPortal App"""
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from tortoise.contrib.fastapi import register_tortoise
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
@@ -9,7 +9,6 @@ import db
 import config
 from routers.authentication import authentication
 from routers.tables import tables
-from routers.tiles import tiles
 from routers.imports import imports
 from routers.analysis import analysis
 from routers.collections import collections
@@ -53,12 +52,6 @@ app.include_router(
 )
 
 app.include_router(
-    tiles.router,
-    prefix="/api/v1/tiles",
-    tags=["Tiles"],
-)
-
-app.include_router(
     imports.router,
     prefix="/api/v1/imports",
     tags=["Imports"],
@@ -86,6 +79,60 @@ async def startup_event():
 async def shutdown_event():
     """Application shutdown: de-register the database connection."""
     await db.close_db_connection(app)
+
+@app.get("/api/v1/", tags=["Landing Page"])
+async def landing_page(request: Request):
+    """
+    Method to show landing page.
+    """
+
+    url = str(request.base_url)
+
+    return {
+        "links": [
+            {
+                "rel": "self",
+                "type": "application/json",
+                "title": "This document as JSON",
+                "href": f"{url}api/v1/"
+            },
+            {
+                "rel": "conformance",
+                "type": "application/json",
+                "title": "Conformance",
+                "href": f"{url}api/v1/conformance"
+            },
+            {
+                "rel": "data",
+                "type": "application/json",
+                "title": "Collections",
+                "href": f"{url}api/v1/collections"
+            },
+            {
+                "rel": "service-desc",
+                "type": "application/vnd.oai.openapi+json;version=3.0",
+                "title": "The OpenAPI definition as JSON",
+                "href": f"{url}openapi.json"
+            }
+        ],
+        "title": "FastGeoPortal",
+        "description": DESCRIPTION
+    }
+
+@app.get("/api/v1/conformance", tags=["Conformance"])
+async def conformance(request: Request):
+    """
+    Method to show conformance
+    """
+
+    url = str(request.base_url)
+
+    return {
+        "conformsTo": [
+            "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core",
+            "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/geojson"
+        ]
+    }
 
 @app.get("/api/v1/health_check", tags=["Health"])
 async def health():
