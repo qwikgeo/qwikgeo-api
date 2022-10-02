@@ -13,9 +13,7 @@ from routers.imports import imports
 from routers.analysis import analysis
 from routers.collections import collections
 
-DESCRIPTION = """
-A python api to create a geoportal.
-"""
+DESCRIPTION = """A python api to create a geoportal."""
 
 app = FastAPI(
     title="FastGeoportal",

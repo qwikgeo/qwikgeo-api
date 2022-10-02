@@ -107,29 +107,17 @@ async def create_table(username: str, table_id: str, title: str,
 
     return table
 
-# async def get_token_header(token: str=Depends(oauth2_scheme)):
-#     expired_credentials_exception = HTTPException(
-#         status_code=status.HTTP_401_UNAUTHORIZED,
-#         detail="Credentials expired",
-#         headers={"WWW-Authenticate": "Bearer"},
-#     )
-#     try:
-#         user = jwt.decode(token, config.SECRET_KEY, algorithms=["HS256"])
-#     except ExpiredSignatureError:
-#         raise expired_credentials_exception
-#     return user['username']
-
-async def get_token_header():
+async def get_token_header(token: str=Depends(oauth2_scheme)):
     expired_credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Credentials expired",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    # try:
-    #     user = jwt.decode(token, config.SECRET_KEY, algorithms=["HS256"])
-    # except ExpiredSignatureError:
-    #     raise expired_credentials_exception
-    return 23
+    try:
+        user = jwt.decode(token, config.SECRET_KEY, algorithms=["HS256"])
+    except ExpiredSignatureError:
+        raise expired_credentials_exception
+    return user['username']
 
 async def get_user_groups(username: str) -> list:
     groups_plus_username = [username]
@@ -155,7 +143,7 @@ async def get_tile(scheme: str, table: str, tileMatrixSetId: str, z: int,
     Method to return vector tile from database.
     """
 
-    cachefile = f'{os.getcwd()}/cache/{config.DB_DATABASE}_{scheme}_{table}/{tileMatrixSetId}/{z}/{x}/{y}'
+    cachefile = f'{os.getcwd()}/cache/{scheme}_{table}/{tileMatrixSetId}/{z}/{x}/{y}'
 
     if os.path.exists(cachefile):
         return '', True
@@ -218,7 +206,7 @@ async def get_tile(scheme: str, table: str, tileMatrixSetId: str, z: int,
 
         if fields is None and cql_filter is None and config.CACHE_AGE_IN_SECONDS > 0:
 
-            cachefile_dir = f'{os.getcwd()}/cache/{config.DB_DATABASE}_{scheme}_{table}/{tileMatrixSetId}/{z}/{x}'
+            cachefile_dir = f'{os.getcwd()}/cache/{scheme}_{table}/{tileMatrixSetId}/{z}/{x}'
 
             if not os.path.exists(cachefile_dir):
                 try:

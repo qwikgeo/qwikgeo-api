@@ -28,7 +28,7 @@ async def generate_token(form_data: OAuth2PasswordRequestForm = Depends()):
 
     expire = datetime.utcnow() + timedelta(minutes=6000)
     token = jwt.encode({
-        "username": user_obj.id,
+        "username": user_obj.username,
         "exp": expire
         }, config.SECRET_KEY
     )
@@ -63,7 +63,6 @@ async def google_token_authenticate(info: models.GoogleTokenAuthenticate):
 
 @router.post("/user/", response_model=models.User_Pydantic)
 async def create_user(user: models.UserIn_Pydantic):
-    print(user)
     try:
         user_obj = db_models.User(
             username=user.username,

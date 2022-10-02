@@ -1,4 +1,6 @@
 import json
+import os
+import shutil
 from functools import reduce
 from fastapi import APIRouter, Request, HTTPException, Depends
 from tortoise.expressions import Q
@@ -6,14 +8,12 @@ from tortoise.expressions import Q
 import routers.tables.models as models
 import utilities
 import db_models
-import db
 import config
 
 router = APIRouter()
 
 @router.get("/", tags=["Tables"])
 async def tables(
-        request: Request,
         user_name: int=Depends(utilities.get_token_header)
     ):
 
@@ -99,6 +99,9 @@ async def edit_row_attributes(
 
         await con.fetch(query)
 
+        if os.path.exists(f'{os.getcwd()}/cache/{info.scheme}_{info.table}'):
+            shutil.rmtree(f'{os.getcwd()}/cache/{info.scheme}_{info.table}')
+
         return {"status": True}
 
 @router.post("/edit_row_geometry/", tags=["Tables"])
@@ -158,6 +161,9 @@ async def add_column(
         """
 
         await con.fetch(query)
+
+        if os.path.exists(f'{os.getcwd()}/cache/{info.scheme}_{info.table}'):
+            shutil.rmtree(f'{os.getcwd()}/cache/{info.scheme}_{info.table}')
         
         return {"status": True}
 
@@ -167,6 +173,13 @@ async def delete_column(
         info: models.DeleteColumn,
         user_name: int=Depends(utilities.get_token_header)
     ):
+
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name,
+        app=request.app,
+        write_access=True
+    )
 
     pool = request.app.state.database
 
@@ -178,6 +191,9 @@ async def delete_column(
         """
 
         await con.fetch(query)
+
+        if os.path.exists(f'{os.getcwd()}/cache/{info.scheme}_{info.table}'):
+            shutil.rmtree(f'{os.getcwd()}/cache/{info.scheme}_{info.table}')
         
         return {"status": True}
 
@@ -256,6 +272,9 @@ async def add_row(
         """
 
         await con.fetch(geom_query)
+
+        if os.path.exists(f'{os.getcwd()}/cache/{info.scheme}_{info.table}'):
+            shutil.rmtree(f'{os.getcwd()}/cache/{info.scheme}_{info.table}')
         
         return {"status": True, "gid": result[0]['gid']}
 
@@ -283,6 +302,9 @@ async def delete_row(
         """
 
         await con.fetch(query)
+
+        if os.path.exists(f'{os.getcwd()}/cache/{info.scheme}_{info.table}'):
+            shutil.rmtree(f'{os.getcwd()}/cache/{info.scheme}_{info.table}')
         
         return {"status": True}
 
@@ -340,6 +362,9 @@ async def delete_table(
         """
 
         await con.fetch(query)
+
+        if os.path.exists(f'{os.getcwd()}/cache/{info.scheme}_{table}'):
+            shutil.rmtree(f'{os.getcwd()}/cache/{info.scheme}_{table}')
         
         return {"status": True}
 

@@ -509,7 +509,7 @@ async def tiles_metadata(scheme: str, table: str, tileMatrixSetId: str, request:
 
         return metadata
 
-@router.get("/{scheme}.{table}/cache_size", tags=["Collections"])
+@router.get("/{scheme}.{table}/tiles/cache_size", tags=["Collections"])
 async def get_tile_cache_size(scheme: str, table: str, request: Request, user_name: int=Depends(utilities.get_token_header)):
     """
     Method used to a list size of cache for table.
@@ -533,7 +533,7 @@ async def get_tile_cache_size(scheme: str, table: str, request: Request, user_na
 
     return {'size_in_gigabytes': size*.000000001}
 
-@router.delete("/cache", tags=["Collections"])
+@router.delete("/{scheme}.{table}/tiles/cache", tags=["Collections"])
 async def delete_tile_cache(scheme: str, table: str, request: Request, user_name: int=Depends(utilities.get_token_header)):
     """
     Method used to delete cache for a table.
