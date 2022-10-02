@@ -504,7 +504,7 @@ async def upload_csv_to_db_with_geographic_data(file_path: str, new_table_id: st
 
 async def get_arcgis_data(url: str, new_table_id: str, process_id: str,
     username: str, title: str, tags: list, description: str, read_access_list: list,
-    write_access_list: list, searchable: bool, app: FastAPI, token: str=None):
+    write_access_list: list, searchable: bool, token: str=None):
     """
     Method get arcgis data from a given url and load it into a database.
     """
@@ -612,7 +612,7 @@ async def get_arcgis_data(url: str, new_table_id: str, process_id: str,
 
 async def upload_geographic_file(file_path: str, new_table_id: str, process_id: str,
     username: str, title: str, tags: list, description: str, read_access_list: list,
-    write_access_list: list, searchable: bool, app: FastAPI):
+    write_access_list: list, searchable: bool):
     """
     Method to upload data from geographic file.
 
