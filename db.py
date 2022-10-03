@@ -1,4 +1,4 @@
-"""FastGeoportal App - Database Setup"""
+"""QwikGeo App - Database Setup"""
 from fastapi import FastAPI
 import asyncpg
 

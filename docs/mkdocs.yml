@@ -1,10 +1,10 @@
-site_name: FastGeoportal Tech Docs
-site_url: https://mkeller3.github.io/FastGeoportal/
-site_description: Tech docs for FastGeoportal
-site_author: MkDocs Team
+site_name: QwikGeo Docs
+site_url: https://docs.qwikgeo.com/
+site_description: Tech docs for QwikGeo
+site_author: Michael Keller
 
-repo_url: https://github.com/mkeller3/FastGeoportal
-repo_name: FastGeoportal
+repo_url: https://github.com/mkeller3/QwikGeo
+repo_name: QwikGeo
 edit_uri: blob/main/docs/
 
 extra_css:

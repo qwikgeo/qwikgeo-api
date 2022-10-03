@@ -1,20 +1,20 @@
-# FastGeoPortal
+# QwikGeo
 
-FastGeoPortal is a enterprise scale api for a GIS portal. FastGeoPortal is written in [Python](https://www.python.org/) using the [FastAPI](https://fastapi.tiangolo.com/) web framework. 
+QwikGeo is a enterprise scale api for a GIS portal. QwikGeo is written in [Python](https://www.python.org/) using the [FastAPI](https://fastapi.tiangolo.com/) web framework. 
 
 ---
 
-**Source Code**: <a href="https://github.com/mkeller3/FastGeoPortal" target="_blank">https://github.com/mkeller3/FastGeoPortal</a>
+**Source Code**: <a href="https://github.com/mkeller3/QwikGeo" target="_blank">https://github.com/mkeller3/QwikGeo</a>
 
 ---
 
 ## Tech Docs
 
-Docs available at [this link](https://mkeller3.github.io/FastGeoportal/).
+Docs available at [this link](https://mkeller3.github.io/QwikGeo/).
 
 ## Requirements
 
-FastGeoPortal requires PostGIS >= 2.4.0.
+QwikGeo requires PostGIS >= 2.4.0.
 
 ## Configuration
 
