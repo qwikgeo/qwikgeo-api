@@ -2,7 +2,11 @@ FROM python:3.9
 
 WORKDIR /
 
-RUN add-apt-repository ppa:ubuntugis/ppa && apt-get update && apt-get install -y gdal-bin python-gdal python3-gdal
+RUN apt-add-repository ppa:ubuntugis/ubuntugis-unstable
+
+RUN apt-get update
+
+RUN apt-get -qqy install python-gdal
 
 COPY ./requirements.txt /app/requirements.txt
 
