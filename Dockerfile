@@ -9,9 +9,9 @@ RUN apt-get -qqy update && \
         gdal-bin \
         libgdal-dev \
         libspatialindex-dev \
-        python3 \
-        python3-dev \
-        python3-pip 
+        python3.8 \
+        python3.8-dev \
+        python3.8-pip 
 
 WORKDIR /
 
