@@ -1,4 +1,4 @@
-FROM andrejreznik/python-gdal:stable
+FROM andrejreznik/python-gdal:py3.10.0-gdal3.2.3
 
 WORKDIR /
 
