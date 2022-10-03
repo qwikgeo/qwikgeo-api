@@ -1,4 +1,17 @@
-FROM python:3.9
+FROM ubuntu:14.04
+
+RUN apt-get -qqy update && \
+    apt-get install -qqy software-properties-common --no-install-recommends && \
+    apt-add-repository -y ppa:ubuntugis/ppa && \
+    apt-get install -qqy \
+        wget \
+        build-essential \
+        gdal-bin \
+        libgdal-dev \
+        libspatialindex-dev \
+        python \
+        python-dev \
+        python-pip 
 
 WORKDIR /
 
