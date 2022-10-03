@@ -9,9 +9,9 @@ RUN apt-get -qqy update && \
         gdal-bin \
         libgdal-dev \
         libspatialindex-dev \
-        python \
-        python-dev \
-        python-pip 
+        python3 \
+        python3-dev \
+        python3-pip 
 
 WORKDIR /
 
@@ -23,7 +23,7 @@ RUN apt-get -qqy install python-gdal
 
 COPY ./requirements.txt /app/requirements.txt
 
-RUN pip install --no-cache-dir -r /app/requirements.txt
+RUN pip install -r /app/requirements.txt
 
 COPY . /
 
