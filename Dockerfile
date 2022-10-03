@@ -23,7 +23,7 @@ RUN apt-get -qqy install python-gdal
 
 COPY ./requirements.txt /app/requirements.txt
 
-RUN pip install -r /app/requirements.txt
+RUN python3 -m pip install -r /app/requirements.txt
 
 COPY . /
 
