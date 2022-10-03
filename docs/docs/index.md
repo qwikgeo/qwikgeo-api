@@ -1,3 +1,3 @@
-# GeoPortal Tech Docs
+# QwikGeo Tech Docs
 
 Under construction

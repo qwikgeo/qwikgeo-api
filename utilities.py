@@ -871,7 +871,7 @@ def load_geographic_data_to_server(table_id: str, file_path: str):
     username = config.DB_USERNAME
     password = config.DB_PASSWORD
     database = config.DB_DATABASE
-    subprocess.call(f'ogr2ogr -f "PostgreSQL" "PG:host={host} user={username} dbname={database} password={password}" "{file_path}" -lco GEOMETRY_NAME=geom -lco FID=gid -lco PRECISION=no -nln {table_id} -overwrite', shell=True)
+    subprocess.call(f'ogr2ogr -f "PostgreSQL" "PG:host={host} user={username} dbname={database} password={password} port={config.DB_PORT}" "{file_path}" -lco GEOMETRY_NAME=geom -lco FID=gid -lco PRECISION=no -nln {table_id} -overwrite', shell=True)
 
 async def get_table_columns(table: str, app: FastAPI, new_table_name: str=None) -> list:
     """
