@@ -1,10 +1,10 @@
-site_name: QwikGeo Docs
+site_name: QwikGeo API Docs
 site_url: https://docs.qwikgeo.com/
 site_description: Tech docs for QwikGeo
 site_author: Michael Keller
 
-repo_url: https://github.com/mkeller3/QwikGeo
-repo_name: QwikGeo
+repo_url: https://github.com/qwikgeo/qwikgeo-api
+repo_name: QwikGeo API
 edit_uri: blob/main/docs/
 
 extra_css:

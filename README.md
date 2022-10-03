@@ -1,6 +1,6 @@
-# QwikGeo
+# QwikGeo API
 
-QwikGeo is a enterprise scale api for a GIS portal. QwikGeo is written in [Python](https://www.python.org/) using the [FastAPI](https://fastapi.tiangolo.com/) web framework. 
+QwikGeo API is a enterprise scale api for a GIS portal. QwikGeo API is written in [Python](https://www.python.org/) using the [FastAPI](https://fastapi.tiangolo.com/) web framework. 
 
 ---
 
@@ -10,15 +10,15 @@ QwikGeo is a enterprise scale api for a GIS portal. QwikGeo is written in [Pytho
 
 ## Tech Docs
 
-Docs available at [this link](https://mkeller3.github.io/QwikGeo/).
+Docs available at [this link](https://docs.qqikgeo.com).
 
 ## Requirements
 
-QwikGeo requires PostGIS >= 2.4.0.
+QwikGeo API requires PostGIS >= 2.4.0.
 
 ## Configuration
 
-In order for the api to work you will need to edit the .env with your database to host the GeoPortal.
+In order for the api to work you will need to edit the .env with your database to host the API.
 
 ```
 DB_HOST=localhost

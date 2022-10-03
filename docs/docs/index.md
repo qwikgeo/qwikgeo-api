@@ -1,3 +1,3 @@
-# QwikGeo Tech Docs
+# QwikGeo API Docs
 
 Under construction

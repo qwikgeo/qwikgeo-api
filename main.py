@@ -1,4 +1,4 @@
-"""QwikGeo App"""
+"""QwikGeo API"""
 
 from fastapi import FastAPI, Request
 from tortoise.contrib.fastapi import register_tortoise
@@ -16,7 +16,7 @@ from routers.collections import collections
 DESCRIPTION = """A python api to create a geoportal."""
 
 app = FastAPI(
-    title="QwikGeo",
+    title="QwikGeo API",
     description=DESCRIPTION,
     version="0.0.1",
     contact={
@@ -113,7 +113,7 @@ async def landing_page(request: Request):
                 "href": f"{url}openapi.json"
             }
         ],
-        "title": "QwikGeo",
+        "title": "QwikGeo API",
         "description": DESCRIPTION
     }
 
