@@ -19,7 +19,7 @@ def status(process_id: str, user_name: int=Depends(utilities.get_token_header)):
         return {"status": "UNKNOWN", "error": "This process_id does not exist."}
     return utilities.import_processes[process_id]
 
-@router.post("/arcgis_service/", tags=["Imports"], response_model=models.BaseResponseModel)
+@router.post("/arcgis_service", tags=["Imports"], response_model=models.BaseResponseModel)
 async def import_arcgis_service(info: models.ArcgisModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
     new_table_id = utilities.get_new_table_id()
 
@@ -53,7 +53,7 @@ async def import_arcgis_service(info: models.ArcgisModel, request: Request, back
         "url": process_url
     }
 
-@router.post("/geographic_data_from_geographic_file/", tags=["Imports"], response_model=models.BaseResponseModel)
+@router.post("/geographic_data_from_geographic_file", tags=["Imports"], response_model=models.BaseResponseModel)
 async def import_geographic_data_from_geographic_file(
         request: Request,
         background_tasks: BackgroundTasks,
@@ -116,7 +116,7 @@ async def import_geographic_data_from_geographic_file(
         "url": process_url
     }
 
-@router.post("/geographic_data_from_csv/", tags=["Imports"], response_model=models.BaseResponseModel)
+@router.post("/geographic_data_from_csv", tags=["Imports"], response_model=models.BaseResponseModel)
 async def import_geographic_data_from_csv(
         request: Request,
         background_tasks: BackgroundTasks,
@@ -189,7 +189,7 @@ async def import_geographic_data_from_csv(
         "url": process_url
     }
 
-@router.post("/point_data_from_csv/", tags=["Imports"], response_model=models.BaseResponseModel)
+@router.post("/point_data_from_csv", tags=["Imports"], response_model=models.BaseResponseModel)
 async def import_point_data_from_csv(
         request: Request,
         background_tasks: BackgroundTasks,
@@ -257,7 +257,7 @@ async def import_point_data_from_csv(
         "url": process_url
     }
 
-@router.post("/geographic_data_from_json_file/", tags=["Imports"], response_model=models.BaseResponseModel)
+@router.post("/geographic_data_from_json_file", tags=["Imports"], response_model=models.BaseResponseModel)
 async def import_geographic_data_from_json_file(
         request: Request,
         background_tasks: BackgroundTasks,
@@ -330,7 +330,7 @@ async def import_geographic_data_from_json_file(
         "url": process_url
     }
 
-@router.post("/point_data_from_json_file/", tags=["Imports"], response_model=models.BaseResponseModel)
+@router.post("/point_data_from_json_file", tags=["Imports"], response_model=models.BaseResponseModel)
 async def import_point_data_from_json_file(
         request: Request,
         background_tasks: BackgroundTasks,
@@ -399,7 +399,7 @@ async def import_point_data_from_json_file(
         "url": process_url
     }
 
-@router.post("/geographic_data_from_json_url/", tags=["Imports"], response_model=models.BaseResponseModel)
+@router.post("/geographic_data_from_json_url", tags=["Imports"], response_model=models.BaseResponseModel)
 async def import_geographic_data_from_json_url(
         request: Request,
         background_tasks: BackgroundTasks,
@@ -450,7 +450,7 @@ async def import_geographic_data_from_json_url(
         "url": process_url
     }
 
-@router.post("/point_data_from_json_url/", tags=["Imports"], response_model=models.BaseResponseModel)
+@router.post("/point_data_from_json_url", tags=["Imports"], response_model=models.BaseResponseModel)
 async def import_point_data_from_json_url(
         request: Request,
         background_tasks: BackgroundTasks,
@@ -499,7 +499,7 @@ async def import_point_data_from_json_url(
         "url": process_url
     }
 
-@router.post("/geojson_from_url/", tags=["Imports"], response_model=models.BaseResponseModel)
+@router.post("/geojson_from_url", tags=["Imports"], response_model=models.BaseResponseModel)
 async def import_geojson_from_url(
         request: Request,
         background_tasks: BackgroundTasks,
