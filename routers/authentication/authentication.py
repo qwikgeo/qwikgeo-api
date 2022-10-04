@@ -27,17 +27,22 @@ async def generate_token(form_data: OAuth2PasswordRequestForm = Depends()):
     user_obj = await models.User_Pydantic.from_tortoise_orm(user)
 
     expire = datetime.utcnow() + timedelta(minutes=6000)
-    token = jwt.encode({
-        "username": user_obj.username,
-        "exp": expire
-        }, config.SECRET_KEY
+    token = jwt.encode(
+        {
+            "username": user_obj.username,
+            "exp": expire
+        }, 
+        config.SECRET_KEY
     )
 
     return {'access_token' : token, 'token_type' : 'bearer'}
 
 @router.post('/google_token_authenticate')
 async def google_token_authenticate(info: models.GoogleTokenAuthenticate):
-    user = id_token.verify_oauth2_token(info.token, requests.Request(), config.GOOGLE_CLIENT_ID)
+    try:
+        user = id_token.verify_oauth2_token(info.token, requests.Request(), config.GOOGLE_CLIENT_ID)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     try:
         user_obj = db_models.User(
@@ -52,7 +57,7 @@ async def google_token_authenticate(info: models.GoogleTokenAuthenticate):
     except exceptions.IntegrityError:
         pass
 
-    expire = datetime.utcnow() + timedelta(minutes=6000)
+    expire = datetime.utcnow() + timedelta(minutes=config.JWT_TOKEN_EXPIRE_IN_MIUNTES)
     token = jwt.encode({
         "username": user['email'].split("@")[0],
         "exp": expire

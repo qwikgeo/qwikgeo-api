@@ -14,6 +14,7 @@ from pygeofilter.parsers.ecql import parse
 import aiohttp
 import pandas as pd
 from tortoise.expressions import Q
+import tortoise
 from functools import reduce
 from jwt.exceptions import ExpiredSignatureError
 
@@ -130,7 +131,10 @@ async def get_user_groups(username: str) -> list:
     return groups_plus_username
 
 async def authenticate_user(username: str, password: str):
-    user = await db_models.User.get(username=username)
+    try:
+        user = await db_models.User.get(username=username)
+    except tortoise.exceptions.DoesNotExist:
+        return False
     if not user:
         return False 
     if not user.verify_password(password):

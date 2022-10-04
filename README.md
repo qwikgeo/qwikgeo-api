@@ -24,12 +24,15 @@ In order for the api to work you will need to edit the .env with your database t
 
 ```
 DB_HOST=localhost
-DB_DATABASE=geoportal
+DB_DATABASE=qwikgeo
 DB_USERNAME=postgres
 DB_PASSWORD=postgres
 DB_PORT=5432
 CACHE_AGE_IN_SECONDS=0
 MAX_FEATURES_PER_TILE=100000
+SECRET_KEY=asdasasfakjh324fds876921vdas7tfv1uqw76fasd87g2q
+GOOGLE_CLIENT_ID=asdasdas745-cj472811c26nu77fm5m98dasdasdasda1vkvk2pscfasad.apps.googleusercontent.com
+JWT_TOKEN_EXPIRE_IN_MIUNTES=60000
 ```
 
 ## Usage
