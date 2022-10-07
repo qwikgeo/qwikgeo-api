@@ -142,7 +142,7 @@ async def get_group(group_id: str, user_name: int=Depends(utilities.get_token_he
         }
     }
 })
-async def update_group(group_id: uuid.UUID, group: models.Group_Pydantic, user_name: int=Depends(utilities.get_token_header)):
+async def update_group(group_id: uuid.UUID, new_group: models.Group_Pydantic, user_name: int=Depends(utilities.get_token_header)):
     try:
         group = await models.Group_Pydantic.from_queryset_single(db_models.Group.get(group_id=group_id).prefetch_related(Prefetch("group_users", queryset=db_models.GroupUser.filter(username=user_name))))
         access = False
@@ -151,12 +151,22 @@ async def update_group(group_id: uuid.UUID, group: models.Group_Pydantic, user_n
                 access = True
         if access == False:
             raise HTTPException(status_code=403, detail=f"You do not have access to this group.")
-        await db_models.Group.filter(name=group.name).update(**group.dict(exclude_unset=True))
-        return await models.Group_Pydantic.from_queryset_single(db_models.Group.get(name=group.name))
+        await db_models.Group.filter(group_id=group_id).update(name=new_group.name)
+        for name in new_group.group_users:
+            await db_models.GroupUser.filter(id=name.id, group_id_id=group_id).update(username=name.username)
+        return await models.Group_Pydantic.from_queryset_single(db_models.Group.get(group_id=group_id))
     except exceptions.DoesNotExist:
         raise HTTPException(status_code=404, detail=f"Group not found.")
 
-@router.delete("/group/{group_id}", response_model=models.Status, description="Delete a group.", responses={
+@router.delete("/group/{group_id}", description="Delete a group.", responses={
+    200: {
+        "description": "Successful Response",
+        "content": {
+            "application/json": {
+                "example": {"message": "Deleted group."}
+            }
+        }
+    },
     403: {
         "description": "No access",
         "content": {
@@ -182,7 +192,7 @@ async def update_group(group_id: uuid.UUID, group: models.Group_Pydantic, user_n
         }
     }
 })
-async def delete_group(group_id: uuid.UUID, group: models.Group_Pydantic, user_name: int=Depends(utilities.get_token_header)):
+async def delete_group(group_id: uuid.UUID, user_name: int=Depends(utilities.get_token_header)):
     try:
         group = await models.Group_Pydantic.from_queryset_single(db_models.Group.get(group_id=group_id).prefetch_related(Prefetch("group_users", queryset=db_models.GroupUser.filter(username=user_name))))
         access = False
