@@ -14,14 +14,31 @@ import config
 
 router = APIRouter()
 
-@router.post('/token')
-async def generate_token(form_data: models.Login):
+@router.post('/token', response_model=models.TokenResponse, description="Create a JWT token to authenticate with api via a valid username and password.", responses={
+    401: {
+        "description": "Invalid username or password.",
+        "content": {
+            "application/json": {
+                "example": {"detail": "Invalid username or password."}
+            }
+        }
+    },
+    500: {
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "Internal Server Error"
+            }
+        }
+    }
+})
+async def create_token(form_data: models.Login):
     user = await utilities.authenticate_user(form_data.username, form_data.password)
 
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail='Invalid username or password'
+            detail='Invalid username or password.'
         )
     user_obj = await models.User_Pydantic.from_tortoise_orm(user)
 
@@ -34,9 +51,26 @@ async def generate_token(form_data: models.Login):
         config.SECRET_KEY
     )
 
-    return {'access_token' : token, 'token_type' : 'bearer'}
+    return {'access_token' : token, 'token_type' : 'Bearer'}
 
-@router.post('/google_token_authenticate')
+@router.post('/google_token_authenticate', response_model=models.TokenResponse, description="Create a JWT token to authenticate with api via a valid Google JWT.", responses={
+    400: {
+        "description": "Invalid JWT Token",
+        "content": {
+            "application/json": {
+                "example": {"detail": "error here."}
+            }
+        }
+    },
+    500: {
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "Internal Server Error"
+            }
+        }
+    }
+})
 async def google_token_authenticate(info: models.GoogleTokenAuthenticate):
     try:
         user = id_token.verify_oauth2_token(info.token, requests.Request(), config.GOOGLE_CLIENT_ID)
@@ -63,9 +97,26 @@ async def google_token_authenticate(info: models.GoogleTokenAuthenticate):
         }, config.SECRET_KEY
     )
 
-    return {'access_token' : token, 'token_type' : 'bearer'}
+    return {'access_token' : token, 'token_type' : 'Bearer'}
 
-@router.post("/user", response_model=models.User_Pydantic)
+@router.post("/user", response_model=models.User_Pydantic, description="Create a new user.", responses={
+    400: {
+        "description": "Username already exist.",
+        "content": {
+            "application/json": {
+                "example": {"detail": "Username already exist."}
+            }
+        }
+    },
+    500: {
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "Internal Server Error"
+            }
+        }
+    }
+})
 async def create_user(user: models.UserIn_Pydantic):
     try:
         user_obj = db_models.User(
@@ -80,23 +131,84 @@ async def create_user(user: models.UserIn_Pydantic):
     except exceptions.IntegrityError:
         raise HTTPException(status_code=400, detail=f"Username already exist.")
 
-@router.get("/user")
+@router.get("/user", response_model=models.User_Pydantic, description="Retrieve information about user.", responses={
+    404: {
+        "description": "User not found.",
+        "content": {
+            "application/json": {
+                "example": {"detail": "User not found."}
+            }
+        }
+    },
+    500: {
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "Internal Server Error"
+            }
+        }
+    }
+})
 async def get_user(user_name: int=Depends(utilities.get_token_header)):
     try:
         user = await models.User_Pydantic.from_queryset_single(db_models.User.get(username=user_name))
         return user
     except exceptions.DoesNotExist:
-        raise HTTPException(status_code=404, detail=f"User not found")
+        raise HTTPException(status_code=404, detail=f"User not found.")
 
-@router.put("/user", response_model=models.User_Pydantic, responses={404: {"model": HTTPNotFoundError}}, dependencies=[Depends(utilities.get_token_header)])
+@router.put("/user", response_model=models.User_Pydantic, description="Update information about user.", responses={
+    404: {
+        "description": "User not found.",
+        "content": {
+            "application/json": {
+                "example": {"detail": "User not found."}
+            }
+        }
+    },
+    500: {
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "Internal Server Error"
+            }
+        }
+    }
+})
 async def update_user(user: models.UserIn_Pydantic, user_name: int=Depends(utilities.get_token_header)):
-    # TODO
-    await db_models.User.filter(username=user_name).update(**user.dict(exclude_unset=True))
-    return await models.User_Pydantic.from_queryset_single(db_models.User.get(username=user_name))
+    try:
+        await db_models.User.filter(username=user_name).update(**user.dict(exclude_unset=True))
+        return await models.User_Pydantic.from_queryset_single(db_models.User.get(username=user_name))
+    except exceptions.DoesNotExist:
+        raise HTTPException(status_code=404, detail=f"User not found.")
 
-@router.delete("/user", response_model=models.Status, responses={404: {"model": HTTPNotFoundError}}, dependencies=[Depends(utilities.get_token_header)])
+@router.delete("/user", response_model=models.Status, description="Delete a user.", responses={
+    200: {
+        "description": "User deleted.",
+        "content": {
+            "application/json": {
+                "example": {"Deleted user."}
+            }
+        }
+    },
+    404: {
+        "description": "User not found.",
+        "content": {
+            "application/json": {
+                "example": {"detail": "User not found."}
+            }
+        }
+    },
+    500: {
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "Internal Server Error"
+            }
+        }
+    }
+})
 async def delete_user(user_name: int=Depends(utilities.get_token_header)):
     deleted_count = await db_models.User.filter(username=user_name).delete()
     if not deleted_count:
-        raise HTTPException(status_code=404, detail=f"User {user_name} not found")
-    return models.Status(message=f"Deleted user {user_name}")
+        raise HTTPException(status_code=404, detail=f"User not found.")
+    return models.Status(message=f"Deleted user.")
