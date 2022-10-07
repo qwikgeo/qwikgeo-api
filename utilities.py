@@ -82,12 +82,12 @@ async def validate_table_access(table: str, user_name: str, app: FastAPI, write_
         if access == False:            
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, 
-                detail='You do not have access to this table.'
+                detail='No access to table.'
             )
     except tortoise.exceptions.DoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, 
-            detail='This table does not exist in the portal.'
+            detail='Table does not exist.'
         )
 
 async def get_user_map_access_list(username: str, write_access: bool=False) -> list:

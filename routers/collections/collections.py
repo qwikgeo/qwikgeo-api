@@ -15,7 +15,62 @@ import config
 
 router = APIRouter()
 
-@router.get("/", tags=["Collections"])
+@router.get("/", responses={
+    200: {
+        "description": "Successful Response",
+        "content": {
+            "application/json": {
+                "example": {
+                    "collections": [
+                        {
+                            "id": "{scheme}.{table}",
+                            "title": "string",
+                            "description": "string",
+                            "keywords": ["string"],
+                            "links": [
+                                {
+                                    "type": "application/json",
+                                    "rel": "self",
+                                    "title": "This document as JSON",
+                                    "href": "http://api.qwikgeo.com/api/v1/collections/{scheme}.{table}"
+                                }
+                            ],
+                            "geometry": "point",
+                            "extent": {
+                                "spatial": {
+                                    "bbox": [
+                                        -180,
+                                        -90,
+                                        180,
+                                        90
+                                    ],
+                                    "crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+                                }
+                            },
+                            "itemType": "feature"
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    403: {
+        "description": "Forbidden",
+        "content": {
+            "application/json": {
+                "example": {"detail": "No access to table."}
+            }
+        }
+    },
+    500: {
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "Internal Server Error"
+            }
+        }
+    }
+})
 async def collections(request: Request, user_name: int=Depends(utilities.get_token_header)):
     """
     Get a list of tables available to query.
@@ -30,49 +85,121 @@ async def collections(request: Request, user_name: int=Depends(utilities.get_tok
 
     table_items = await db_models.Item.filter(item_type='table').prefetch_related(Prefetch("item_read_access_list", queryset=db_models.ItemReadAccessList.filter(reduce(lambda x, y: x | y, [Q(name=group) for group in user_groups]))))
 
-    tables = await db_models.Table_Pydantic.from_queryset(db_models.Table.filter(reduce(lambda x, y: x | y, [Q(portal_id_id=table.portal_id) for table in table_items])))
+    if len(table_items) > 0:
+        tables = await db_models.Table_Pydantic.from_queryset(db_models.Table.filter(reduce(lambda x, y: x | y, [Q(portal_id_id=table.portal_id) for table in table_items])))
 
-    for table in tables:
-        table_metadata = await db_models.Item_Pydantic.from_queryset_single(db_models.Item.get(portal_id=table.portal_id.portal_id))
-        db_tables.append(
-            {
-                "id" : f"user_data.{table.table_id}",
-                "title" : table_metadata.title,
-                "description" : table_metadata.description,
-                "keywords": table_metadata.tags,
-                "links": [
-                    {
-                        "type": "application/json",
-                        "rel": "self",
-                        "title": "This document as JSON",
-                        "href": f"{url}api/v1/collections/user_data.{table.table_id}"
-                    }
-                ],
-                "geometry": await utilities.get_table_geometry_type(
-                    scheme="user_data",
-                    table=table.table_id,
-                    app=request.app
-                ),
-                "extent": {
-                    "spatial": {
-                        "bbox": await utilities.get_table_bounds(
-                            scheme="user_data",
-                            table=table.table_id,
-                            app=request.app
-                        ),
-                        "crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
-                    }
-                },
-                "itemType": "feature"
-            }
-        )
+        for table in tables:
+            table_metadata = await db_models.Item_Pydantic.from_queryset_single(db_models.Item.get(portal_id=table.portal_id.portal_id))
+            db_tables.append(
+                {
+                    "id" : f"user_data.{table.table_id}",
+                    "title" : table_metadata.title,
+                    "description" : table_metadata.description,
+                    "keywords": table_metadata.tags,
+                    "links": [
+                        {
+                            "type": "application/json",
+                            "rel": "self",
+                            "title": "This document as JSON",
+                            "href": f"{url}api/v1/collections/user_data.{table.table_id}"
+                        }
+                    ],
+                    "geometry": await utilities.get_table_geometry_type(
+                        scheme="user_data",
+                        table=table.table_id,
+                        app=request.app
+                    ),
+                    "extent": {
+                        "spatial": {
+                            "bbox": await utilities.get_table_bounds(
+                                scheme="user_data",
+                                table=table.table_id,
+                                app=request.app
+                            ),
+                            "crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+                        }
+                    },
+                    "itemType": "feature"
+                }
+            )
 
     return {"collections": db_tables}
 
-@router.get("/{scheme}.{table}", tags=["Collections"])
+@router.get("/{scheme}.{table}", responses={
+    200: {
+        "description": "Successful Response",
+        "content": {
+            "application/json": {
+                "example": {
+                    "id": "{scheme}.{table}",
+                    "title": "string",
+                    "description": "string",
+                    "keywords": ["string"],
+                    "links": [
+                        {
+                            "type": "application/json",
+                            "rel": "self",
+                            "title": "Items as GeoJSON",
+                            "href": "http://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items"
+                        },
+                        {
+                            "type": "application/json",
+                            "rel": "queryables",
+                            "title": "Queryables for this collection as JSON",
+                            "href": "http://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/queryables"
+                        },
+                        {
+                            "type": "application/json",
+                            "rel": "tiles",
+                            "title": "Tiles as JSON",
+                            "href": "http://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/tiles"
+                        }
+                    ],
+                    "geometry": "point",
+                    "extent": {
+                        "spatial": {
+                            "bbox": [
+                                -180,
+                                -90,
+                                180,
+                                90
+                            ],
+                            "crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+                        }
+                    },
+                    "itemType": "feature"
+                }
+            }
+        }
+    },
+    403: {
+        "description": "Forbidden",
+        "content": {
+            "application/json": {
+                "example": {"detail": "No access to table."}
+            }
+        }
+    },
+    404: {
+        "description": "Not Found",
+        "content": {
+            "application/json": {
+                "example": {"detail": "Table does not exist."}
+            }
+        }
+    },
+    500: {
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "Internal Server Error"
+            }
+        }
+    }
+})
 async def collection(scheme: str, table: str, request: Request, user_name: int=Depends(utilities.get_token_header)):
     """
-    Get return information about a collection.
+    Get information about a collection.
 
     """
 
@@ -131,7 +258,51 @@ async def collection(scheme: str, table: str, request: Request, user_name: int=D
         "itemType": "feature"
     }
 
-@router.get("/{scheme}.{table}/queryables", tags=["Collections"])
+@router.get("/{scheme}.{table}/queryables", responses={
+    200: {
+        "description": "Successful Response",
+        "content": {
+            "application/json": {
+                "example": {
+                    "$id": "http://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/queryables",
+                    "title": "string",
+                    "type": "object",
+                    "$schema": "http://json-schema.org/draft/2019-09/schema",
+                    "properties": {
+                        "string": {
+                            "title": "string",
+                            "type": "numeric"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    403: {
+        "description": "Forbidden",
+        "content": {
+            "application/json": {
+                "example": {"detail": "No access to table."}
+            }
+        }
+    },
+    404: {
+        "description": "Not Found",
+        "content": {
+            "application/json": {
+                "example": {"detail": "Table does not exist."}
+            }
+        }
+    },
+    500: {
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "Internal Server Error"
+            }
+        }
+    }
+})
 async def queryables(scheme: str, table: str, request: Request,
     user_name: int=Depends(utilities.get_token_header)):
     """
@@ -183,7 +354,72 @@ async def queryables(scheme: str, table: str, request: Request,
 
         return queryable
 
-@router.get("/{scheme}.{table}/items", tags=["Collections"])
+@router.get("/{scheme}.{table}/items", responses={
+    200: {
+        "description": "Successful Response",
+        "content": {
+            "application/json": {
+                "example": {
+                    "type": "FeatureCollection",
+                    "features": [
+                        {
+                            "type": "Feature",
+                            "geometry": {
+                                "type": "Point",
+                                "coordinates": [
+                                    -88.8892,
+                                    36.201015
+                                ]
+                            },
+                            "properties": {},
+                            "id": 1
+                        }
+                    ],
+                    "numberMatched": 56,
+                    "numberReturned": 10,
+                    "links": [
+                        {
+                            "type": "application/json",
+                            "rel": "self",
+                            "title": "This document as GeoJSON",
+                            "href": "http://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items"
+                        },
+                        {
+                            "type": "application/json",
+                            "title": "{scheme}.{table}",
+                            "rel": "collection",
+                            "href": "http://api.qwikgeo.com/api/v1/collections/{scheme}.{table}"
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    403: {
+        "description": "Forbidden",
+        "content": {
+            "application/json": {
+                "example": {"detail": "No access to table."}
+            }
+        }
+    },
+    404: {
+        "description": "Not Found",
+        "content": {
+            "application/json": {
+                "example": {"detail": "Table does not exist."}
+            }
+        }
+    },
+    500: {
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "Internal Server Error"
+            }
+        }
+    }
+})
 async def items(scheme: str, table: str, request: Request,
     bbox: str=None, limit: int=100, offset: int=0, properties: str="*",
     sortby :str="gid", filter :str=None, srid: int=4326, user_name: int=Depends(utilities.get_token_header)):
@@ -283,7 +519,71 @@ async def items(scheme: str, table: str, request: Request,
 
         return results
 
-@router.get("/{scheme}.{table}/items/{id}", tags=["Collections"])
+@router.get("/{scheme}.{table}/items/{id}", responses={
+    200: {
+        "description": "Successful Response",
+        "content": {
+            "application/json": {
+                "example": {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            -88.8892,
+                            36.201015
+                        ]
+                    },
+                    "properties": {},
+                    "id": 1,
+                    "links": [
+                        {
+                            "type": "application/json",
+                            "rel": "self",
+                            "title": "This document as GeoJSON",
+                            "href": "http://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items/1"
+                        },
+                        {
+                            "type": "application/json",
+                            "title": "items as GeoJSON",
+                            "rel": "items",
+                            "href": "http://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items"
+                        },
+                        {
+                            "type": "application/json",
+                            "title": "{scheme}.{table}",
+                            "rel": "collection",
+                            "href": "http://api.qwikgeo.com/api/v1/collections/{scheme}.{table}"
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    403: {
+        "description": "Forbidden",
+        "content": {
+            "application/json": {
+                "example": {"detail": "No access to table."}
+            }
+        }
+    },
+    404: {
+        "description": "Not Found",
+        "content": {
+            "application/json": {
+                "example": {"detail": "Table does not exist."}
+            }
+        }
+    },
+    500: {
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "Internal Server Error"
+            }
+        }
+    }
+})
 async def item(scheme: str, table: str, id:str, request: Request,
     properties: str="*", srid: int=4326, user_name: int=Depends(utilities.get_token_header)):
     """
@@ -351,7 +651,72 @@ async def item(scheme: str, table: str, id:str, request: Request,
 
         return results['features'][0]
 
-@router.get("/{scheme}.{table}/tiles", tags=["Collections"])
+@router.get("/{scheme}.{table}/tiles", responses={
+    200: {
+        "description": "Successful Response",
+        "content": {
+            "application/json": {
+                "example": {
+                    "id": "{scheme}.{table}",
+                    "title": "string",
+                    "description": "string",
+                    "links": [
+                        {
+                            "type": "application/json",
+                            "rel": "self",
+                            "title": "This document as JSON",
+                            "href": "http://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/tiles"
+                        },
+                        {
+                            "type": "application/vnd.mapbox-vector-tile",
+                            "rel": "item",
+                            "title": "This collection as Mapbox vector tiles",
+                            "href": "http://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/tiles/{tileMatrixSetId}/{tileMatrix}/{tileRow}/{tileCol}",
+                            "templated": True
+                        },
+                        {
+                            "type": "application/json",
+                            "rel": "describedby",
+                            "title": "Metadata for this collection in the TileJSON format",
+                            "href": "http://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/tiles/{tileMatrixSetId}/metadata",
+                            "templated": True
+                        }
+                    ],
+                    "tileMatrixSetLinks": [
+                        {
+                            "tileMatrixSet": "WorldCRS84Quad",
+                            "tileMatrixSetURI": "http://schemas.opengis.net/tms/1.0/json/examples/WorldCRS84Quad.json"
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    403: {
+        "description": "Forbidden",
+        "content": {
+            "application/json": {
+                "example": {"detail": "No access to table."}
+            }
+        }
+    },
+    404: {
+        "description": "Not Found",
+        "content": {
+            "application/json": {
+                "example": {"detail": "Table does not exist."}
+            }
+        }
+    },
+    500: {
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "Internal Server Error"
+            }
+        }
+    }
+})
 async def tiles(scheme: str, table: str, request: Request,
     user_name: int=Depends(utilities.get_token_header)):
     """
@@ -409,16 +774,49 @@ async def tiles(scheme: str, table: str, request: Request,
 
     return tile_info
 
-@router.get(
-    "/{scheme}.{table}/tiles/{tileMatrixSetId}/{tileMatrix}/{tileRow}/{tileCol}",
-    tags=["Collections"],
-    summary="Endpoint to return a vector of tiles for a given table"
-)
+@router.get("/{scheme}.{table}/tiles/{tileMatrixSetId}/{tileMatrix}/{tileRow}/{tileCol}", responses={
+    200: {
+        "description": "Successful Response",
+        "content": {
+            "application/vnd.mapbox-vector-tile": {}
+        }
+    },
+    204: {
+        "description": "No Content",
+        "content": {
+            "application/vnd.mapbox-vector-tile": {}
+        }
+    },
+    403: {
+        "description": "Forbidden",
+        "content": {
+            "application/json": {
+                "example": {"detail": "No access to table."}
+            }
+        }
+    },
+    404: {
+        "description": "Not Found",
+        "content": {
+            "application/json": {
+                "example": {"detail": "Table does not exist."}
+            }
+        }
+    },
+    500: {
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "Internal Server Error"
+            }
+        }
+    }
+})
 async def tile(scheme: str, table: str, tileMatrixSetId: str, tileMatrix: int, tileRow: int,
     tileCol: int, request: Request,fields: Optional[str] = None, cql_filter: Optional[str] = None,
     user_name: int=Depends(utilities.get_token_header)):
     """
-    Get a vector of tiles for a given table.
+    Get a vector tile for a given table.
     """
 
     await utilities.validate_table_access(
@@ -470,10 +868,60 @@ async def tile(scheme: str, table: str, tileMatrixSetId: str, tileMatrix: int, t
         }
     )
 
-@router.get("/{scheme}.{table}/tiles/{tileMatrixSetId}/metadata", tags=["Collections"])
+@router.get("/{scheme}.{table}/tiles/{tileMatrixSetId}/metadata", responses={
+    200: {
+        "description": "Successful Response",
+        "content": {
+            "application/json": {
+                "example": {
+                    "tilejson": "3.0.0",
+                    "name": "{scheme}.{table}",
+                    "tiles": "http://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/tiles/WorldCRS84Quad/{tileMatrix}/{tileRow}/{tileCol}?f=mvt",
+                    "minzoom": "0",
+                    "maxzoom": "22",
+                    "attribution": "string",
+                    "description": "string",
+                    "vector_layers": [
+                        {
+                            "id": "{scheme}.{table}",
+                            "description": "string",
+                            "minzoom": 0,
+                            "maxzoom": 22,
+                            "fields": {}
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    403: {
+        "description": "Forbidden",
+        "content": {
+            "application/json": {
+                "example": {"detail": "No access to table."}
+            }
+        }
+    },
+    404: {
+        "description": "Not Found",
+        "content": {
+            "application/json": {
+                "example": {"detail": "Table does not exist."}
+            }
+        }
+    },
+    500: {
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "Internal Server Error"
+            }
+        }
+    }
+})
 async def tiles_metadata(scheme: str, table: str, tileMatrixSetId: str, request: Request, user_name: int=Depends(utilities.get_token_header)):
     """
-    Get a tile metadata for a given table.
+    Get tile metadata for a given table.
     """
 
     await utilities.validate_table_access(
@@ -532,10 +980,21 @@ async def tiles_metadata(scheme: str, table: str, tileMatrixSetId: str, request:
 
         return metadata
 
-@router.get("/{scheme}.{table}/tiles/cache_size", tags=["Collections"])
+@router.get("/{scheme}.{table}/tiles/cache_size", responses={
+    200: {
+        "description": "Successful Response",
+        "content": {
+            "application/json": {
+                "example": {
+                    "size_in_gigabytes": 0
+                }
+            }
+        }
+    }
+})
 async def get_tile_cache_size(scheme: str, table: str, request: Request, user_name: int=Depends(utilities.get_token_header)):
     """
-    Method used to a list size of cache for table.
+    Get size of cache for table.
     """
 
     await utilities.validate_table_access(
@@ -554,12 +1013,47 @@ async def get_tile_cache_size(scheme: str, table: str, request: Request, user_na
                 fp = os.path.join(path, f)
                 size += os.path.getsize(fp)
 
-    return {'size_in_gigabytes': size*.000000001}
+    return {"size_in_gigabytes": size*.000000001}
 
-@router.delete("/{scheme}.{table}/tiles/cache", tags=["Collections"])
+@router.delete("/{scheme}.{table}/tiles/cache", responses={
+    200: {
+        "description": "Successful Response",
+        "content": {
+            "application/json": {
+                "example": {
+                    "status": "deleted"
+                }
+            }
+        }
+    },
+    403: {
+        "description": "Forbidden",
+        "content": {
+            "application/json": {
+                "example": {"detail": "No access to table."}
+            }
+        }
+    },
+    404: {
+        "description": "Not Found",
+        "content": {
+            "application/json": {
+                "example": {"detail": "Table does not exist."}
+            }
+        }
+    },
+    500: {
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "Internal Server Error"
+            }
+        }
+    }
+})
 async def delete_tile_cache(scheme: str, table: str, request: Request, user_name: int=Depends(utilities.get_token_header)):
     """
-    Method used to delete cache for a table.
+    Delete cache for a table.
     """
 
     await utilities.validate_table_access(

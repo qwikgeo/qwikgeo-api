@@ -79,7 +79,7 @@ async def create_group(group: models.Group):
 
 @router.get("/group/{group_id}", response_model=models.Group_Pydantic, description="Retrieve a group.", responses={
     403: {
-        "description": "No access",
+        "description": "Forbidden",
         "content": {
             "application/json": {
                 "example": {"detail": "You do not have access to this group."}
@@ -87,7 +87,7 @@ async def create_group(group: models.Group):
         }
     },
     404: {
-        "description": "Group not found",
+        "description": "Not Found",
         "content": {
             "application/json": {
                 "example": {"detail": "Group not found."}
@@ -118,7 +118,7 @@ async def get_group(group_id: str, user_name: int=Depends(utilities.get_token_he
 
 @router.put("/group/{group_id}", response_model=models.Group_Pydantic, description="Update a group.", responses={
     403: {
-        "description": "No access",
+        "description": "Forbidden",
         "content": {
             "application/json": {
                 "example": {"detail": "You do not have access to this group."}
@@ -126,7 +126,7 @@ async def get_group(group_id: str, user_name: int=Depends(utilities.get_token_he
         }
     },
     404: {
-        "description": "Group not found",
+        "description": "Not Found",
         "content": {
             "application/json": {
                 "example": {"detail": "Group not found."}
@@ -168,7 +168,7 @@ async def update_group(group_id: uuid.UUID, new_group: models.Group_Pydantic, us
         }
     },
     403: {
-        "description": "No access",
+        "description": "Forbidden",
         "content": {
             "application/json": {
                 "example": {"detail": "You do not have access to this group."}
@@ -176,7 +176,7 @@ async def update_group(group_id: uuid.UUID, new_group: models.Group_Pydantic, us
         }
     },
     404: {
-        "description": "Group not found",
+        "description": "Not Found",
         "content": {
             "application/json": {
                 "example": {"detail": "Group not found."}

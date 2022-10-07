@@ -14,7 +14,7 @@ import config
 
 router = APIRouter()
 
-@router.get("/", tags=["Items"], response_model=List[db_models.Item_Pydantic])
+@router.get("/", response_model=List[db_models.Item_Pydantic])
 async def items(
         user_name: int=Depends(utilities.get_token_header)
     ):

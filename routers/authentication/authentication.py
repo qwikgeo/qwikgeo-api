@@ -16,7 +16,7 @@ router = APIRouter()
 
 @router.post('/token', response_model=models.TokenResponse, description="Create a JWT token to authenticate with api via a valid username and password.", responses={
     401: {
-        "description": "Invalid username or password",
+        "description": "Unauthorized",
         "content": {
             "application/json": {
                 "example": {"detail": "Invalid username or password."}
@@ -55,7 +55,7 @@ async def create_token(form_data: models.Login):
 
 @router.post('/google_token_authenticate', response_model=models.TokenResponse, description="Create a JWT token to authenticate with api via a valid Google JWT.", responses={
     400: {
-        "description": "Invalid JWT Token",
+        "description": "Bad Request",
         "content": {
             "application/json": {
                 "example": {"detail": "error here"}
@@ -101,7 +101,7 @@ async def google_token_authenticate(info: models.GoogleTokenAuthenticate):
 
 @router.post("/user", response_model=models.User_Pydantic, description="Create a new user.", responses={
     400: {
-        "description": "Username already exist",
+        "description": "Bad Request",
         "content": {
             "application/json": {
                 "example": {"detail": "Username already exist."}
@@ -133,7 +133,7 @@ async def create_user(user: models.UserIn_Pydantic):
 
 @router.get("/user/{username}", response_model=models.User_Pydantic, description="Retrieve information about user.", responses={
     403: {
-        "description": "No access",
+        "description": "Forbidden",
         "content": {
             "application/json": {
                 "example": {"detail": "You do not have access to this user."}
@@ -141,7 +141,7 @@ async def create_user(user: models.UserIn_Pydantic):
         }
     },
     404: {
-        "description": "User not found",
+        "description": "Not Found",
         "content": {
             "application/json": {
                 "example": {"detail": "User not found."}
@@ -168,7 +168,7 @@ async def get_user(username:str, user_name: int=Depends(utilities.get_token_head
 
 @router.put("/user/{username}", response_model=models.User_Pydantic, description="Update information about user.", responses={
     403: {
-        "description": "No access",
+        "description": "Forbidden",
         "content": {
             "application/json": {
                 "example": {"detail": "You do not have access to this user."}
@@ -176,7 +176,7 @@ async def get_user(username:str, user_name: int=Depends(utilities.get_token_head
         }
     },
     404: {
-        "description": "User not found",
+        "description": "Not Found",
         "content": {
             "application/json": {
                 "example": {"detail": "User not found."}
@@ -211,7 +211,7 @@ async def update_user(username:str, user: models.UserIn_Pydantic, user_name: int
         }
     },
     403: {
-        "description": "No access",
+        "description": "Forbidden",
         "content": {
             "application/json": {
                 "example": {"detail": "You do not have access to this user."}
@@ -219,7 +219,7 @@ async def update_user(username:str, user: models.UserIn_Pydantic, user_name: int
         }
     },
     404: {
-        "description": "User not found",
+        "description": "Not Found",
         "content": {
             "application/json": {
                 "example": {"detail": "User not found."}
