@@ -4,16 +4,30 @@ from fastapi import FastAPI, Request
 from tortoise.contrib.fastapi import register_tortoise
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
+from tortoise import Tortoise
 
 import db
 import config
 from routers.authentication import authentication
-from routers.tables import tables
+from routers.groups import groups
+from routers.items import items
 from routers.imports import imports
 from routers.analysis import analysis
 from routers.collections import collections
 
 DESCRIPTION = """A python api to create a geoportal."""
+
+DB_CONFIG = {
+    "connections": {
+        "default": f"postgres://{config.DB_USERNAME}:{config.DB_PASSWORD}@{config.DB_HOST}:{config.DB_PORT}/{config.DB_DATABASE}"
+    },
+    "apps": {
+        "models": {
+            "models": ["db_models", "aerich.models"],
+            "default_connection": "default",
+        },
+    }
+}
 
 app = FastAPI(
     title="QwikGeo API",
@@ -44,9 +58,15 @@ app.include_router(
 )
 
 app.include_router(
-    tables.router,
-    prefix="/api/v1/tables",
-    tags=["Tables"],
+    groups.router,
+    prefix="/api/v1/groups",
+    tags=["Groups"],
+)
+
+app.include_router(
+    items.router,
+    prefix="/api/v1/items",
+    tags=["Items"],
 )
 
 app.include_router(
@@ -72,6 +92,7 @@ app.include_router(
 async def startup_event():
     """Application startup: register the database connection and create table list."""
     await db.connect_to_db(app)
+    
 
 @app.on_event("shutdown")
 async def shutdown_event():
@@ -141,21 +162,12 @@ async def health():
 
     return {"status": "UP"}
 
-DB_CONFIG = {
-    "connections": {
-        "default": f"postgres://{config.DB_USERNAME}:{config.DB_PASSWORD}@{config.DB_HOST}:{config.DB_PORT}/{config.DB_DATABASE}"
-    },
-    "apps": {
-        "models": {
-            "models": ["db_models", "aerich.models"],
-            "default_connection": "default",
-        },
-    }
-}
-
 register_tortoise(
     app,
-    config=DB_CONFIG
+    config=DB_CONFIG,
+    generate_schemas=True,
+    add_exception_handlers=True
 )
+
 
 Instrumentator().instrument(app).expose(app)

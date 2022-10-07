@@ -1,7 +1,6 @@
 from passlib.hash import bcrypt
 from tortoise.contrib.fastapi import HTTPNotFoundError
 from fastapi import APIRouter, HTTPException, Depends, status
-from fastapi.security import OAuth2PasswordRequestForm
 from tortoise import exceptions
 import jwt
 from datetime import datetime, timedelta
@@ -16,7 +15,7 @@ import config
 router = APIRouter()
 
 @router.post('/token')
-async def generate_token(form_data: OAuth2PasswordRequestForm = Depends()):
+async def generate_token(form_data: models.Login):
     user = await utilities.authenticate_user(form_data.username, form_data.password)
 
     if not user:
@@ -26,7 +25,7 @@ async def generate_token(form_data: OAuth2PasswordRequestForm = Depends()):
         )
     user_obj = await models.User_Pydantic.from_tortoise_orm(user)
 
-    expire = datetime.utcnow() + timedelta(minutes=6000)
+    expire = datetime.utcnow() + timedelta(minutes=int(config.JWT_TOKEN_EXPIRE_IN_MINUTES))
     token = jwt.encode(
         {
             "username": user_obj.username,
@@ -57,7 +56,7 @@ async def google_token_authenticate(info: models.GoogleTokenAuthenticate):
     except exceptions.IntegrityError:
         pass
 
-    expire = datetime.utcnow() + timedelta(minutes=config.JWT_TOKEN_EXPIRE_IN_MIUNTES)
+    expire = datetime.utcnow() + timedelta(minutes=int(config.JWT_TOKEN_EXPIRE_IN_MINUTES))
     token = jwt.encode({
         "username": user['email'].split("@")[0],
         "exp": expire

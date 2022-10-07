@@ -21,7 +21,7 @@ def status(process_id: str, user_name: int=Depends(utilities.get_token_header)):
 
 @router.post("/arcgis_service", tags=["Imports"], response_model=models.BaseResponseModel)
 async def import_arcgis_service(info: models.ArcgisModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
-    new_table_id = utilities.get_new_table_id()
+    table_id = utilities.get_new_table_id()
 
     process_id = utilities.get_new_process_id()
 
@@ -37,7 +37,7 @@ async def import_arcgis_service(info: models.ArcgisModel, request: Request, back
         utilities.get_arcgis_data,
         url=info.url,
         token=info.token,
-        new_table_id=new_table_id,
+        table_id=table_id,
         process_id=process_id,
         username=user_name,
         title=info.title,

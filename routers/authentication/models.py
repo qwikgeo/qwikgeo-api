@@ -3,6 +3,10 @@ from pydantic import BaseModel
 
 import db_models
 
+class Login(BaseModel):
+    username: str
+    password: str
+
 class GoogleTokenAuthenticate(BaseModel):
     token: str
 

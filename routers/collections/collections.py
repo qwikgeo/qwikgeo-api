@@ -27,10 +27,12 @@ async def collections(request: Request, user_name: int=Depends(utilities.get_tok
 
     user_groups = await utilities.get_user_groups(user_name)
 
-    tables = await db_models.Table_Pydantic.from_queryset(db_models.Table.filter(reduce(lambda x, y: x | y, [Q(read_access_list__contains=[group]) for group in user_groups])))
+    table_items = await db_models.Item.filter(reduce(lambda x, y: x | y, [Q(read_access_list__contains=[group]) for group in user_groups]),item_type='table')
+
+    tables = await db_models.Table_Pydantic.from_queryset(db_models.Table.filter(reduce(lambda x, y: x | y, [Q(portal_id=table.portal_id) for table in table_items])))
 
     for table in tables:
-        table_metadata = await db_models.Table_Pydantic.from_queryset_single(db_models.Table.get(table_id=table.table_id))
+        table_metadata = await db_models.Item_Pydantic.from_queryset_single(db_models.Item.get(portal_id=table.portal_id))
         db_tables.append(
             {
                 "id" : f"user_data.{table.table_id}",
@@ -45,6 +47,11 @@ async def collections(request: Request, user_name: int=Depends(utilities.get_tok
                         "href": f"{url}api/v1/collections/user_data.{table.table_id}"
                     }
                 ],
+                "geometry": await utilities.get_table_geometry_type(
+                    scheme="user_data",
+                    table=table.table_id,
+                    app=request.app
+                ),
                 "extent": {
                     "spatial": {
                         "bbox": await utilities.get_table_bounds(
@@ -103,6 +110,11 @@ async def collection(scheme: str, table: str, request: Request, user_name: int=D
                 "href": f"{url}api/v1/collections/{scheme}.{table}/tiles"
             }
         ],
+        "geometry": await utilities.get_table_geometry_type(
+            scheme="user_data",
+            table=table.table_id,
+            app=request.app
+        ),
         "extent": {
             "spatial": {
                 "bbox": await utilities.get_table_bounds(

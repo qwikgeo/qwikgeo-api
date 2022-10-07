@@ -15,11 +15,11 @@ import aiohttp
 import pandas as pd
 from tortoise.expressions import Q
 import tortoise
+from tortoise.query_utils import Prefetch
 from functools import reduce
 from jwt.exceptions import ExpiredSignatureError
 
 import db_models
-import db
 import config
 
 import_processes = {}
@@ -55,58 +55,88 @@ async def validate_table_access(table: str, user_name: str, app: FastAPI, write_
     Method to validate if user has access to table in portal.
 
     """
+    try:
+        table = await db_models.Table_Pydantic.from_queryset_single(db_models.Table.get(table_id=table))
 
-    db_tables = await get_all_tables_from_db(app)
+        item = await db_models.Item_Pydantic.from_queryset_single(db_models.Item.get(portal_id=table.portal_id.portal_id))
 
-    tables = await get_user_map_access_list(user_name, write_access)
+        user_groups = await get_user_groups(user_name)
+        
+        access = False
 
-    if table not in tables:
-        if table not in db_tables:
+        print(item.item_write_access_list)
+
+        write_access_list = []
+        read_access_list = []
+
+        for access in item.item_write_access_list:
+            write_access_list.append(access.name)
+
+        for access in item.item_read_access_list:
+            read_access_list.append(access.name)
+
+        if write_access:
+            if any(map(lambda v: v in user_groups, write_access_list)):
+                access = True
+        elif any(map(lambda v: v in user_groups, read_access_list)):
+            access = True
+
+        if access == False:            
             raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, 
+                detail='You do not have access to this table.'
+            )
+    except tortoise.exceptions.DoesNotExist:
+        raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, 
             detail='This table does not exist in the portal.'
-        )
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail='You do not have access to this table.'
         )
 
 async def get_user_map_access_list(username: str, write_access: bool=False) -> list:
     user_groups = await get_user_groups(username)
     
     if write_access:
-        tables = await db_models.Table.filter(reduce(lambda x, y: x | y, [Q(write_access_list__contains=[group]) for group in user_groups]))
+        tables = await db_models.Item.filter(reduce(lambda x, y: x | y, [Q(write_access_list__contains=[group]) for group in user_groups]),item_type='table')
     else:
-        tables = await db_models.Table.filter(reduce(lambda x, y: x | y, [Q(read_access_list__contains=[group]) for group in user_groups]))
+        tables = await db_models.Item.filter(reduce(lambda x, y: x | y, [Q(read_access_list__contains=[group]) for group in user_groups]),item_type='table')
 
     access_list = []
 
     for table in tables:
-        access_list.append(table.table_id)
+        access_list.append(table.portal_id)
 
     return access_list
 
 async def create_table(username: str, table_id: str, title: str,
-    tags: list, description: str, searchable: bool, geometry_type: str,
+    tags: list, description: str, searchable: bool,
     read_access_list: list, write_access_list: list):
     if read_access_list == []:
         read_access_list = [username]
     if write_access_list == []:
         write_access_list = [username]
-    table = await db_models.Table.create(
-        username=username,
-        table_id=table_id,
+    item = await db_models.Item.create(
+        username_id=username,
         title=title,
         tags=tags,
         description=description,
         views="1",
         searchable=searchable,
-        geometry_type=geometry_type,
-        read_access_list=read_access_list,
-        write_access_list=write_access_list
+        item_type="table"
     )
 
-    return table
+    for name in read_access_list:
+        await db_models.ItemReadAccessList.create(name=name, portal_id_id=item.portal_id)
+
+    for name in write_access_list:
+        await db_models.ItemWriteAccessList.create(name=name, portal_id_id=item.portal_id)
+
+    await db_models.Table.create(
+        username_id=username,
+        portal_id_id=item.portal_id,
+        table_id=table_id
+    )
+
+    return item
 
 async def get_token_header(token: str=Depends(oauth2_scheme)):
     expired_credentials_exception = HTTPException(
@@ -123,7 +153,10 @@ async def get_token_header(token: str=Depends(oauth2_scheme)):
 async def get_user_groups(username: str) -> list:
     groups_plus_username = [username]
 
-    groups = await db_models.Group.filter(users__contains=[username])
+    groups = (
+        await db_models.Group.all()
+        .prefetch_related(Prefetch("group_users", queryset=db_models.GroupUser.filter(username=username)))
+    )
 
     for group in groups:
         groups_plus_username.append(group.name)
@@ -263,7 +296,14 @@ async def get_table_geometry_type(scheme: str, table: str, app: FastAPI) -> list
         """
         geometry_type = await con.fetchval(geometry_query)
 
-        return geometry_type
+        geom_type = 'point'
+
+        if 'Polygon' in geometry_type:
+            geom_type = 'polygon'
+        elif 'Line' in geometry_type:
+            geom_type = 'line'
+
+        return geom_type
 
 async def get_table_center(scheme: str, table: str, app: FastAPI) -> list:
     """
@@ -506,7 +546,7 @@ async def upload_csv_to_db_with_geographic_data(file_path: str, new_table_id: st
 
         await con.fetch(f"""DROP TABLE IF EXISTS user_data."{new_table_id}_temp";""")
 
-async def get_arcgis_data(url: str, new_table_id: str, process_id: str,
+async def get_arcgis_data(url: str, table_id: str, process_id: str,
     username: str, title: str, tags: list, description: str, read_access_list: list,
     write_access_list: list, searchable: bool, token: str=None):
     """
@@ -547,12 +587,12 @@ async def get_arcgis_data(url: str, new_table_id: str, process_id: str,
 
                             data = await resp.json()  
                             
-                            with open(f'{new_table_id}.geojson', 'w') as json_file:
+                            with open(f'{table_id}.geojson', 'w') as json_file:
                                 json.dump(data, json_file)
                             
                             load_geographic_data_to_server(
-                                table_id=f"user_data.{new_table_id}",
-                                file_path=f'{new_table_id}.geojson'
+                                table_id=f"user_data.{table_id}",
+                                file_path=f'{table_id}.geojson'
                             )
 
                     else:
@@ -581,34 +621,39 @@ async def get_arcgis_data(url: str, new_table_id: str, process_id: str,
 
                                 feature_collection['features'] += data['features']
 
-                        with open(f'{new_table_id}.geojson', 'w') as json_file:
+                        with open(f'{table_id}.geojson', 'w') as json_file:
                             json.dump(feature_collection, json_file)
                         
                         load_geographic_data_to_server(
-                            table_id=f"user_data.{new_table_id}",
-                            file_path=f'{new_table_id}.geojson'
+                            table_id=f"user_data.{table_id}",
+                            file_path=f'{table_id}.geojson'
                         )
 
                 await create_table(
                     username=username,
-                    table_id=new_table_id,
+                    table_id=table_id,
                     title=title,
                     tags=tags,
                     description=description,
                     read_access_list=read_access_list,
                     write_access_list=write_access_list,
-                    searchable=searchable,
-                    geometry_type="test"
+                    searchable=searchable
                 )
 
-                os.remove(f'{new_table_id}.geojson')
+                load_geographic_data_to_server(
+                    table_id=f"user_data.{table_id}",
+                    file_path=f'{table_id}.geojson'
+                )
+
+                os.remove(f'{table_id}.geojson')
                 import_processes[process_id]['status'] = "SUCCESS"
-                import_processes[process_id]['table_id'] = new_table_id
+                import_processes[process_id]['table_id'] = table_id
                 import_processes[process_id]['completion_time'] = datetime.datetime.now()
                 import_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
     except Exception as error:
-        if os.path.exists(f'{new_table_id}.geojson'):
-            os.remove(f'{new_table_id}.geojson')
+        if os.path.exists(f'{table_id}.geojson'):
+            os.remove(f'{table_id}.geojson')
+        print(error)
         import_processes[process_id]['status'] = "FAILURE"
         import_processes[process_id]['error'] = str(error)
         import_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -641,8 +686,7 @@ async def upload_geographic_file(file_path: str, new_table_id: str, process_id: 
             description=description,
             read_access_list=read_access_list,
             write_access_list=write_access_list,
-            searchable=searchable,
-            geometry_type="test"
+            searchable=searchable
         )
         import_processes[process_id]['status'] = "SUCCESS"
         import_processes[process_id]['new_table_id'] = new_table_id
@@ -693,8 +737,7 @@ async def import_geographic_data_from_csv(file_path: str, new_table_id: str, pro
             description=description,
             read_access_list=read_access_list,
             write_access_list=write_access_list,
-            searchable=searchable,
-            geometry_type="test"
+            searchable=searchable
         )
         import_processes[process_id]['status'] = "SUCCESS"
         import_processes[process_id]['new_table_id'] = new_table_id
@@ -743,8 +786,7 @@ async def import_point_data_from_csv(file_path: str, new_table_id: str, process_
             description=description,
             read_access_list=read_access_list,
             write_access_list=write_access_list,
-            searchable=searchable,
-            geometry_type="test"
+            searchable=searchable
         )
         import_processes[process_id]['status'] = "SUCCESS"
         import_processes[process_id]['new_table_id'] = new_table_id
@@ -797,8 +839,7 @@ async def import_point_data_from_json_file(file_path: str, new_table_id: str, pr
             description=description,
             read_access_list=read_access_list,
             write_access_list=write_access_list,
-            searchable=searchable,
-            geometry_type="test"
+            searchable=searchable
         )
         import_processes[process_id]['status'] = "SUCCESS"
         import_processes[process_id]['new_table_id'] = new_table_id
@@ -853,8 +894,7 @@ async def import_geographic_data_from_json_file(file_path: str, new_table_id: st
             description=description,
             read_access_list=read_access_list,
             write_access_list=write_access_list,
-            searchable=searchable,
-            geometry_type="test"
+            searchable=searchable
         )
         import_processes[process_id]['status'] = "SUCCESS"
         import_processes[process_id]['new_table_id'] = new_table_id

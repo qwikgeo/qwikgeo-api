@@ -1,29 +1,51 @@
 import json
 import os
 import shutil
+from typing import List
 from functools import reduce
 from fastapi import APIRouter, Request, HTTPException, Depends
 from tortoise.expressions import Q
+from tortoise.query_utils import Prefetch
 
-import routers.tables.models as models
+import routers.items.models as models
 import utilities
 import db_models
 import config
 
 router = APIRouter()
 
-@router.get("/", tags=["Tables"])
+@router.get("/", tags=["Items"], response_model=List[db_models.Item_Pydantic])
+async def items(
+        user_name: int=Depends(utilities.get_token_header)
+    ):
+
+
+    user_groups = await utilities.get_user_groups(user_name)
+
+    items = await db_models.Item_Pydantic.from_queryset(db_models.Item.all().prefetch_related(Prefetch("item_read_access_list", queryset=db_models.ItemReadAccessList.filter(reduce(lambda x, y: x | y, [Q(name=group) for group in user_groups])))))
+
+    return items
+
+
+@router.get("/tables", tags=["Tables"])
 async def tables(
         user_name: int=Depends(utilities.get_token_header)
     ):
 
     user_groups = await utilities.get_user_groups(user_name)
 
-    tables = await db_models.Table_Pydantic.from_queryset(db_models.Table.filter(reduce(lambda x, y: x | y, [Q(read_access_list__contains=[group]) for group in user_groups])))
+    items = await db_models.Item_Pydantic.from_queryset(db_models.Item.filter(item_type='table').prefetch_related(Prefetch("item_read_access_list", queryset=db_models.ItemReadAccessList.filter(reduce(lambda x, y: x | y, [Q(name=group) for group in user_groups])))))
+    
+    portal_ids = []
+
+    for item in items:
+        portal_ids.append(item.portal_id)
+
+    tables = await db_models.Table_Pydantic.from_queryset(db_models.Table.filter(portal_id_id__in=portal_ids))
 
     return tables
 
-@router.get("/table/{table_id}", tags=["Tables"])
+@router.get("/tables/table/{table_id}", tags=["Tables"])
 async def table(
         table_id: str,
         request: Request,
@@ -38,11 +60,13 @@ async def table(
 
     table = await db_models.Table_Pydantic.from_queryset_single(db_models.Table.get(table_id=table_id))
 
-    await db_models.Table.filter(table_id=table_id).update(views=table.views+1)
+    item = await db_models.Item_Pydantic.from_queryset_single(db_models.Item.get(portal_id=table.portal_id.portal_id))
+
+    await db_models.Item.filter(portal_id=table.portal_id.portal_id).update(views=item.views+1)
 
     return table
 
-@router.post("/edit_row_attributes", tags=["Tables"])
+@router.post("/tables/edit_row_attributes", tags=["Tables"])
 async def edit_row_attributes(
         request: Request,
         info: models.EditRowAttributes,
@@ -104,7 +128,7 @@ async def edit_row_attributes(
 
         return {"status": True}
 
-@router.post("/edit_row_geometry", tags=["Tables"])
+@router.post("/tables/edit_row_geometry", tags=["Tables"])
 async def edit_row_geometry(
         request: Request,
         info: models.EditRowGeometry,
@@ -137,7 +161,7 @@ async def edit_row_geometry(
         
         return {"status": True}
 
-@router.post("/add_column", tags=["Tables"])
+@router.post("/tables/add_column", tags=["Tables"])
 async def add_column(
         request: Request,
         info: models.AddColumn,
@@ -167,7 +191,7 @@ async def add_column(
         
         return {"status": True}
 
-@router.delete("/delete_column", tags=["Tables"])
+@router.delete("/tables/delete_column", tags=["Tables"])
 async def delete_column(
         request: Request,
         info: models.DeleteColumn,
@@ -197,7 +221,7 @@ async def delete_column(
         
         return {"status": True}
 
-@router.post("/add_row", tags=["Tables"])
+@router.post("/tables/add_row", tags=["Tables"])
 async def add_row(
         request: Request,
         info: models.AddRow,
@@ -278,7 +302,7 @@ async def add_row(
         
         return {"status": True, "gid": result[0]['gid']}
 
-@router.delete("/delete_row", tags=["Tables"])
+@router.delete("/tables/delete_row", tags=["Tables"])
 async def delete_row(
         request: Request,
         info: models.DeleteRow,
@@ -308,7 +332,7 @@ async def delete_row(
         
         return {"status": True}
 
-@router.post("/create_table", tags=["Tables"])
+@router.post("/tables/create_table", tags=["Tables"])
 async def create_table(
         request: Request,
         info: models.CreateTable,
@@ -339,7 +363,7 @@ async def create_table(
         
         return {"status": True}
 
-@router.delete("/delete_table", tags=["Tables"])
+@router.delete("/tables/delete_table", tags=["Tables"])
 async def delete_table(
         request: Request,
         info: models.DeleteTable,
@@ -368,7 +392,7 @@ async def delete_table(
         
         return {"status": True}
 
-@router.post("/statistics", tags=["Tables"])
+@router.post("/tables/statistics", tags=["Tables"])
 async def statistics(info: models.StatisticsModel, request: Request, user_name: int=Depends(utilities.get_token_header)):
 
     await utilities.validate_table_access(
@@ -427,7 +451,7 @@ async def statistics(info: models.StatisticsModel, request: Request, user_name: 
             "status": "SUCCESS"
         }
 
-@router.post("/bins", tags=["Tables"])
+@router.post("/tables/bins", tags=["Tables"])
 async def bins(info: models.BinsModel, request: Request, user_name: int=Depends(utilities.get_token_header)):
 
     await utilities.validate_table_access(
@@ -482,7 +506,7 @@ async def bins(info: models.BinsModel, request: Request, user_name: int=Depends(
             "status": "SUCCESS"
         }
 
-@router.post("/numeric_breaks", tags=["Tables"])
+@router.post("/tables/numeric_breaks", tags=["Tables"])
 async def numeric_breaks(info: models.NumericBreaksModel, request: Request, user_name: int=Depends(utilities.get_token_header)):
 
     await utilities.validate_table_access(
@@ -551,7 +575,7 @@ async def numeric_breaks(info: models.NumericBreaksModel, request: Request, user
             "status": "SUCCESS"
         }
 
-@router.post("/custom_break_values", tags=["Tables"])
+@router.post("/tables/custom_break_values", tags=["Tables"])
 async def custom_break_values(info: models.CustomBreaksModel, request: Request, user_name: int=Depends(utilities.get_token_header)):
 
     await utilities.validate_table_access(
