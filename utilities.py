@@ -64,8 +64,6 @@ async def validate_table_access(table: str, user_name: str, app: FastAPI, write_
         
         access = False
 
-        print(item.item_write_access_list)
-
         write_access_list = []
         read_access_list = []
 

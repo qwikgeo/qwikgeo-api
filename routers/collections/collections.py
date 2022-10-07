@@ -7,6 +7,7 @@ from starlette.responses import FileResponse
 from pygeofilter.backends.sql import to_sql_where
 from pygeofilter.parsers.ecql import parse
 from tortoise.expressions import Q
+from tortoise.query_utils import Prefetch
 
 import utilities
 import db_models
@@ -17,7 +18,7 @@ router = APIRouter()
 @router.get("/", tags=["Collections"])
 async def collections(request: Request, user_name: int=Depends(utilities.get_token_header)):
     """
-    Method used to return a list of tables available to query.
+    Get a list of tables available to query.
 
     """
 
@@ -27,12 +28,12 @@ async def collections(request: Request, user_name: int=Depends(utilities.get_tok
 
     user_groups = await utilities.get_user_groups(user_name)
 
-    table_items = await db_models.Item.filter(reduce(lambda x, y: x | y, [Q(read_access_list__contains=[group]) for group in user_groups]),item_type='table')
+    table_items = await db_models.Item.filter(item_type='table').prefetch_related(Prefetch("item_read_access_list", queryset=db_models.ItemReadAccessList.filter(reduce(lambda x, y: x | y, [Q(name=group) for group in user_groups]))))
 
-    tables = await db_models.Table_Pydantic.from_queryset(db_models.Table.filter(reduce(lambda x, y: x | y, [Q(portal_id=table.portal_id) for table in table_items])))
+    tables = await db_models.Table_Pydantic.from_queryset(db_models.Table.filter(reduce(lambda x, y: x | y, [Q(portal_id_id=table.portal_id) for table in table_items])))
 
     for table in tables:
-        table_metadata = await db_models.Item_Pydantic.from_queryset_single(db_models.Item.get(portal_id=table.portal_id))
+        table_metadata = await db_models.Item_Pydantic.from_queryset_single(db_models.Item.get(portal_id=table.portal_id.portal_id))
         db_tables.append(
             {
                 "id" : f"user_data.{table.table_id}",
@@ -71,7 +72,7 @@ async def collections(request: Request, user_name: int=Depends(utilities.get_tok
 @router.get("/{scheme}.{table}", tags=["Collections"])
 async def collection(scheme: str, table: str, request: Request, user_name: int=Depends(utilities.get_token_header)):
     """
-    Method used to return information about a collection.
+    Get return information about a collection.
 
     """
 
@@ -83,13 +84,15 @@ async def collection(scheme: str, table: str, request: Request, user_name: int=D
 
     table_metadata = await db_models.Table_Pydantic.from_queryset_single(db_models.Table.get(table_id=table))
 
+    item_metadata = await db_models.Item_Pydantic.from_queryset_single(db_models.Item.get(portal_id=table_metadata.portal_id.portal_id))
+
     url = str(request.base_url)
 
     return {
         "id": f"{scheme}.{table}",
-        "title" : table_metadata.title,
-        "description" : table_metadata.description,
-        "keywords": table_metadata.tags,
+        "title" : item_metadata.title,
+        "description" : item_metadata.description,
+        "keywords": item_metadata.tags,
         "links": [
             {
                 "type": "application/json",
@@ -112,7 +115,7 @@ async def collection(scheme: str, table: str, request: Request, user_name: int=D
         ],
         "geometry": await utilities.get_table_geometry_type(
             scheme="user_data",
-            table=table.table_id,
+            table=table_metadata.table_id,
             app=request.app
         ),
         "extent": {
@@ -132,7 +135,7 @@ async def collection(scheme: str, table: str, request: Request, user_name: int=D
 async def queryables(scheme: str, table: str, request: Request,
     user_name: int=Depends(utilities.get_token_header)):
     """
-    Method used to return queryable information about a collection.
+    Get queryable information about a collection.
 
     """
 
@@ -140,13 +143,17 @@ async def queryables(scheme: str, table: str, request: Request,
         table=table,
         user_name=user_name,
         app=request.app
-    )    
+    )
+
+    table_metadata = await db_models.Table_Pydantic.from_queryset_single(db_models.Table.get(table_id=table))
+
+    item_metadata = await db_models.Item_Pydantic.from_queryset_single(db_models.Item.get(portal_id=table_metadata.portal_id.portal_id))
 
     url = str(request.base_url)
 
     queryable = {
         "$id": f"{url}api/v1/collections/{scheme}.{table}/queryables",
-        "title": f"{scheme}.{table}",
+        "title": item_metadata.title,
         "type": "object",
         "$schema": "http://json-schema.org/draft/2019-09/schema",
         "properties": {}
@@ -181,7 +188,7 @@ async def items(scheme: str, table: str, request: Request,
     bbox: str=None, limit: int=100, offset: int=0, properties: str="*",
     sortby :str="gid", filter :str=None, srid: int=4326, user_name: int=Depends(utilities.get_token_header)):
     """
-    Method used to return geojson from a collection.
+    Get geojson from a collection.
 
     """
 
@@ -280,7 +287,7 @@ async def items(scheme: str, table: str, request: Request,
 async def item(scheme: str, table: str, id:str, request: Request,
     properties: str="*", srid: int=4326, user_name: int=Depends(utilities.get_token_header)):
     """
-    Method used to return geojson for one item of a collection.
+    Get geojson for one item of a collection.
 
     """
 
@@ -348,7 +355,7 @@ async def item(scheme: str, table: str, id:str, request: Request,
 async def tiles(scheme: str, table: str, request: Request,
     user_name: int=Depends(utilities.get_token_header)):
     """
-    Method used to return queryable information about a collection.
+    Get queryable information about a collection.
 
     """
 
@@ -360,14 +367,16 @@ async def tiles(scheme: str, table: str, request: Request,
 
     table_metadata = await db_models.Table_Pydantic.from_queryset_single(db_models.Table.get(table_id=table))
 
+    item_metadata = await db_models.Item_Pydantic.from_queryset_single(db_models.Item.get(portal_id=table_metadata.portal_id.portal_id))
+
     url = str(request.base_url)
 
     mvt_path = "{tileMatrixSetId}/{tileMatrix}/{tileRow}/{tileCol}"
 
     tile_info = {
         "id": f"{scheme}.{table}",
-        "title": table_metadata.title,
-        "description": table_metadata.description,
+        "title": item_metadata.title,
+        "description": item_metadata.description,
         "links": [
             {
                 "type": "application/json",
@@ -405,11 +414,11 @@ async def tiles(scheme: str, table: str, request: Request,
     tags=["Collections"],
     summary="Endpoint to return a vector of tiles for a given table"
 )
-async def tiles(scheme: str, table: str, tileMatrixSetId: str, tileMatrix: int, tileRow: int,
+async def tile(scheme: str, table: str, tileMatrixSetId: str, tileMatrix: int, tileRow: int,
     tileCol: int, request: Request,fields: Optional[str] = None, cql_filter: Optional[str] = None,
     user_name: int=Depends(utilities.get_token_header)):
     """
-    Method used to return a vector of tiles for a given table.
+    Get a vector of tiles for a given table.
     """
 
     await utilities.validate_table_access(
@@ -464,7 +473,7 @@ async def tiles(scheme: str, table: str, tileMatrixSetId: str, tileMatrix: int, 
 @router.get("/{scheme}.{table}/tiles/{tileMatrixSetId}/metadata", tags=["Collections"])
 async def tiles_metadata(scheme: str, table: str, tileMatrixSetId: str, request: Request, user_name: int=Depends(utilities.get_token_header)):
     """
-    Method used to return a tile metadata for a given table.
+    Get a tile metadata for a given table.
     """
 
     await utilities.validate_table_access(
@@ -474,6 +483,8 @@ async def tiles_metadata(scheme: str, table: str, tileMatrixSetId: str, request:
     )
 
     table_metadata = await db_models.Table_Pydantic.from_queryset_single(db_models.Table.get(table_id=table))
+
+    item_metadata = await db_models.Item_Pydantic.from_queryset_single(db_models.Item.get(portal_id=table_metadata.portal_id.portal_id))
 
     url = str(request.base_url)
 
@@ -488,11 +499,11 @@ async def tiles_metadata(scheme: str, table: str, tileMatrixSetId: str, request:
         # "bounds": "-124.953634,-16.536406,109.929807,66.969298",
         # "center": "-84.375000,44.951199,5",
         "attribution": None,
-        "description": table_metadata.description,
+        "description": item_metadata.description,
         "vector_layers": [
             {
                 "id": f"{scheme}.{table}",
-                "description": table_metadata.description,
+                "description": item_metadata.description,
                 "minzoom": 0,
                 "maxzoom": 22,
                 "fields": {}

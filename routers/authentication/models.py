@@ -16,7 +16,7 @@ class Status(BaseModel):
 
 class TokenResponse(BaseModel):
 
-    access_token: uuid.UUID
+    access_token: str
     token_type: str="Bearer"
 
 User_Pydantic = pydantic_model_creator(db_models.User, name="User", exclude=("password_hash", ))
