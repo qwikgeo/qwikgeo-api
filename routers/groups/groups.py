@@ -1,3 +1,4 @@
+import uuid
 from fastapi import APIRouter, HTTPException, Depends
 from tortoise import exceptions
 from tortoise.query_utils import Prefetch
@@ -8,7 +9,16 @@ import utilities
 
 router = APIRouter()
 
-@router.get("/", response_model=models.Groups, description="Return a list of all groups.")
+@router.get("/", response_model=models.Groups, description="Return a list of all groups.", responses={
+    500: {
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "Internal Server Error"
+            }
+        }
+    }
+})
 async def groups(user_name: int=Depends(utilities.get_token_header)):
     groups = (
         await db_models.Group.all()
@@ -17,7 +27,16 @@ async def groups(user_name: int=Depends(utilities.get_token_header)):
 
     return {"groups": groups}
 
-@router.get("/search", response_model=models.Groups, description="Return a list of groups based off of searching via the name of the group.")
+@router.get("/search", response_model=models.Groups, description="Return a list of groups based off of searching via the name of the group.", responses={
+    500: {
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "Internal Server Error"
+            }
+        }
+    }
+})
 async def group_search(name: str, user_name: int=Depends(utilities.get_token_header)):
     groups = (
         await db_models.Group.filter(name__search=name)
@@ -27,12 +46,20 @@ async def group_search(name: str, user_name: int=Depends(utilities.get_token_hea
     return {"groups": groups}
 
 
-@router.post("/group", response_model=models.Group_Pydantic, description="Create a new group.", responses={
+@router.post("/group", response_model=models.Group_Pydantic, description="Create a group.", responses={
     400: {
-        "description": "Group name already exist.",
+        "description": "Group name already exist",
         "content": {
             "application/json": {
                 "example": {"detail": "Group name already exist."}
+            }
+        }
+    },
+    500: {
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "Internal Server Error"
             }
         }
     }
@@ -50,12 +77,28 @@ async def create_group(group: models.Group):
     except exceptions.IntegrityError:
         raise HTTPException(status_code=400, detail=f"Group name already exist.")
 
-@router.get("/group/{group_id}", response_model=models.Group_Pydantic, description="Get a group via the group id.", responses={
+@router.get("/group/{group_id}", response_model=models.Group_Pydantic, description="Retrieve a group.", responses={
+    403: {
+        "description": "No access",
+        "content": {
+            "application/json": {
+                "example": {"detail": "You do not have access to this group."}
+            }
+        }
+    },
     404: {
-        "description": "Group not found.",
+        "description": "Group not found",
         "content": {
             "application/json": {
                 "example": {"detail": "Group not found."}
+            }
+        }
+    },
+    500: {
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "Internal Server Error"
             }
         }
     }
@@ -63,19 +106,94 @@ async def create_group(group: models.Group):
 async def get_group(group_id: str, user_name: int=Depends(utilities.get_token_header)):
     try:
         group = await models.Group_Pydantic.from_queryset_single(db_models.Group.get(group_id=group_id).prefetch_related(Prefetch("group_users", queryset=db_models.GroupUser.filter(username=user_name))))
+        access = False
+        for user in group.group_users:
+            if user.username == user_name:
+                access = True
+        if access == False:
+            raise HTTPException(status_code=403, detail=f"You do not have access to this group.")
         return group
     except exceptions.DoesNotExist:
         raise HTTPException(status_code=404, detail=f"Group not found.")
 
-# @router.put("/group", response_model=models.Group_Pydantic)
-# async def update_user(group: models.Group_Pydantic, user_name: int=Depends(utilities.get_token_header)):
-#     # TODO
-#     await db_models.User.filter(username=user_name).update(**user.dict(exclude_unset=True))
-#     return await models.User_Pydantic.from_queryset_single(db_models.User.get(username=user_name))
+@router.put("/group/{group_id}", response_model=models.Group_Pydantic, description="Update a group.", responses={
+    403: {
+        "description": "No access",
+        "content": {
+            "application/json": {
+                "example": {"detail": "You do not have access to this group."}
+            }
+        }
+    },
+    404: {
+        "description": "Group not found",
+        "content": {
+            "application/json": {
+                "example": {"detail": "Group not found."}
+            }
+        }
+    },
+    500: {
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "Internal Server Error"
+            }
+        }
+    }
+})
+async def update_group(group_id: uuid.UUID, group: models.Group_Pydantic, user_name: int=Depends(utilities.get_token_header)):
+    try:
+        group = await models.Group_Pydantic.from_queryset_single(db_models.Group.get(group_id=group_id).prefetch_related(Prefetch("group_users", queryset=db_models.GroupUser.filter(username=user_name))))
+        access = False
+        for user in group.group_users:
+            if user.username == user_name:
+                access = True
+        if access == False:
+            raise HTTPException(status_code=403, detail=f"You do not have access to this group.")
+        await db_models.Group.filter(name=group.name).update(**group.dict(exclude_unset=True))
+        return await models.Group_Pydantic.from_queryset_single(db_models.Group.get(name=group.name))
+    except exceptions.DoesNotExist:
+        raise HTTPException(status_code=404, detail=f"Group not found.")
 
-# @router.delete("/group", response_model=models.Status, responses={404: {"model": HTTPNotFoundError}}, dependencies=[Depends(utilities.get_token_header)])
-# async def delete_user(user_name: int=Depends(utilities.get_token_header)):
-#     deleted_count = await db_models.User.filter(username=user_name).delete()
-#     if not deleted_count:
-#         raise HTTPException(status_code=404, detail=f"User {user_name} not found")
-#     return models.Status(message=f"Deleted user {user_name}")
+@router.delete("/group/{group_id}", response_model=models.Status, description="Delete a group.", responses={
+    403: {
+        "description": "No access",
+        "content": {
+            "application/json": {
+                "example": {"detail": "You do not have access to this group."}
+            }
+        }
+    },
+    404: {
+        "description": "Group not found",
+        "content": {
+            "application/json": {
+                "example": {"detail": "Group not found."}
+            }
+        }
+    },
+    500: {
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "Internal Server Error"
+            }
+        }
+    }
+})
+async def delete_group(group_id: uuid.UUID, group: models.Group_Pydantic, user_name: int=Depends(utilities.get_token_header)):
+    try:
+        group = await models.Group_Pydantic.from_queryset_single(db_models.Group.get(group_id=group_id).prefetch_related(Prefetch("group_users", queryset=db_models.GroupUser.filter(username=user_name))))
+        access = False
+        for user in group.group_users:
+            if user.username == user_name:
+                access = True
+        if access == False:
+            raise HTTPException(status_code=403, detail=f"You do not have access to this group.")
+        deleted_count = await db_models.Group.filter(group_id=group_id).delete()
+        if not deleted_count:
+            raise HTTPException(status_code=404, detail=f"Group not found")
+        return models.Status(message=f"Deleted group.")
+    except exceptions.DoesNotExist:
+        raise HTTPException(status_code=404, detail=f"Group not found.")

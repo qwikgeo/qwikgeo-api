@@ -5,6 +5,10 @@ import uuid
 
 import db_models
 
+class Status(BaseModel):
+
+    message: str
+
 class User(BaseModel):
 
     username: str

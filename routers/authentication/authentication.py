@@ -16,7 +16,7 @@ router = APIRouter()
 
 @router.post('/token', response_model=models.TokenResponse, description="Create a JWT token to authenticate with api via a valid username and password.", responses={
     401: {
-        "description": "Invalid username or password.",
+        "description": "Invalid username or password",
         "content": {
             "application/json": {
                 "example": {"detail": "Invalid username or password."}
@@ -58,7 +58,7 @@ async def create_token(form_data: models.Login):
         "description": "Invalid JWT Token",
         "content": {
             "application/json": {
-                "example": {"detail": "error here."}
+                "example": {"detail": "error here"}
             }
         }
     },
@@ -101,7 +101,7 @@ async def google_token_authenticate(info: models.GoogleTokenAuthenticate):
 
 @router.post("/user", response_model=models.User_Pydantic, description="Create a new user.", responses={
     400: {
-        "description": "Username already exist.",
+        "description": "Username already exist",
         "content": {
             "application/json": {
                 "example": {"detail": "Username already exist."}
@@ -131,9 +131,17 @@ async def create_user(user: models.UserIn_Pydantic):
     except exceptions.IntegrityError:
         raise HTTPException(status_code=400, detail=f"Username already exist.")
 
-@router.get("/user", response_model=models.User_Pydantic, description="Retrieve information about user.", responses={
+@router.get("/user/{username}", response_model=models.User_Pydantic, description="Retrieve information about user.", responses={
+    403: {
+        "description": "No access",
+        "content": {
+            "application/json": {
+                "example": {"detail": "You do not have access to this user."}
+            }
+        }
+    },
     404: {
-        "description": "User not found.",
+        "description": "User not found",
         "content": {
             "application/json": {
                 "example": {"detail": "User not found."}
@@ -149,16 +157,26 @@ async def create_user(user: models.UserIn_Pydantic):
         }
     }
 })
-async def get_user(user_name: int=Depends(utilities.get_token_header)):
+async def get_user(username:str, user_name: int=Depends(utilities.get_token_header)):
+    if username != user_name:
+        raise HTTPException(status_code=403, detail=f"You do not have access to this user.")
     try:
         user = await models.User_Pydantic.from_queryset_single(db_models.User.get(username=user_name))
         return user
     except exceptions.DoesNotExist:
         raise HTTPException(status_code=404, detail=f"User not found.")
 
-@router.put("/user", response_model=models.User_Pydantic, description="Update information about user.", responses={
+@router.put("/user/{username}", response_model=models.User_Pydantic, description="Update information about user.", responses={
+    403: {
+        "description": "No access",
+        "content": {
+            "application/json": {
+                "example": {"detail": "You do not have access to this user."}
+            }
+        }
+    },
     404: {
-        "description": "User not found.",
+        "description": "User not found",
         "content": {
             "application/json": {
                 "example": {"detail": "User not found."}
@@ -174,24 +192,34 @@ async def get_user(user_name: int=Depends(utilities.get_token_header)):
         }
     }
 })
-async def update_user(user: models.UserIn_Pydantic, user_name: int=Depends(utilities.get_token_header)):
+async def update_user(username:str, user: models.UserIn_Pydantic, user_name: int=Depends(utilities.get_token_header)):
+    if username != user_name:
+        raise HTTPException(status_code=403, detail=f"You do not have access to this user.")
     try:
         await db_models.User.filter(username=user_name).update(**user.dict(exclude_unset=True))
         return await models.User_Pydantic.from_queryset_single(db_models.User.get(username=user_name))
     except exceptions.DoesNotExist:
         raise HTTPException(status_code=404, detail=f"User not found.")
 
-@router.delete("/user", response_model=models.Status, description="Delete a user.", responses={
+@router.delete("/user/{username}", response_model=models.Status, description="Delete a user.", responses={
     200: {
-        "description": "User deleted.",
+        "description": "User deleted",
         "content": {
             "application/json": {
                 "example": {"Deleted user."}
             }
         }
     },
+    403: {
+        "description": "No access",
+        "content": {
+            "application/json": {
+                "example": {"detail": "You do not have access to this user."}
+            }
+        }
+    },
     404: {
-        "description": "User not found.",
+        "description": "User not found",
         "content": {
             "application/json": {
                 "example": {"detail": "User not found."}
@@ -207,7 +235,9 @@ async def update_user(user: models.UserIn_Pydantic, user_name: int=Depends(utili
         }
     }
 })
-async def delete_user(user_name: int=Depends(utilities.get_token_header)):
+async def delete_user(username:str, user_name: int=Depends(utilities.get_token_header)):
+    if username != user_name:
+        raise HTTPException(status_code=403, detail=f"You do not have access to this user.")
     deleted_count = await db_models.User.filter(username=user_name).delete()
     if not deleted_count:
         raise HTTPException(status_code=404, detail=f"User not found.")
