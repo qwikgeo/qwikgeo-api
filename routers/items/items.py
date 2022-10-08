@@ -1,3 +1,5 @@
+"""QwikGeo API - Items"""
+
 import json
 import os
 import shutil
@@ -14,43 +16,116 @@ import config
 
 router = APIRouter()
 
-@router.get("/", response_model=List[db_models.Item_Pydantic])
+@router.get(
+    path="/",
+    response_model=List[db_models.Item_Pydantic],
+    responses={
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
 async def items(
-        user_name: int=Depends(utilities.get_token_header)
-    ):
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """List all items."""
 
 
     user_groups = await utilities.get_user_groups(user_name)
 
-    items = await db_models.Item_Pydantic.from_queryset(db_models.Item.all().prefetch_related(Prefetch("item_read_access_list", queryset=db_models.ItemReadAccessList.filter(reduce(lambda x, y: x | y, [Q(name=group) for group in user_groups])))))
+    portal_items = await db_models.Item_Pydantic.from_queryset(
+        db_models.Item.all().prefetch_related(
+            Prefetch("item_read_access_list", queryset=db_models.ItemReadAccessList.filter(
+                reduce(lambda x, y: x | y, [Q(name=group) for group in user_groups])
+                )
+            )
+        )
+    )
 
-    return items
+    return portal_items
 
 
-@router.get("/tables", tags=["Tables"])
+@router.get(
+    path="/tables",
+    response_model=List[db_models.Table_Pydantic],
+    responses={
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
 async def tables(
-        user_name: int=Depends(utilities.get_token_header)
-    ):
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """List all tables."""
 
     user_groups = await utilities.get_user_groups(user_name)
 
-    items = await db_models.Item_Pydantic.from_queryset(db_models.Item.filter(item_type='table').prefetch_related(Prefetch("item_read_access_list", queryset=db_models.ItemReadAccessList.filter(reduce(lambda x, y: x | y, [Q(name=group) for group in user_groups])))))
-    
+    portal_items = await db_models.Item_Pydantic.from_queryset(
+        db_models.Item.filter(item_type='table').prefetch_related(
+            Prefetch("item_read_access_list", queryset=db_models.ItemReadAccessList.filter(
+                reduce(lambda x, y: x | y, [Q(name=group) for group in user_groups]))
+            )
+        )
+    )
+
     portal_ids = []
 
-    for item in items:
+    for item in portal_items:
         portal_ids.append(item.portal_id)
 
-    tables = await db_models.Table_Pydantic.from_queryset(db_models.Table.filter(portal_id_id__in=portal_ids))
+    portal_tables = await db_models.Table_Pydantic.from_queryset(
+        db_models.Table.filter(portal_id_id__in=portal_ids)
+    )
 
-    return tables
+    return portal_tables
 
-@router.get("/tables/table/{table_id}", tags=["Tables"])
+@router.get(
+    path="/tables/table/{table_id}",
+    response_model=db_models.Table_Pydantic,
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
 async def table(
-        table_id: str,
-        request: Request,
-        user_name: int=Depends(utilities.get_token_header)
-    ):
+    table_id: str,
+    request: Request,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """Get a table."""
 
     await utilities.validate_table_access(
         table=table_id,
@@ -58,20 +133,55 @@ async def table(
         app=request.app
     )
 
-    table = await db_models.Table_Pydantic.from_queryset_single(db_models.Table.get(table_id=table_id))
+    portal_table = await db_models.Table_Pydantic.from_queryset_single(
+        db_models.Table.get(table_id=table_id)
+    )
 
-    item = await db_models.Item_Pydantic.from_queryset_single(db_models.Item.get(portal_id=table.portal_id.portal_id))
+    item = await db_models.Item_Pydantic.from_queryset_single(
+        db_models.Item.get(portal_id=portal_table.portal_id.portal_id)
+    )
 
-    await db_models.Item.filter(portal_id=table.portal_id.portal_id).update(views=item.views+1)
+    await db_models.Item.filter(
+        portal_id=portal_table.portal_id.portal_id
+    ).update(views=item.views+1)
 
-    return table
+    return portal_table
 
-@router.post("/tables/edit_row_attributes", tags=["Tables"])
+@router.post(
+    path="/tables/edit_row_attributes",
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
 async def edit_row_attributes(
-        request: Request,
-        info: models.EditRowAttributes,
-        user_name: int=Depends(utilities.get_token_header)
-    ):
+    request: Request,
+    info: models.EditRowAttributes,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """Update a table's attributes."""
 
     await utilities.validate_table_access(
         table=info.table,
@@ -111,12 +221,15 @@ async def edit_row_attributes(
 
         for field in info.values:
             if field not in db_columns:
-                raise HTTPException(status_code=400, detail=f"Column: {field} is not a column for {info.table}. Please use one of the following columns. {string_columns}")
-            if db_column_types[field] in numeric_field_types: 
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"""Column: {field} is not a column for {info.table}.
+                    Please use one of the following columns. {string_columns}""")
+            if db_column_types[field] in numeric_field_types:
                 query += f"{field} = {info.values[field]},"
             else:
                 query += f"{field} = '{info.values[field]}',"
-        
+
         query = query[:-1]
 
         query += f" WHERE gid = {info.gid};"
@@ -128,12 +241,41 @@ async def edit_row_attributes(
 
         return {"status": True}
 
-@router.post("/tables/edit_row_geometry", tags=["Tables"])
+@router.post(
+    path="/tables/edit_row_geometry",
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
 async def edit_row_geometry(
-        request: Request,
-        info: models.EditRowGeometry,
-        user_name: int=Depends(utilities.get_token_header)
-    ):
+    request: Request,
+    info: models.EditRowGeometry,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """Update a table's geometry."""
 
     await utilities.validate_table_access(
         table=info.table,
@@ -158,15 +300,44 @@ async def edit_row_geometry(
         """
 
         await con.fetch(query)
-        
+
         return {"status": True}
 
-@router.post("/tables/add_column", tags=["Tables"])
+@router.post(
+    path="/tables/add_column",
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
 async def add_column(
-        request: Request,
-        info: models.AddColumn,
-        user_name: int=Depends(utilities.get_token_header)
-    ):
+    request: Request,
+    info: models.AddColumn,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """Create a new column for a table."""
 
     await utilities.validate_table_access(
         table=info.table,
@@ -188,15 +359,44 @@ async def add_column(
 
         if os.path.exists(f'{os.getcwd()}/cache/{info.scheme}_{info.table}'):
             shutil.rmtree(f'{os.getcwd()}/cache/{info.scheme}_{info.table}')
-        
+
         return {"status": True}
 
-@router.delete("/tables/delete_column", tags=["Tables"])
+@router.delete(
+    path="/tables/delete_column",
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
 async def delete_column(
-        request: Request,
-        info: models.DeleteColumn,
-        user_name: int=Depends(utilities.get_token_header)
-    ):
+    request: Request,
+    info: models.DeleteColumn,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """Delete a column for a table."""
 
     await utilities.validate_table_access(
         table=table,
@@ -208,7 +408,7 @@ async def delete_column(
     pool = request.app.state.database
 
     async with pool.acquire() as con:
-        
+
         query = f"""
             ALTER TABLE "{info.table}"
             DROP COLUMN IF EXISTS "{info.column_name}";
@@ -218,15 +418,44 @@ async def delete_column(
 
         if os.path.exists(f'{os.getcwd()}/cache/{info.scheme}_{info.table}'):
             shutil.rmtree(f'{os.getcwd()}/cache/{info.scheme}_{info.table}')
-        
+
         return {"status": True}
 
-@router.post("/tables/add_row", tags=["Tables"])
+@router.post(
+    path="/tables/add_row",
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
 async def add_row(
-        request: Request,
-        info: models.AddRow,
-        user_name: int=Depends(utilities.get_token_header)
-    ):
+    request: Request,
+    info: models.AddRow,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """Create a new row for a table."""
 
     await utilities.validate_table_access(
         table=info.table,
@@ -266,13 +495,17 @@ async def add_row(
 
         for column in info.columns:
             if column.column_name not in db_columns:
-                raise HTTPException(status_code=400, detail=f"Column: {column.column_name} is not a column for {info.table}. Please use one of the following columns. {string_columns}")
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"""Column: {column.column_name} is not a column for {info.table}.
+                    Please use one of the following columns. {string_columns}"""
+                )
             input_columns += f""""{column.column_name}","""
             if db_column_types[column.column_name] in numeric_field_types:
                 values += f"""{float(column.value)},"""
             else:
                 values += f"""'{column.value}',"""
-        
+
         input_columns = input_columns[:-1]
         values = values[:-1]
 
@@ -299,15 +532,44 @@ async def add_row(
 
         if os.path.exists(f'{os.getcwd()}/cache/{info.scheme}_{info.table}'):
             shutil.rmtree(f'{os.getcwd()}/cache/{info.scheme}_{info.table}')
-        
+
         return {"status": True, "gid": result[0]['gid']}
 
-@router.delete("/tables/delete_row", tags=["Tables"])
+@router.delete(
+    path="/tables/delete_row",
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
 async def delete_row(
-        request: Request,
-        info: models.DeleteRow,
-        user_name: int=Depends(utilities.get_token_header)
-    ):
+    request: Request,
+    info: models.DeleteRow,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """Delete a row for a table."""
 
     await utilities.validate_table_access(
         table=info.table,
@@ -319,7 +581,7 @@ async def delete_row(
     pool = request.app.state.database
 
     async with pool.acquire() as con:
-        
+
         query = f"""
             DELETE FROM "{info.table}"
             WHERE gid = {info.gid};
@@ -329,20 +591,50 @@ async def delete_row(
 
         if os.path.exists(f'{os.getcwd()}/cache/{info.scheme}_{info.table}'):
             shutil.rmtree(f'{os.getcwd()}/cache/{info.scheme}_{info.table}')
-        
+
         return {"status": True}
 
-@router.post("/tables/create_table", tags=["Tables"])
+@router.post(
+    path="/tables/create_table",
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
 async def create_table(
-        request: Request,
-        info: models.CreateTable,
-        user_name: int=Depends(utilities.get_token_header)
-    ):
+    request: Request,
+    info: models.CreateTable,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """Create a new table."""
+    # TODO
 
     pool = request.app.state.database
 
     async with pool.acquire() as con:
-        
+
         query = f"""
             CREATE TABLE "{info.table}"(
             gid SERIAL PRIMARY KEY
@@ -358,17 +650,46 @@ async def create_table(
         geom_query = f"""
             SELECT AddGeometryColumn ('public','{info.table}','geom',{info.srid},'{info.geometry_type}',2);
         """
-        
+
         await con.fetch(geom_query)
-        
+
         return {"status": True}
 
-@router.delete("/tables/delete_table", tags=["Tables"])
+@router.delete(
+    path="/tables/delete_table",
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
 async def delete_table(
-        request: Request,
-        info: models.DeleteTable,
-        user_name: int=Depends(utilities.get_token_header)
-    ):
+    request: Request,
+    info: models.DeleteTable,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """Delete a table."""
 
     await utilities.validate_table_access(
         table=info.table,
@@ -380,7 +701,7 @@ async def delete_table(
     pool = request.app.state.database
 
     async with pool.acquire() as con:
-        
+
         query = f"""
             DROP TABLE IF EXISTS "{info.table}";
         """
@@ -389,11 +710,44 @@ async def delete_table(
 
         if os.path.exists(f'{os.getcwd()}/cache/{info.scheme}_{table}'):
             shutil.rmtree(f'{os.getcwd()}/cache/{info.scheme}_{table}')
-        
+
         return {"status": True}
 
-@router.post("/tables/statistics", tags=["Tables"])
-async def statistics(info: models.StatisticsModel, request: Request, user_name: int=Depends(utilities.get_token_header)):
+@router.post(
+    path="/tables/statistics",
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def statistics(
+    info: models.StatisticsModel,
+    request: Request,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """Retrieve statistics for a table."""
 
     await utilities.validate_table_access(
         table=info.table,
@@ -411,13 +765,15 @@ async def statistics(info: models.StatisticsModel, request: Request, user_name: 
         distinct = False
         general_stats = False
 
-        for aggregrate in info.aggregate_columns:
-            if aggregrate.type == 'distinct':
+        for aggregate in info.aggregate_columns:
+            if aggregate.type == 'distinct':
                 distinct = True
             else:
                 general_stats = True
-                cols.append(f"""{aggregrate.type }("{aggregrate.column}") as {aggregrate.type}_{aggregrate.column}""")
-                col_names.append(f"{aggregrate.type}_{aggregrate.column}")
+                cols.append(f"""
+                {aggregate.type }("{aggregate.column}") as {aggregate.type}_{aggregate.column}
+                """)
+                col_names.append(f"{aggregate.type}_{aggregate.column}")
 
         if general_stats:
             formatted_columns = ','.join(cols)
@@ -425,7 +781,7 @@ async def statistics(info: models.StatisticsModel, request: Request, user_name: 
                 SELECT {formatted_columns}
                 FROM "{info.table}"
             """
-            
+
             query += await utilities.generate_where_clause(info, con)
 
             data = await con.fetchrow(query)
@@ -434,25 +790,64 @@ async def statistics(info: models.StatisticsModel, request: Request, user_name: 
                 final_results[col] = data[col]
 
         if distinct:
-            for aggregrate in info.aggregate_columns:
-                if aggregrate.type == 'distinct':
-                    query = f"""SELECT DISTINCT("{aggregrate.column}"), {aggregrate.group_method}("{aggregrate.group_column}") FROM "{info.table}" """
+            for aggregate in info.aggregate_columns:
+                if aggregate.type == 'distinct':
+                    query = f"""
+                    SELECT DISTINCT("{aggregate.column}"), {aggregate.group_method}("{aggregate.group_column}") 
+                    FROM "{info.table}" """
 
                     query += await utilities.generate_where_clause(info, con)
 
-                    query += f""" GROUP BY "{aggregrate.column}" ORDER BY "{aggregrate.group_method}" DESC"""
+                    query += f"""
+                    GROUP BY "{aggregate.column}"
+                    ORDER BY "{aggregate.group_method}" DESC"""
 
                     data = await con.fetch(query)
 
-                    final_results[f"distinct_{aggregrate.column}_{aggregrate.group_method}_{aggregrate.group_column}"] = data
+                    final_results[
+                        f"""distinct_{aggregate.column}_{aggregate.group_method}_{aggregate.group_column}"""
+                    ] = data
 
         return {
             "results": final_results,
             "status": "SUCCESS"
         }
 
-@router.post("/tables/bins", tags=["Tables"])
-async def bins(info: models.BinsModel, request: Request, user_name: int=Depends(utilities.get_token_header)):
+@router.post(
+    path="/tables/bins",
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def bins(
+    info: models.BinsModel,
+    request: Request,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """Retrieve a numerical column's bins for a table."""
 
     await utilities.validate_table_access(
         table=info.table,
@@ -479,16 +874,16 @@ async def bins(info: models.BinsModel, request: Request, user_name: int=Depends(
 
         for group in range(info.number_of_bins):
             if group == 0:
-                min = data['min']
-                max = group_size
+                minimum = data['min']
+                maximum = group_size
             else:
-                min = group*group_size
-                max = (group+1)*group_size
+                minimum = group*group_size
+                maximum = (group+1)*group_size
             query = f"""
                 SELECT COUNT(*)
                 FROM "{info.table}"
-                WHERE "{info.column}" > {min}
-                AND "{info.column}" <= {max}
+                WHERE "{info.column}" > {minimum}
+                AND "{info.column}" <= {maximum}
             """
 
             query += await utilities.generate_where_clause(info, con, True)
@@ -496,8 +891,8 @@ async def bins(info: models.BinsModel, request: Request, user_name: int=Depends(
             data = await con.fetchrow(query)
 
             results.append({
-                "min": min,
-                "max": max,
+                "min": minimum,
+                "max": maximum,
                 "count": data['count']
             })
 
@@ -506,8 +901,42 @@ async def bins(info: models.BinsModel, request: Request, user_name: int=Depends(
             "status": "SUCCESS"
         }
 
-@router.post("/tables/numeric_breaks", tags=["Tables"])
-async def numeric_breaks(info: models.NumericBreaksModel, request: Request, user_name: int=Depends(utilities.get_token_header)):
+@router.post(
+    path="/tables/numeric_breaks",
+    description="",
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def numeric_breaks(
+    info: models.NumericBreaksModel,
+    request: Request,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """Retrieve a numerical column's breaks for a table."""
 
     await utilities.validate_table_access(
         table=info.table,
@@ -521,7 +950,7 @@ async def numeric_breaks(info: models.NumericBreaksModel, request: Request, user
         results = [
 
         ]
-        
+
         if info.break_type == "quantile":
             query = f"""
                 SELECT {info.break_type}_bins(array_agg(CAST("{info.column}" AS integer)), {info.number_of_breaks}) 
@@ -548,16 +977,16 @@ async def numeric_breaks(info: models.NumericBreaksModel, request: Request, user
 
         for index, max_number in enumerate(break_points[f"{info.break_type}_bins"]):
             if index == 0:
-                min = min_number['min']
-                max = max_number
+                minimum = min_number['min']
+                maximum = max_number
             else:
-                min = break_points[f"{info.break_type}_bins"][index-1]
-                max = max_number
+                minimum = break_points[f"{info.break_type}_bins"][index-1]
+                maximum = max_number
             query = f"""
                 SELECT COUNT(*)
                 FROM "{info.table}"
-                WHERE "{info.column}" > {min}
-                AND "{info.column}" <= {max}
+                WHERE "{info.column}" > {minimum}
+                AND "{info.column}" <= {maximum}
             """
 
             query += await utilities.generate_where_clause(info, con, True)
@@ -565,8 +994,8 @@ async def numeric_breaks(info: models.NumericBreaksModel, request: Request, user
             data = await con.fetchrow(query)
 
             results.append({
-                "min": min,
-                "max": max,
+                "min": minimum,
+                "max": maximum,
                 "count": data['count']
             })
 
@@ -575,8 +1004,41 @@ async def numeric_breaks(info: models.NumericBreaksModel, request: Request, user
             "status": "SUCCESS"
         }
 
-@router.post("/tables/custom_break_values", tags=["Tables"])
-async def custom_break_values(info: models.CustomBreaksModel, request: Request, user_name: int=Depends(utilities.get_token_header)):
+@router.post(
+    path="/tables/custom_break_values",
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def custom_break_values(
+    info: models.CustomBreaksModel,
+    request: Request,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """Retrieve custom break values for a column for a table."""
 
     await utilities.validate_table_access(
         table=info.table,
@@ -589,17 +1051,17 @@ async def custom_break_values(info: models.CustomBreaksModel, request: Request, 
     async with pool.acquire() as con:
         results = [
 
-        ]        
+        ]
 
         for break_range in info.breaks:
-            min = break_range.min
-            max = break_range.max
+            minimum = break_range.min
+            maximum = break_range.max
 
             query = f"""
                 SELECT COUNT(*)
                 FROM "{info.table}"
-                WHERE "{info.column}" > {min}
-                AND "{info.column}" <= {max}
+                WHERE "{info.column}" > {minimum}
+                AND "{info.column}" <= {maximum}
             """
 
             query += await utilities.generate_where_clause(info, con, True)
@@ -607,8 +1069,8 @@ async def custom_break_values(info: models.CustomBreaksModel, request: Request, 
             data = await con.fetchrow(query)
 
             results.append({
-                "min": min,
-                "max": max,
+                "min": minimum,
+                "max": maximum,
                 "count": data['count']
             })
 
