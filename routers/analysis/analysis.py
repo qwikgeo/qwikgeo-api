@@ -16,6 +16,12 @@ def status(process_id: str, user_name: int=Depends(utilities.get_token_header)):
 
 @router.post("/buffer", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def buffer(info: models.BufferModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
+
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name
+    )
+
     new_table_id = utilities.get_new_table_id()
 
     process_id = utilities.get_new_process_id()
@@ -43,6 +49,12 @@ async def buffer(info: models.BufferModel, request: Request, background_tasks: B
 
 @router.post("/dissolve", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def dissolve(info: models.BaseAnalysisModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
+    
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name
+    )
+
     new_table_id = utilities.get_new_table_id()
 
     process_id = utilities.get_new_process_id()
@@ -69,6 +81,12 @@ async def dissolve(info: models.BaseAnalysisModel, request: Request, background_
 
 @router.post("/dissolve_by_value", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def dissolve_by_value(info: models.DissolveByValueModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
+    
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name
+    )
+
     new_table_id = utilities.get_new_table_id()
 
     process_id = utilities.get_new_process_id()
@@ -96,6 +114,12 @@ async def dissolve_by_value(info: models.DissolveByValueModel, request: Request,
 
 @router.post("/square_grids", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def square_grids(info: models.GridModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
+    
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name
+    )
+
     new_table_id = utilities.get_new_table_id()
 
     process_id = utilities.get_new_process_id()
@@ -123,6 +147,12 @@ async def square_grids(info: models.GridModel, request: Request, background_task
 
 @router.post("/hexagon_grids", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def hexagon_grids(info: models.GridModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
+    
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name
+    )
+
     new_table_id = utilities.get_new_table_id()
 
     process_id = utilities.get_new_process_id()
@@ -150,6 +180,12 @@ async def hexagon_grids(info: models.GridModel, request: Request, background_tas
 
 @router.post("/bounding_box", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def bounding_box(info: models.BaseAnalysisModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
+    
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name
+    )
+
     new_table_id = utilities.get_new_table_id()
 
     process_id = utilities.get_new_process_id()
@@ -176,6 +212,12 @@ async def bounding_box(info: models.BaseAnalysisModel, request: Request, backgro
 
 @router.post("/k_means_cluster", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def k_means_cluster(info: models.KMeansModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
+    
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name
+    )
+
     new_table_id = utilities.get_new_table_id()
 
     process_id = utilities.get_new_process_id()
@@ -203,6 +245,12 @@ async def k_means_cluster(info: models.KMeansModel, request: Request, background
 
 @router.post("/center_of_each_polygon", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def center_of_each_polygon(info: models.BaseAnalysisModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
+    
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name
+    )
+
     new_table_id = utilities.get_new_table_id()
 
     process_id = utilities.get_new_process_id()
@@ -229,6 +277,12 @@ async def center_of_each_polygon(info: models.BaseAnalysisModel, request: Reques
 
 @router.post("/center_of_dataset", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def center_of_dataset(info: models.BaseAnalysisModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
+    
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name
+    )
+
     new_table_id = utilities.get_new_table_id()
 
     process_id = utilities.get_new_process_id()
@@ -255,6 +309,12 @@ async def center_of_dataset(info: models.BaseAnalysisModel, request: Request, ba
 
 @router.post("/find_within_distance", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def find_within_distance(info: models.FindWithinDistanceModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
+    
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name
+    )
+
     new_table_id = utilities.get_new_table_id()
 
     process_id = utilities.get_new_process_id()
@@ -284,6 +344,13 @@ async def find_within_distance(info: models.FindWithinDistanceModel, request: Re
 
 @router.post("/convex_hull", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def convex_hull(info: models.BaseAnalysisModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
+    
+    
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name
+    )
+
     new_table_id = utilities.get_new_table_id()
 
     process_id = utilities.get_new_process_id()
@@ -310,6 +377,12 @@ async def convex_hull(info: models.BaseAnalysisModel, request: Request, backgrou
 
 @router.post("/aggregate_points_by_grids", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def aggregate_points_by_grids(info: models.AggregatePointsByGridsModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
+
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name
+    )
+
     new_table_id = utilities.get_new_table_id()
 
     process_id = utilities.get_new_process_id()
@@ -338,6 +411,17 @@ async def aggregate_points_by_grids(info: models.AggregatePointsByGridsModel, re
 
 @router.post("/aggregate_points_by_polygons", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def aggregate_points_by_polygons(info: models.PolygonsModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
+    
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name
+    )
+
+    await utilities.validate_table_access(
+        table=info.polygons,
+        user_name=user_name
+    )
+
     new_table_id = utilities.get_new_table_id()
 
     process_id = utilities.get_new_process_id()
@@ -365,6 +449,17 @@ async def aggregate_points_by_polygons(info: models.PolygonsModel, request: Requ
 
 @router.post("/select_inside", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def select_inside(info: models.PolygonsModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
+    
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name
+    )
+
+    await utilities.validate_table_access(
+        table=info.polygons,
+        user_name=user_name
+    )
+
     new_table_id = utilities.get_new_table_id()
 
     process_id = utilities.get_new_process_id()
@@ -392,6 +487,17 @@ async def select_inside(info: models.PolygonsModel, request: Request, background
 
 @router.post("/select_outside", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def select_outside(info: models.PolygonsModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
+
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name
+    )
+
+    await utilities.validate_table_access(
+        table=info.polygons,
+        user_name=user_name
+    )
+
     new_table_id = utilities.get_new_table_id()
 
     process_id = utilities.get_new_process_id()
@@ -419,6 +525,17 @@ async def select_outside(info: models.PolygonsModel, request: Request, backgroun
 
 @router.post("/clip", tags=["Analysis"], response_model=models.BaseResponseModel)
 async def clip(info: models.PolygonsModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
+
+    await utilities.validate_table_access(
+        table=info.table,
+        user_name=user_name
+    )
+
+    await utilities.validate_table_access(
+        table=info.polygons,
+        user_name=user_name
+    )
+
     new_table_id = utilities.get_new_table_id()
 
     process_id = utilities.get_new_process_id()
