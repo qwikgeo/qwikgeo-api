@@ -6,7 +6,7 @@ QwikGeo API is a enterprise scale api for a GIS portal. QwikGeo API is written i
 
 ---
 
-**Source Code**: <a href="https://github.com/mkeller3/QwikGeo" target="_blank">https://github.com/mkeller3/QwikGeo</a>
+**Source Code**: <a href="https://github.com/qwikgeo/qwikgeo-api" target="_blank">https://github.com/qwikgeo/qwikgeo-api</a>
 
 ---
 
