@@ -2,18 +2,16 @@
 
 | Method | URL                                                                              | Description                                 |
 | ------ | -------------------------------------------------------------------------------- | ------------------------------------------- |
-| `PUT`  | `/api/v1/tables/edit_row_attributes`                                             | [Edit Row Attributes](#edit-row-attributes) |
-| `PUT`  | `/api/v1/tables/edit_row_geometry`                                               | [Edit Row Geometry](#edit-row-geometry)     |
-| `POST`  | `/api/v1/tables/add_column`                                                     | [Add Column](#add-column)                   |
-| `DELETE`  | `/api/v1/tables/delete_column`                                                | [Delete Column](#delete-column)             |
-| `POST`  | `/api/v1/tables/add_row`                                                        | [Add Row](#add-row)                         |
-| `DELETE`  | `/api/v1/tables/delete_row`                                                   | [Delete Row](#delete-row)                   |
-| `DELETE`  | `/api/v1/tables/delete_table`                                                 | [Delete Table](#delete-table)               |
-| `POST`  | `/api/v1/tables/create_table`                                                   | [Create Table](#create-table)               |
-| `POST`  | `/api/v1/tables/statistics`                                                     | [Statistics](#statistics)                   |
-| `POST`  | `/api/v1/tables/bins`                                                           | [Bins](#bins)                               |
-| `POST`  | `/api/v1/tables/numeric_breaks`                                                 | [Numeric Breaks](#numeric-breaks)           |
-| `POST`  | `/api/v1/tables/custom_break_values`                                            | [Custom Break Values](#custom-break-values) |
+| `POST`  | `/api/v1/items/tables/add_column`                                                     | [Add Column](#add-column)                   |
+| `DELETE`  | `/api/v1/items/tables/delete_column`                                                | [Delete Column](#delete-column)             |
+| `POST`  | `/api/v1/items/tables/add_row`                                                        | [Add Row](#add-row)                         |
+| `DELETE`  | `/api/v1/items/tables/delete_row`                                                   | [Delete Row](#delete-row)                   |
+| `DELETE`  | `/api/v1/items/tables/delete_table`                                                 | [Delete Table](#delete-table)               |
+| `POST`  | `/api/v1/items/tables/create_table`                                                   | [Create Table](#create-table)               |
+| `POST`  | `/api/v1/items/tables/statistics`                                                     | [Statistics](#statistics)                   |
+| `POST`  | `/api/v1/items/tables/bins`                                                           | [Bins](#bins)                               |
+| `POST`  | `/api/v1/items/tables/numeric_breaks`                                                 | [Numeric Breaks](#numeric-breaks)           |
+| `POST`  | `/api/v1/items/tables/custom_break_values`                                            | [Custom Break Values](#custom-break-values) |
 
 ## Endpoint Description's
 
@@ -28,7 +26,6 @@ Example:
 ### Example Input 
 ```json
 {
-    "database": "data",
     "table": "mclean_county_parcels",
     "gid": 1,
     "values": {
@@ -55,7 +52,6 @@ Example:
 ### Example Input 
 ```json
 {
-    "database": "data",
     "table": "zip_centroids",
     "gid": 1,
     "geojson": {
@@ -85,7 +81,6 @@ Example: In the example below, we are adding a column called `test` that is text
 ### Example Input 
 ```json
 {
-    "database": "data",
     "table": "zip_centroids",
     "column_name": "test",
     "column_type": "text"
@@ -110,7 +105,6 @@ Example: In the example below, we are deleting a column called `test` from the t
 ### Example Input 
 ```json
 {
-    "database": "data",
     "table": "zip_centroids",
     "column_name": "test"
 }
@@ -134,7 +128,6 @@ Example: In the example below, we are adding a a new row to the `zip_centroids` 
 ### Example Input 
 ```json
 {
-    "database": "data",
     "table": "zip_centroids",
     "columns": [
         {
@@ -169,7 +162,6 @@ Example: In the example below, we are deleting the column with a gid of `1` in t
 ### Example Input 
 ```json
 {
-    "database": "data",
     "table": "zip_centroids",
     "gid": 1
 }
@@ -193,7 +185,6 @@ and setting the table to have `POINT` geometry.
 ### Example Input 
 ```json
 {
-    "database": "data",
     "table": "zip_centroids_new",
     "columns": [
         {
@@ -222,7 +213,6 @@ Example: In the example below, we are deleting a table called `zip_centroids`.
 ### Example Input 
 ```json
 {
-    "database": "data",
     "table": "zip_centroids"
 }
 ```
@@ -250,7 +240,6 @@ Example: In the example below we will be searching for the number of parcels, av
 ### Example Input 
 ```json
 {
-    "database": "data",
     "table": "mclean_county_parcels",
     "aggregate_columns": [
         {
@@ -354,7 +343,6 @@ Example: Calculate 10 bins for the `deed_ac` column on the `mclean_county_parcel
 ### Example Input
 ```json
 {
-    "database": "data",
     "table": "mclean_county_parcels",
     "column": "deed_ac",
     "bins": 10
@@ -438,7 +426,6 @@ Example: Create 3 breaks based off of the column `population` for the table `zip
 ### Example Input
 ```json
 {
-    "database": "data",
     "table": "zip_centroids",
     "column": "population",
     "number_of_breaks": 3,
@@ -487,7 +474,6 @@ off of the column `population` for the table `zip_centroids` using a quantile br
 ### Example Input
 ```json
 {
-    "database": "data",
     "table": "zip_centroids",
     "column": "population",
     "breaks": [
