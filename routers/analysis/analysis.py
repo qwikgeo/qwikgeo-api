@@ -1,3 +1,5 @@
+"""QwikGeo API - Analysis"""
+
 from fastapi import APIRouter, BackgroundTasks, Request, Depends
 
 import utilities
@@ -8,14 +10,59 @@ router = APIRouter()
 
 analysis_processes = {}
 
-@router.get("/status/{process_id}", tags=["Analysis"])
-def status(process_id: str, user_name: int=Depends(utilities.get_token_header)):
+@router.get(
+    path="/status/{process_id}"
+)
+def status(
+    process_id: str,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """Return status of an analysis."""
+
     if process_id not in analysis_processes:
         return {"status": "UNKNOWN", "error": "This process_id does not exist."}
     return analysis_processes[process_id]
 
-@router.post("/buffer", tags=["Analysis"], response_model=models.BaseResponseModel)
-async def buffer(info: models.BufferModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
+@router.post(
+    path="/buffer",
+    response_model=models.BaseResponseModel,
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def buffer(
+    info: models.BufferModel,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """
+    Create a buffer analysis.
+    More information at https://docs.qwikgeo.com/analysis/#buffer
+    """
 
     await utilities.validate_table_access(
         table=info.table,
@@ -47,9 +94,47 @@ async def buffer(info: models.BufferModel, request: Request, background_tasks: B
         "url": process_url
     }
 
-@router.post("/dissolve", tags=["Analysis"], response_model=models.BaseResponseModel)
-async def dissolve(info: models.BaseAnalysisModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
-    
+@router.post(
+    path="/dissolve",
+    response_model=models.BaseResponseModel,
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def dissolve(
+    info: models.BaseAnalysisModel,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """
+    Create a dissolve analysis.
+    More information at https://docs.qwikgeo.com/analysis/#dissolve
+    """
+
     await utilities.validate_table_access(
         table=info.table,
         user_name=user_name
@@ -79,9 +164,47 @@ async def dissolve(info: models.BaseAnalysisModel, request: Request, background_
         "url": process_url
     }
 
-@router.post("/dissolve_by_value", tags=["Analysis"], response_model=models.BaseResponseModel)
-async def dissolve_by_value(info: models.DissolveByValueModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
-    
+@router.post(
+    path="/dissolve_by_value",
+    response_model=models.BaseResponseModel,
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def dissolve_by_value(
+    info: models.DissolveByValueModel,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """
+    Create a dissolve by value analysis.
+    More information at https://docs.qwikgeo.com/analysis/#dissolve-by-value
+    """
+
     await utilities.validate_table_access(
         table=info.table,
         user_name=user_name
@@ -112,9 +235,47 @@ async def dissolve_by_value(info: models.DissolveByValueModel, request: Request,
         "url": process_url
     }
 
-@router.post("/square_grids", tags=["Analysis"], response_model=models.BaseResponseModel)
-async def square_grids(info: models.GridModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
-    
+@router.post(
+    path="/square_grids",
+    response_model=models.BaseResponseModel,
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def square_grids(
+    info: models.GridModel,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """
+    Create a square grid analysis.
+    More information at https://docs.qwikgeo.com/analysis/#square-grids
+    """
+
     await utilities.validate_table_access(
         table=info.table,
         user_name=user_name
@@ -145,9 +306,47 @@ async def square_grids(info: models.GridModel, request: Request, background_task
         "url": process_url
     }
 
-@router.post("/hexagon_grids", tags=["Analysis"], response_model=models.BaseResponseModel)
-async def hexagon_grids(info: models.GridModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
-    
+@router.post(
+    path="/hexagon_grids",
+    response_model=models.BaseResponseModel,
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def hexagon_grids(
+    info: models.GridModel,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """
+    Create a hexagon grid analysis.
+    More information at https://docs.qwikgeo.com/analysis/#hexagon-grids
+    """
+
     await utilities.validate_table_access(
         table=info.table,
         user_name=user_name
@@ -178,9 +377,47 @@ async def hexagon_grids(info: models.GridModel, request: Request, background_tas
         "url": process_url
     }
 
-@router.post("/bounding_box", tags=["Analysis"], response_model=models.BaseResponseModel)
-async def bounding_box(info: models.BaseAnalysisModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
-    
+@router.post(
+    path="/bounding_box",
+    response_model=models.BaseResponseModel,
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def bounding_box(
+    info: models.BaseAnalysisModel,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """
+    Create a bounding box analysis.
+    More information at https://docs.qwikgeo.com/analysis/#bounding-box
+    """
+
     await utilities.validate_table_access(
         table=info.table,
         user_name=user_name
@@ -210,9 +447,47 @@ async def bounding_box(info: models.BaseAnalysisModel, request: Request, backgro
         "url": process_url
     }
 
-@router.post("/k_means_cluster", tags=["Analysis"], response_model=models.BaseResponseModel)
-async def k_means_cluster(info: models.KMeansModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
-    
+@router.post(
+    path="/k_means_cluster",
+    response_model=models.BaseResponseModel,
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def k_means_cluster(
+    info: models.KMeansModel,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """
+    Create a k means cluster analysis.
+    More information at https://docs.qwikgeo.com/analysis/#k-means-cluster
+    """
+
     await utilities.validate_table_access(
         table=info.table,
         user_name=user_name
@@ -243,9 +518,47 @@ async def k_means_cluster(info: models.KMeansModel, request: Request, background
         "url": process_url
     }
 
-@router.post("/center_of_each_polygon", tags=["Analysis"], response_model=models.BaseResponseModel)
-async def center_of_each_polygon(info: models.BaseAnalysisModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
-    
+@router.post(
+    path="/center_of_each_polygon",
+    response_model=models.BaseResponseModel,
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def center_of_each_polygon(
+    info: models.BaseAnalysisModel,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """
+    Create a center of each polygon analysis.
+    More information at https://docs.qwikgeo.com/analysis/#center-of-each-polygon
+    """
+
     await utilities.validate_table_access(
         table=info.table,
         user_name=user_name
@@ -275,9 +588,47 @@ async def center_of_each_polygon(info: models.BaseAnalysisModel, request: Reques
         "url": process_url
     }
 
-@router.post("/center_of_dataset", tags=["Analysis"], response_model=models.BaseResponseModel)
-async def center_of_dataset(info: models.BaseAnalysisModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
-    
+@router.post(
+    path="/center_of_dataset",
+    response_model=models.BaseResponseModel,
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def center_of_dataset(
+    info: models.BaseAnalysisModel,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """
+    Create a center of dataset analysis.
+    More information at https://docs.qwikgeo.com/analysis/#center-of-dataset
+    """
+
     await utilities.validate_table_access(
         table=info.table,
         user_name=user_name
@@ -307,9 +658,47 @@ async def center_of_dataset(info: models.BaseAnalysisModel, request: Request, ba
         "url": process_url
     }
 
-@router.post("/find_within_distance", tags=["Analysis"], response_model=models.BaseResponseModel)
-async def find_within_distance(info: models.FindWithinDistanceModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
-    
+@router.post(
+    path="/find_within_distance",
+    response_model=models.BaseResponseModel,
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def find_within_distance(
+    info: models.FindWithinDistanceModel,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """
+    Create a find within distance analysis.
+    More information at https://docs.qwikgeo.com/analysis/#find-within-distance
+    """
+
     await utilities.validate_table_access(
         table=info.table,
         user_name=user_name
@@ -342,10 +731,47 @@ async def find_within_distance(info: models.FindWithinDistanceModel, request: Re
         "url": process_url
     }
 
-@router.post("/convex_hull", tags=["Analysis"], response_model=models.BaseResponseModel)
-async def convex_hull(info: models.BaseAnalysisModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
-    
-    
+@router.post(
+    path="/convex_hull",
+    response_model=models.BaseResponseModel,
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def convex_hull(
+    info: models.BaseAnalysisModel,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """
+    Create a convex hull analysis.
+    More information at https://docs.qwikgeo.com/analysis/#convex-hull
+    """
+
     await utilities.validate_table_access(
         table=info.table,
         user_name=user_name
@@ -375,8 +801,46 @@ async def convex_hull(info: models.BaseAnalysisModel, request: Request, backgrou
         "url": process_url
     }
 
-@router.post("/aggregate_points_by_grids", tags=["Analysis"], response_model=models.BaseResponseModel)
-async def aggregate_points_by_grids(info: models.AggregatePointsByGridsModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
+@router.post(
+    path="/aggregate_points_by_grids",
+    response_model=models.BaseResponseModel,
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def aggregate_points_by_grids(
+    info: models.AggregatePointsByGridsModel,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """
+    Create a aggregate points by grid analysis.
+    More information at https://docs.qwikgeo.com/analysis/#aggregate-points-by-grid
+    """
 
     await utilities.validate_table_access(
         table=info.table,
@@ -409,9 +873,47 @@ async def aggregate_points_by_grids(info: models.AggregatePointsByGridsModel, re
         "url": process_url
     }
 
-@router.post("/aggregate_points_by_polygons", tags=["Analysis"], response_model=models.BaseResponseModel)
-async def aggregate_points_by_polygons(info: models.PolygonsModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
-    
+@router.post(
+    path="/aggregate_points_by_polygons",
+    response_model=models.BaseResponseModel,
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def aggregate_points_by_polygons(
+    info: models.PolygonsModel,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """
+    Create a aggregate points by polygons analysis.
+    More information at https://docs.qwikgeo.com/analysis/#aggregate-points-by-polygons
+    """
+
     await utilities.validate_table_access(
         table=info.table,
         user_name=user_name
@@ -435,7 +937,7 @@ async def aggregate_points_by_polygons(info: models.PolygonsModel, request: Requ
     }
 
     background_tasks.add_task(
-        analysis_queries.aggregrate_points_by_polygons,
+        analysis_queries.aggregate_points_by_polygons,
         table=info.table,
         new_table_id=new_table_id,
         polygons=info.polygons,
@@ -447,9 +949,47 @@ async def aggregate_points_by_polygons(info: models.PolygonsModel, request: Requ
         "url": process_url
     }
 
-@router.post("/select_inside", tags=["Analysis"], response_model=models.BaseResponseModel)
-async def select_inside(info: models.PolygonsModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
-    
+@router.post(
+    path="/select_inside",
+    response_model=models.BaseResponseModel,
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def select_inside(
+    info: models.PolygonsModel,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """
+    Create a select inside analysis.
+    More information at https://docs.qwikgeo.com/analysis/#select-inside
+    """
+
     await utilities.validate_table_access(
         table=info.table,
         user_name=user_name
@@ -485,8 +1025,46 @@ async def select_inside(info: models.PolygonsModel, request: Request, background
         "url": process_url
     }
 
-@router.post("/select_outside", tags=["Analysis"], response_model=models.BaseResponseModel)
-async def select_outside(info: models.PolygonsModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
+@router.post(
+    path="/select_outside",
+    response_model=models.BaseResponseModel,
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def select_outside(
+    info: models.PolygonsModel,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """
+    Create a select outside analysis.
+    More information at https://docs.qwikgeo.com/analysis/#select-outside
+    """
 
     await utilities.validate_table_access(
         table=info.table,
@@ -523,8 +1101,46 @@ async def select_outside(info: models.PolygonsModel, request: Request, backgroun
         "url": process_url
     }
 
-@router.post("/clip", tags=["Analysis"], response_model=models.BaseResponseModel)
-async def clip(info: models.PolygonsModel, request: Request, background_tasks: BackgroundTasks, user_name: int=Depends(utilities.get_token_header)):
+@router.post(
+    path="/clip",
+    response_model=models.BaseResponseModel,
+    responses={
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def clip(
+    info: models.PolygonsModel,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """
+    Create a clip analysis.
+    More information at https://docs.qwikgeo.com/analysis/#clip
+    """
 
     await utilities.validate_table_access(
         table=info.table,

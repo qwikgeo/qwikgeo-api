@@ -1,14 +1,17 @@
+"""QwikGeo API - Analysis - Models"""
+
 from pydantic import BaseModel, Field
 
 class BaseAnalysisModel(BaseModel):
+    """Model for base analysis"""
+
     table: str = Field(
         default=None, title="Name of the table to perform analysis on."
     )
-    database: str = Field(
-        default=None, title="Name of the database the table belongs to."
-    )
 
 class StatusResponseModel(BaseModel):
+    """Model for analysis response"""
+
     status: str = Field(
         default="SUCCESS"
     )
@@ -24,14 +27,18 @@ class StatusResponseModel(BaseModel):
     )
 
 class BaseResponseModel(BaseModel):
+    """Model for base analysis response"""
+
     process_id: str = Field(
         default="472e29dc-91a8-41d3-b05f-cee34006e3f7"
     )
     url: str = Field(
-        default="http://127.0.0.1:8000/api/v1/analysis/status/472e29dc-91a8-41d3-b05f-cee34006e3f7"
+        default="https://api.qwikgeo.com/api/v1/analysis/status/472e29dc-91a8-41d3-b05f-cee34006e3f7"
     )
 
 class BadResponseModel(BaseModel):
+    """Model for bad analysis response"""
+
     status: str = Field(
         default="FAILURE"
     )
@@ -43,55 +50,50 @@ class BadResponseModel(BaseModel):
     )
 
 class BufferModel(BaseModel):
+    """Model for buffer analysis"""
+
     table: str = Field(
         default=None, title="Name of the table to perform analysis on."
-    )
-    database: str = Field(
-        default=None, title="Name of the database the table belongs to."
     )
     distance_in_kilometers: float = Field(
         default=None, title="Size of buffer in kilometers."
     )
 
 class DissolveByValueModel(BaseModel):
+    """Model for dissolve by value analysis"""
+
     table: str = Field(
         default=None, title="Name of the table to perform analysis on."
-    )
-    database: str = Field(
-        default=None, title="Name of the database the table belongs to."
     )
     column: str = Field(
         default=None, title="Column used to dissolve geometry."
     )
 
 class GridModel(BaseModel):
+    """Model for grid analysis"""
+
     table: str = Field(
         default=None, title="Name of the table to perform analysis on."
-    )
-    database: str = Field(
-        default=None, title="Name of the database the table belongs to."
     )
     grid_size_in_kilometers: float = Field(
         default=None, title="Size of grids in kilometers."
     )
 
 class KMeansModel(BaseModel):
+    """Model for k means cluster analysis"""
+
     table: str = Field(
         default=None, title="Name of the table to perform analysis on."
-    )
-    database: str = Field(
-        default=None, title="Name of the database the table belongs to."
     )
     number_of_clusters: int = Field(
         default=None, title="Number of clusters to group points together."
     )
 
 class FindWithinDistanceModel(BaseModel):
+    """Model for find within distance analysis"""
+
     table: str = Field(
         default=None, title="Name of the table to perform analysis on."
-    )
-    database: str = Field(
-        default=None, title="Name of the database the table belongs to."
     )
     latitude: float = Field(
         default=None, title="Starting Latitude."
@@ -104,22 +106,20 @@ class FindWithinDistanceModel(BaseModel):
     )
 
 class PolygonsModel(BaseModel):
+    """Model for polygon based analyses"""
+
     table: str = Field(
         default=None, title="Name of the table to perform analysis on."
-    )
-    database: str = Field(
-        default=None, title="Name of the database the table belongs to."
     )
     polygons: str = Field(
         default=None, title="Name of the table of polygons."
     )
 
 class AggregatePointsByGridsModel(BaseModel):
+    """Model for aggregate points by grid analysis"""
+
     table: str = Field(
         default=None, title="Name of the table to perform analysis on."
-    )
-    database: str = Field(
-        default=None, title="Name of the database the table belongs to."
     )
     distance_in_kilometers: float = Field(
         default=None, title="Size to search in kilometers."

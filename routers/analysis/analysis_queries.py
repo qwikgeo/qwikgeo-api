@@ -1,3 +1,5 @@
+"""QwikGeo API - Analysis - Analysis Queries"""
+
 import datetime
 
 import main
@@ -206,7 +208,7 @@ async def bounding_box(table: str, new_table_id: str, process_id: str):
             """
 
             await con.fetch(sql_query)
-            
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -243,7 +245,7 @@ async def k_means_cluster(table: str, new_table_id: str, number_of_clusters: int
             """
 
             await con.fetch(sql_query)
-            
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -280,7 +282,7 @@ async def center_of_each_polygon(table: str, new_table_id: str, process_id: str)
             """
 
             await con.fetch(sql_query)
-            
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -310,7 +312,7 @@ async def center_of_dataset(table: str, new_table_id: str, process_id: str):
             """
 
             await con.fetch(sql_query)
-            
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -342,7 +344,7 @@ async def find_within_distance(table: str, new_table_id: str,
             """
 
             await con.fetch(sql_query)
-            
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -372,7 +374,7 @@ async def convex_hull(table: str, new_table_id: str, process_id: str):
             """
 
             await con.fetch(sql_query)
-            
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -410,7 +412,7 @@ async def aggregate_points_by_grids(table: str, new_table_id: str, distance_in_k
             """
 
             await con.fetch(sql_query)
-            
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -443,7 +445,7 @@ async def aggregate_points_by_polygons(table: str, new_table_id: str, polygons: 
             """
 
             await con.fetch(sql_query)
-            
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -475,7 +477,7 @@ async def select_inside(table: str, new_table_id: str, polygons: str, process_id
             """
 
             await con.fetch(sql_query)
-            
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -508,7 +510,7 @@ async def select_outside(table: str, new_table_id: str, polygons: str, process_i
             """
 
             await con.fetch(sql_query)
-            
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -547,7 +549,7 @@ async def clip(table: str, new_table_id: str, polygons: str, process_id: str):
             """
 
             await con.fetch(sql_query)
-            
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -557,3 +559,4 @@ async def clip(table: str, new_table_id: str, polygons: str, process_id: str):
         analysis.analysis_processes[process_id]['error'] = str(error)
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+    
