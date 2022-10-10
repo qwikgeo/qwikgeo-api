@@ -134,6 +134,12 @@ async def import_geographic_data_from_csv(
         write_access_list: list=[],
         searchable: bool=True
     ):
+
+    await utilities.validate_table_access(
+        table=map_name,
+        user_name=user_name
+    )
+
     new_table_id = utilities.get_new_table_id()
 
     process_id = utilities.get_new_process_id()
@@ -275,6 +281,12 @@ async def import_geographic_data_from_json_file(
         write_access_list: list=[],
         searchable: bool=True
     ):
+
+    await utilities.validate_table_access(
+        table=map_name,
+        user_name=user_name
+    )
+
     new_table_id = utilities.get_new_table_id()
 
     process_id = utilities.get_new_process_id()
@@ -406,6 +418,12 @@ async def import_geographic_data_from_json_url(
         info: models.GeographicJsonUrl,
         user_name: int=Depends(utilities.get_token_header)
     ):
+
+    await utilities.validate_table_access(
+        table=info.map_name,
+        user_name=user_name
+    )
+
     new_table_id = utilities.get_new_table_id()
 
     process_id = utilities.get_new_process_id()
@@ -506,6 +524,7 @@ async def import_geojson_from_url(
         info: models.GeojsonUrl,
         user_name: int=Depends(utilities.get_token_header)
     ):
+
     new_table_id = utilities.get_new_table_id()
 
     process_id = utilities.get_new_process_id()
