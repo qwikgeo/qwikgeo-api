@@ -1,9 +1,12 @@
+"""QwikGeo API - Database Models"""
+
 from passlib.hash import bcrypt
 from tortoise import fields, models
 from tortoise.contrib.pydantic import pydantic_model_creator
 from tortoise import Tortoise
 
 class User(models.Model):
+    """Model for user in database"""
 
     id = fields.IntField(pk=True)
     username = fields.CharField(500, unique=True)
@@ -15,16 +18,20 @@ class User(models.Model):
     created_time = fields.DatetimeField(auto_now_add=True)
     modified_time = fields.DatetimeField(auto_now=True)
 
-    def verify_password(self, password):
+    def verify_password(self, password: str):
+        """Method used to verify password is correct against hash in database."""
+
         return bcrypt.verify(password, self.password_hash)
 
 class Group(models.Model):
+    """Model for group in database"""
 
     group_id = fields.UUIDField(unique=True, indexable=True, pk=True)
     name = fields.CharField(500, unique=True)
     users = fields.ReverseRelation["GroupUser"]
 
 class GroupUser(models.Model):
+    """Model for group_user in database"""
 
     id = fields.IntField(pk=True)
     group_id: fields.ForeignKeyRelation[Group] = fields.ForeignKeyField(
@@ -33,6 +40,7 @@ class GroupUser(models.Model):
     username = fields.CharField(500)
 
 class Item(models.Model):
+    """Model for item in database"""
 
     username: fields.ForeignKeyField(
         "models.User", related_name="items", to_field="username"
@@ -51,6 +59,7 @@ class Item(models.Model):
     url = fields.TextField(null=True)
 
 class ItemReadAccessList(models.Model):
+    """Model for item_read_access_list in database"""
 
     portal_id: fields.ForeignKeyRelation[Item] = fields.ForeignKeyField(
         "models.Item", related_name="item_read_access_list", to_field="portal_id"
@@ -58,6 +67,7 @@ class ItemReadAccessList(models.Model):
     name = fields.CharField(500)
 
 class ItemWriteAccessList(models.Model):
+    """Model for item_read_access_list in database"""
 
     portal_id: fields.ForeignKeyRelation[Item] = fields.ForeignKeyField(
         "models.Item", related_name="item_write_access_list", to_field="portal_id"
@@ -65,6 +75,7 @@ class ItemWriteAccessList(models.Model):
     name = fields.CharField(500)
 
 class Table(models.Model):
+    """Model for table in database"""
 
     username: fields.ForeignKeyField(
         "models.User", related_name="tables", to_field="username"

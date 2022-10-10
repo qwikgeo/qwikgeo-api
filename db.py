@@ -1,4 +1,5 @@
 """QwikGeo API - Database Setup"""
+
 from fastapi import FastAPI
 import asyncpg
 
@@ -10,7 +11,7 @@ async def connect_to_db(app: FastAPI) -> None:
     Connect to all databases.
     """
     app.state.database = {}
-    
+
     app.state.database = await asyncpg.create_pool(
         dsn=f"postgres://{config.DB_USERNAME}:{config.DB_PASSWORD}@{config.DB_HOST}:{config.DB_PORT}/{config.DB_DATABASE}",
         min_size=1,
@@ -22,11 +23,11 @@ async def connect_to_db(app: FastAPI) -> None:
 
     async with app.state.database.acquire() as con:
 
-        await con.fetchrow(bins_sql.equal_interval_bins_sql)
-        await con.fetchrow(bins_sql.head_tail_bins_sql)
-        await con.fetchrow(bins_sql.quantile_bins_sql)
-        await con.fetchrow(bins_sql.jenk_bins_sql_1)
-        await con.fetchrow(bins_sql.jenk_bins_sql_2)
+        await con.fetchrow(bins_sql.EQUAL_INTERVAL_BINS_SQL)
+        await con.fetchrow(bins_sql.HEAD_TAIL_BINS_SQL)
+        await con.fetchrow(bins_sql.QUANTILE_BINS_SQL)
+        await con.fetchrow(bins_sql.JENKS_BIN_SQL_1)
+        await con.fetchrow(bins_sql.JENKS_BIN_SQL_2)
 
 async def close_db_connection(app: FastAPI) -> None:
     """

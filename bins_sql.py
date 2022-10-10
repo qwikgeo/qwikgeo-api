@@ -1,4 +1,6 @@
-equal_interval_bins_sql = """
+"""QwikGeo API - Bins SQL"""
+
+EQUAL_INTERVAL_BINS_SQL = """
 -- https://github.com/CartoDB/cartodb-postgresql/tree/master/scripts-available
 
 CREATE OR REPLACE FUNCTION equal_interval_bins ( in_array anyarray, breaks INT ) RETURNS anyarray as $$
@@ -12,7 +14,7 @@ SELECT array_agg(bins)
 $$ language SQL IMMUTABLE STRICT PARALLEL SAFE;
 """
 
-head_tail_bins_sql = """
+HEAD_TAIL_BINS_SQL= """
 CREATE OR REPLACE FUNCTION head_tail_bins ( in_array anyarray, breaks INT) RETURNS anyarray as $$ 
 DECLARE 
     element_count INT4; 
@@ -51,7 +53,7 @@ END;
 $$ language plpgsql IMMUTABLE PARALLEL SAFE;
 """
 
-quantile_bins_sql = """
+QUANTILE_BINS_SQL = """
 CREATE OR REPLACE FUNCTION quantile_bins(in_array numeric[], breaks int)
 RETURNS numeric[]
 AS $$
@@ -63,7 +65,7 @@ AS $$
 $$ language SQL IMMUTABLE STRICT PARALLEL SAFE;
 """
 
-jenk_bins_sql_1 = """
+JENKS_BIN_SQL_1 = """
 CREATE OR REPLACE FUNCTION jenk_bins(in_array anyarray, breaks INT, iterations INT DEFAULT 0, invert BOOLEAN DEFAULT FALSE)
 RETURNS NUMERIC[] as
 $$
@@ -191,7 +193,7 @@ END;
 $$ LANGUAGE PLPGSQL IMMUTABLE PARALLEL RESTRICTED;
 """
 
-jenk_bins_sql_2 = """
+JENKS_BIN_SQL_2 = """
 
 CREATE OR REPLACE FUNCTION jenk_bins_iteration ( in_matrix NUMERIC[], breaks INT, classes INT[], invert BOOLEAN, sdam NUMERIC, max_search INT DEFAULT 50) RETURNS NUMERIC[] as $$
 DECLARE
