@@ -29,8 +29,8 @@ Example Response
     "type": "table",
     "id": "public.states",
     "database": "data",
-    "detailurl": "http://127.0.0.1:8000/api/v1/table/data/public/states.json",
-    "viewerurl": "http://127.0.0.1:8000/viewer/data/public/states"
+    "detailurl": "https://api.qwikgeo.com/api/v1/table/data/public/states.json",
+    "viewerurl": "https://api.qwikgeo.com/viewer/data/public/states"
   },
   {},...
 ```
@@ -50,8 +50,8 @@ Example Response
 {
   "id": "public.states",
   "schema": "public",
-  "tileurl": "http://127.0.0.1:8000/api/v1/tiles/data/public/states/{z}/{x}/{y}.pbf",
-  "viewerurl": "http://127.0.0.1:8000/viewer/data/public/states",
+  "tileurl": "https://api.qwikgeo.com/api/v1/tiles/data/public/states/{z}/{x}/{y}.pbf",
+  "viewerurl": "https://api.qwikgeo.com/viewer/data/public/states",
   "properties": [
     {
       "name": "gid",
@@ -164,9 +164,9 @@ Example Response
   "version": "1.0.0",
   "scheme": "xyz",
   "tiles": [
-    "http://127.0.0.1:8000/api/v1/tiles/data/public/states/{z}/{x}/{y}.pbf"
+    "https://api.qwikgeo.com/api/v1/tiles/data/public/states/{z}/{x}/{y}.pbf"
   ],
-  "viewerurl": "http://127.0.0.1:8000/viewer/data/public/states",
+  "viewerurl": "https://api.qwikgeo.com/viewer/data/public/states",
   "minzoom": 0,
   "maxzoom": 22
 }

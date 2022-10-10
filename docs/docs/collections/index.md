@@ -22,7 +22,7 @@ Example Response
 ```json
 [
     {
-        "id": "data.public.zip_centroids",
+        "id": "user_data.zip_centroids",
         "title": "zip_centroids",
         "description": "zip_centroids",
         "keywords": [
@@ -33,7 +33,7 @@ Example Response
                 "type": "application/json",
                 "rel": "self",
                 "title": "This document as JSON",
-                "href": "http://127.0.0.1:8000/api/v1/collections/data.public.zip_centroids"
+                "href": "https://api.qwikgeo.com/api/v1/collections/user_data.zip_centroids"
             }
         ],
         "extent": {
@@ -58,24 +58,24 @@ Feature Collection endpoint returns information about a single table.
 Collections endpoint is available at `/api/v1/collections/{item}`
 
 ```shell
-curl http://localhost:8000/api/v1/collections/data.public.zip_centroids
+curl http://localhost:8000/api/v1/collections/user_data.zip_centroids
 ```
 
 Example Response
 ```json
 {
-    "id": "data.public.zip_centroids",
-    "title": "data.public.zip_centroids",
-    "description": "data.public.zip_centroids",
+    "id": "user_data.zip_centroids",
+    "title": "user_data.zip_centroids",
+    "description": "user_data.zip_centroids",
     "keywords": [
-        "data.public.zip_centroids"
+        "user_data.zip_centroids"
     ],
     "links": [
         {
             "type": "application/json",
             "rel": "self",
             "title": "Items as GeoJSON",
-            "href": "http://127.0.0.1:8000/api/v1/collections/data.public.zip_centroids/items"
+            "href": "https://api.qwikgeo.com/api/v1/collections/user_data.zip_centroids/items"
         }
     ],
     "extent": {
@@ -99,7 +99,7 @@ Features endpoint returns a geojson feature collection for a feature collection.
 Collections endpoint is available at `/api/v1/collections/{item}/items`
 
 ```shell
-curl http://localhost:8000/api/v1/collections/data.public.states/items
+curl http://localhost:8000/api/v1/collections/user_data.states/items
 ```
 
 ### Parameters
@@ -149,7 +149,7 @@ Feature endpoint returns a geojson feature collection for a single feature in a 
 Collections endpoint is available at `/api/v1/collections/{item}/items/{id}`
 
 ```shell
-curl http://localhost:8000/api/v1/collections/data.public.states/items/5
+curl http://localhost:8000/api/v1/collections/user_data.states/items/5
 ```
 
 ### Parameters

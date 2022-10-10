@@ -26,19 +26,19 @@
 Any time an analysis is submitted it given a process_id to have the analysis run in the background using [FastAPI's Background Tasks](https://fastapi.tiangolo.com/tutorial/background-tasks/). To check the
 status of an analysis, you can call this endpoint with the process_id.
 
-## Example Call
+### Example Call
 ```shell
-/api/v1/analysis/status/472e29dc-91a8-41d3-b05f-cee34006e3f7
+https://api.qwikgeo.com/api/v1/analysis/status/472e29dc-91a8-41d3-b05f-cee34006e3f7
 ```
 
-## Example Output - Still Running
+### Example Output - Still Running
 ```json
 {
     "status": "PENDING"
 }
 ```
 
-## Example Output - Complete
+### Example Output - Complete
 ```json
 {
     "status": "SUCCESS",
@@ -48,7 +48,7 @@ status of an analysis, you can call this endpoint with the process_id.
 }
 ```
 
-## Example Output - Error
+### Example Output - Error
 ```json
 {
     "status": "FAILURE",
@@ -80,7 +80,7 @@ Example: Buffer zip centroids by one kilometer.
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -105,7 +105,7 @@ Example: Dissolve all the US States into one single geometry.
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -130,7 +130,7 @@ Example: Dissolve US States based off a column in the table called `sub_region`.
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -155,7 +155,7 @@ Example: Generate 100 kilometers square grids based off of a table containing US
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -180,7 +180,7 @@ Example: Generate 100 kilometers hexagon grids based off of a table containing U
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -204,7 +204,7 @@ Example: Find the bounding box of a table that contains all of the US States.
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -229,7 +229,7 @@ Use [K Means Clustering](https://en.wikipedia.org/wiki/K-means_clustering) to gr
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -253,7 +253,7 @@ Example: Find the center of each US State.
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -277,7 +277,7 @@ Example: Find the geomeric center of a table that contains all of the US States.
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -304,7 +304,7 @@ Example: Find all states within `500` kilometers of latitude `40.45` and latitud
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -328,7 +328,7 @@ Example: Find the smallest convex hull around all the US States.
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -354,7 +354,7 @@ Example: Determine how many zip centroids are each 1000 kilometer hexagon grid.
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -379,7 +379,7 @@ Example: Determine how many zip centroids are within each US State.
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -404,7 +404,7 @@ Example: Find all zip centroids within the US States table.
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -429,7 +429,7 @@ Example: Find all the zip centroids outside of the table with US States.
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -454,6 +454,6 @@ Example: Clip the US States table to a large polygon.
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
