@@ -44,11 +44,6 @@ async def create_token(
 
     user = await utilities.authenticate_user(form_data.username, form_data.password)
 
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail='Invalid username or password.'
-        )
     user_obj = await models.User_Pydantic.from_tortoise_orm(user)
 
     expire = datetime.utcnow() + timedelta(minutes=int(config.JWT_TOKEN_EXPIRE_IN_MINUTES))

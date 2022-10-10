@@ -1,22 +1,22 @@
+"""QwikGeo API - Utilities"""
+
 import os
 import json
-import jwt
 import random
 import re
 import string
 import uuid
 import datetime
 import subprocess
+import jwt
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, FastAPI, HTTPException, status
 from pygeofilter.backends.sql import to_sql_where
 from pygeofilter.parsers.ecql import parse
 import aiohttp
 import pandas as pd
-from tortoise.expressions import Q
 import tortoise
 from tortoise.query_utils import Prefetch
-from functools import reduce
 from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError, DecodeError
 
 import db_models
@@ -26,7 +26,9 @@ import_processes = {}
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token')
 
-async def get_all_tables_from_db(app: FastAPI) -> list:
+async def get_all_tables_from_db(
+    app: FastAPI
+) -> list:
     """
     Method to return list of tables in database.
 
@@ -50,18 +52,27 @@ async def get_all_tables_from_db(app: FastAPI) -> list:
 
         return db_tables
 
-async def validate_table_access(table: str, user_name: str, app: FastAPI, write_access: bool=False):
+async def validate_table_access(
+    table: str,
+    user_name: str,
+    write_access: bool=False
+) -> bool:
     """
     Method to validate if user has access to table in portal.
 
     """
-    try:
-        table = await db_models.Table_Pydantic.from_queryset_single(db_models.Table.get(table_id=table))
 
-        item = await db_models.Item_Pydantic.from_queryset_single(db_models.Item.get(portal_id=table.portal_id.portal_id))
+    try:
+        table = await db_models.Table_Pydantic.from_queryset_single(
+            db_models.Table.get(table_id=table)
+        )
+
+        item = await db_models.Item_Pydantic.from_queryset_single(
+            db_models.Item.get(portal_id=table.portal_id.portal_id)
+        )
 
         user_groups = await get_user_groups(user_name)
-        
+
         access = False
 
         write_access_list = []
@@ -79,35 +90,32 @@ async def validate_table_access(table: str, user_name: str, app: FastAPI, write_
         elif any(map(lambda v: v in user_groups, read_access_list)):
             access = True
 
-        if access == False:            
+        if access is False:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, 
+                status_code=status.HTTP_401_UNAUTHORIZED,
                 detail='No access to table.'
             )
-    except tortoise.exceptions.DoesNotExist:
+    except tortoise.exceptions.DoesNotExist as exc:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
+            status_code=status.HTTP_404_NOT_FOUND,
             detail='Table does not exist.'
-        )
+        ) from exc
 
-async def get_user_map_access_list(username: str, write_access: bool=False) -> list:
-    user_groups = await get_user_groups(username)
-    
-    if write_access:
-        tables = await db_models.Item.filter(reduce(lambda x, y: x | y, [Q(write_access_list__contains=[group]) for group in user_groups]),item_type='table')
-    else:
-        tables = await db_models.Item.filter(reduce(lambda x, y: x | y, [Q(read_access_list__contains=[group]) for group in user_groups]),item_type='table')
+async def create_table(
+    username: str,
+    table_id: str,
+    title: str,
+    tags: list,
+    description: str,
+    searchable: bool,
+    read_access_list: list,
+    write_access_list: list
+) -> object:
+    """
+    Method to create a table within the database of the portal.
 
-    access_list = []
+    """
 
-    for table in tables:
-        access_list.append(table.portal_id)
-
-    return access_list
-
-async def create_table(username: str, table_id: str, title: str,
-    tags: list, description: str, searchable: bool,
-    read_access_list: list, write_access_list: list):
     if read_access_list == []:
         read_access_list = [username]
     if write_access_list == []:
@@ -136,22 +144,38 @@ async def create_table(username: str, table_id: str, title: str,
 
     return item
 
-async def get_token_header(token: str=Depends(oauth2_scheme)):
+async def get_token_header(
+    token: str=Depends(oauth2_scheme)
+) -> str:
+    """
+    Method to return username via JWT token.
+
+    """
+
     try:
         user = jwt.decode(token, config.SECRET_KEY, algorithms=["HS256"])
     except (ExpiredSignatureError, InvalidSignatureError, DecodeError) as exc:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"JWT Error: {str(exc)}"
         ) from exc
     return user['username']
 
-async def get_user_groups(username: str) -> list:
+async def get_user_groups(
+    username: str
+) -> list:
+    """
+    Method to return a list of groups a user has access to within the portal.
+
+    """
+
     groups_plus_username = [username]
 
     groups = (
         await db_models.Group.all()
-        .prefetch_related(Prefetch("group_users", queryset=db_models.GroupUser.filter(username=username)))
+        .prefetch_related(Prefetch(
+            "group_users", queryset=db_models.GroupUser.filter(username=username)
+        ))
     )
 
     for group in groups:
@@ -159,26 +183,54 @@ async def get_user_groups(username: str) -> list:
 
     return groups_plus_username
 
-async def authenticate_user(username: str, password: str):
+async def authenticate_user(
+    username: str,
+    password: str
+) -> object:
+    """
+    Method to validate a user via their username and password and return
+    the user's information.
+
+    """
+
     try:
         user = await db_models.User.get(username=username)
-    except tortoise.exceptions.DoesNotExist:
-        return False
+    except tortoise.exceptions.DoesNotExist as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Invalid username or password.'
+        ) from exc
     if not user:
-        return False 
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Invalid username or password.'
+        )
     if not user.verify_password(password):
-        return False
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Invalid username or password.'
+        )
     return user
 
-async def get_tile(scheme: str, table: str, tileMatrixSetId: str, z: int,
-    x: int, y: int, fields: str, cql_filter: str, app: FastAPI) -> bytes:
+async def get_tile(
+    scheme: str,
+    table: str,
+    tile_matrix_set_id: str,
+    z: int,
+    x: int,
+    y: int,
+    fields: str,
+    cql_filter: str,
+    app: FastAPI
+) -> bytes:
     """
     Method to return vector tile from database.
+
     """
 
-    cachefile = f'{os.getcwd()}/cache/{scheme}_{table}/{tileMatrixSetId}/{z}/{x}/{y}'
+    cache_file = f'{os.getcwd()}/cache/{scheme}_{table}/{tile_matrix_set_id}/{z}/{x}/{y}'
 
-    if os.path.exists(cachefile):
+    if os.path.exists(cache_file):
         return '', True
 
     pool = app.state.database
@@ -239,23 +291,28 @@ async def get_tile(scheme: str, table: str, tileMatrixSetId: str, z: int,
 
         if fields is None and cql_filter is None and config.CACHE_AGE_IN_SECONDS > 0:
 
-            cachefile_dir = f'{os.getcwd()}/cache/{scheme}_{table}/{tileMatrixSetId}/{z}/{x}'
+            cache_file_dir = f'{os.getcwd()}/cache/{scheme}_{table}/{tile_matrix_set_id}/{z}/{x}'
 
-            if not os.path.exists(cachefile_dir):
+            if not os.path.exists(cache_file_dir):
                 try:
-                    os.makedirs(cachefile_dir)
+                    os.makedirs(cache_file_dir)
                 except OSError:
                     pass
 
-            with open(cachefile, "wb") as file:
+            with open(cache_file, "wb") as file:
                 file.write(tile)
                 file.close()
 
         return tile, False
 
-async def get_table_columns_list(scheme: str, table: str, app: FastAPI) -> list:
+async def get_table_columns_list(
+    scheme: str,
+    table: str,
+    app: FastAPI
+) -> list:
     """
     Method used to retrieve columns for a given table.
+
     """
 
     pool = app.state.database
@@ -278,9 +335,14 @@ async def get_table_columns_list(scheme: str, table: str, app: FastAPI) -> list:
 
         return json.loads(columns)
 
-async def get_table_geometry_type(scheme: str, table: str, app: FastAPI) -> list:
+async def get_table_geometry_type(
+    scheme: str,
+    table: str,
+    app: FastAPI
+) -> list:
     """
     Method used to retrieve the geometry type for a given table.
+
     """
 
     pool = app.state.database
@@ -301,9 +363,14 @@ async def get_table_geometry_type(scheme: str, table: str, app: FastAPI) -> list
 
         return geom_type
 
-async def get_table_center(scheme: str, table: str, app: FastAPI) -> list:
+async def get_table_center(
+    scheme: str,
+    table: str,
+    app: FastAPI
+) -> list:
     """
     Method used to retrieve the table center for a given table.
+
     """
 
     pool = app.state.database
@@ -315,37 +382,19 @@ async def get_table_center(scheme: str, table: str, app: FastAPI) -> list:
         FROM {scheme}.{table}
         """
         center = await con.fetch(query)
-        
+
         return [center[0][0],center[0][1]]
 
-async def get_table_bounds(scheme: str, table: str, app: FastAPI) -> list:
+async def generate_where_clause(
+    info: object,
+    con,
+    no_where: bool=False
+) -> str:
     """
-    Method used to retrieve the bounds for a given table.
-    """
-
-    pool = app.state.database
-
-    async with pool.acquire() as con:
-        query = f"""
-            SELECT ARRAY[
-                ST_XMin(ST_Union(geom)),
-                ST_YMin(ST_Union(geom)),
-                ST_XMax(ST_Union(geom)),
-                ST_YMax(ST_Union(geom))
-            ]
-            FROM {scheme}.{table}
-        """
-
-        extent = await con.fetchval(query)
-
-        return extent
-
-async def generate_where_clause(info: object, con, no_where: bool=False) -> str:
-    """
-    Method to generate where clause
+    Method to generate where clause.
 
     """
-    
+
     query = ""
 
     if info.filter:
@@ -358,7 +407,7 @@ async def generate_where_clause(info: object, con, no_where: bool=False) -> str:
 
         db_fields = await con.fetch(sql_field_query)
 
-        field_mapping = {}  
+        field_mapping = {}
 
         for field in db_fields:
             field_mapping[field['column_name']] = field['column_name']
@@ -367,11 +416,11 @@ async def generate_where_clause(info: object, con, no_where: bool=False) -> str:
         filter = to_sql_where(ast, field_mapping)
 
         if no_where is False:
-            query += f" WHERE "
+            query += " WHERE "
         else:
-            query += f" AND "
+            query += " AND "
         query += f" {filter}"
-    
+
     if info.coordinates and info.geometry_type and info.spatial_relationship:
         if info.filter:
             query += " AND "
@@ -387,7 +436,8 @@ async def generate_where_clause(info: object, con, no_where: bool=False) -> str:
 
 def get_new_table_id() -> str:
     """
-    Method to return a new table id
+    Method to return a new table id.
+
     """
     letters = string.ascii_lowercase
 
@@ -395,17 +445,31 @@ def get_new_table_id() -> str:
 
 def get_new_process_id() -> str:
     """
-    Method to return a new process id
+    Method to return a new process id.
+
     """
 
     return str(uuid.uuid4())
 
-def remove_bad_characters(string: str) -> str:
-    regex = re.compile('[^a-zA-Z0-9_]')
-    return regex.sub('_', string).lower()
+def remove_bad_characters(
+    string_of_characters: str
+) -> str:
+    """
+    Method remove bad characters from a string.
 
-async def upload_csv_to_db_with_latitude_and_longitude(file_path: str, new_table_id: str,
-    latitude: str, longitude: str, table_columns: list, app: FastAPI):
+    """
+
+    regex = re.compile('[^a-zA-Z0-9_]')
+    return regex.sub('_', string_of_characters).lower()
+
+async def upload_csv_to_db_with_latitude_and_longitude(
+    file_path: str,
+    new_table_id: str,
+    latitude: str,
+    longitude: str,
+    table_columns: list,
+    app: FastAPI
+) -> None:
     """
     Method to upload data from from a csv file with latitude and longitude columns into db.
 
@@ -413,7 +477,7 @@ async def upload_csv_to_db_with_latitude_and_longitude(file_path: str, new_table
 
     pd.options.display.max_rows = 10
 
-    df = pd.read_csv(file_path)
+    data_frame = pd.read_csv(file_path)
 
     columns = ""
 
@@ -426,20 +490,20 @@ async def upload_csv_to_db_with_latitude_and_longitude(file_path: str, new_table
 
     create_table_sql = f"""CREATE TABLE user_data."{new_table_id}" ("""
 
-    for name, data_type in df.dtypes.iteritems():
+    for name, data_type in data_frame.dtypes.iteritems():
         columns += f"{remove_bad_characters(name)},"
         create_table_sql += f'"{remove_bad_characters(name)}"'
         if data_type == "object" or data_type == "datetime64":
             create_table_sql += " text,"
         if data_type == "int64":
-            create_table_sql += " integer,"            
+            create_table_sql += " integer,"
         if data_type == "float64":
             create_table_sql += " double precision,"
 
     create_table_sql = create_table_sql[:-1]
 
     columns = columns[:-1]
-    
+
     create_table_sql += ");"
 
     pool = app.state.database
@@ -475,9 +539,16 @@ async def upload_csv_to_db_with_latitude_and_longitude(file_path: str, new_table
 
         await con.fetch(delete_bad_geom_sql)
 
-async def upload_csv_to_db_with_geographic_data(file_path: str, new_table_id: str,
-    map: str, map_column: str, table_column: str, table_columns: list, map_columns: list, 
-    app: FastAPI):
+async def upload_csv_to_db_with_geographic_data(
+    file_path: str,
+    new_table_id: str,
+    map_name: str,
+    map_column: str,
+    table_column: str,
+    table_columns: list,
+    map_columns: list,
+    app: FastAPI
+) -> None:
     """
     Method to upload data from from a csv file with geographic data into db.
 
@@ -485,7 +556,7 @@ async def upload_csv_to_db_with_geographic_data(file_path: str, new_table_id: st
 
     pd.options.display.max_rows = 10
 
-    df = pd.read_csv(file_path)
+    data_frame = pd.read_csv(file_path)
 
     columns = ""
 
@@ -496,25 +567,25 @@ async def upload_csv_to_db_with_geographic_data(file_path: str, new_table_id: st
     for col in table_columns:
         if col not in map_columns:
             formatted_table_columns += f"a.{remove_bad_characters(col)},"
-    
+
     for column in map_columns:
         formatted_map_columns += f"b.{remove_bad_characters(column)},"
 
     create_table_sql = f"""CREATE TABLE user_data."{new_table_id}_temp" ("""
 
-    for name, data_type in df.dtypes.iteritems():
+    for name, data_type in data_frame.dtypes.iteritems():
         columns += f"{remove_bad_characters(name)},"
         create_table_sql += f'"{remove_bad_characters(name)}"'
         if data_type == "object" or data_type == "datetime64":
             create_table_sql += " text,"
         if data_type == "int64":
-            create_table_sql += " integer,"            
+            create_table_sql += " integer,"
         if data_type == "float64":
             create_table_sql += " double precision,"
 
     create_table_sql = create_table_sql[:-1]
     columns = columns[:-1]
-    
+
     create_table_sql += ");"
 
     pool = app.state.database
@@ -534,7 +605,7 @@ async def upload_csv_to_db_with_geographic_data(file_path: str, new_table_id: st
         join_sql = f"""CREATE TABLE user_data."{new_table_id}" AS
             SELECT {formatted_table_columns} {formatted_map_columns} geom
             FROM "{new_table_id}_temp" as a
-            LEFT JOIN "{map}" as b
+            LEFT JOIN "{map_name}" as b
             ON a."{table_column}" = b."{map_column}";
         """
 
@@ -542,11 +613,22 @@ async def upload_csv_to_db_with_geographic_data(file_path: str, new_table_id: st
 
         await con.fetch(f"""DROP TABLE IF EXISTS user_data."{new_table_id}_temp";""")
 
-async def get_arcgis_data(url: str, table_id: str, process_id: str,
-    username: str, title: str, tags: list, description: str, read_access_list: list,
-    write_access_list: list, searchable: bool, token: str=None):
+async def get_arcgis_data(
+    url: str,
+    table_id: str,
+    process_id: str,
+    username: str,
+    title: str,
+    tags: list,
+    description: str,
+    read_access_list: list,
+    write_access_list: list,
+    searchable: bool,
+    token: str=None
+) -> None:
     """
     Method get arcgis data from a given url and load it into a database.
+
     """
 
     start = datetime.datetime.now()
@@ -556,7 +638,7 @@ async def get_arcgis_data(url: str, table_id: str, process_id: str,
 
         if token is not None:
             service_url += f"&token={token}"
-        
+
         async with aiohttp.ClientSession() as session:
 
             async with session.get(service_url) as resp:
@@ -581,11 +663,11 @@ async def get_arcgis_data(url: str, table_id: str, process_id: str,
 
                         async with session.get(f"{url}/query?where=1=1&outFields=*&returnGeometry=true&geometryPrecision=6&outSR=4326&f=geojson") as resp:
 
-                            data = await resp.json()  
-                            
+                            data = await resp.json()
+
                             with open(f'{table_id}.geojson', 'w') as json_file:
                                 json.dump(data, json_file)
-                            
+
                             load_geographic_data_to_server(
                                 table_id=f"user_data.{table_id}",
                                 file_path=f'{table_id}.geojson'
@@ -593,18 +675,27 @@ async def get_arcgis_data(url: str, table_id: str, process_id: str,
 
                     else:
                         start_counter = 0
-                        
+
                         feature_collection = {
-                            "type": "FeatureCollection",           
+                            "type": "FeatureCollection",
                             "features": []
                         }
 
-                        for x in range( start_counter, number_of_features, max_number_of_features_per_query ):
+                        for x in range(
+                            start_counter,
+                            number_of_features,
+                            max_number_of_features_per_query
+                        ):
                             ids_requested = object_ids[x: x + max_number_of_features_per_query ]
-                            payload = { 'f': 'geojson', 'where': '1=1', 
-                                'objectIds': str( ids_requested )[1:-1], 'outSR': '4326',  
-                                'returnGeometry': 'true', 'outFields': '*', 
-                                'geometryPrecision': '4'}
+                            payload = {
+                                'f': 'geojson',
+                                'where': '1=1',
+                                'objectIds': str( ids_requested )[1:-1],
+                                'outSR': '4326',
+                                'returnGeometry': 'true',
+                                'outFields': '*',
+                                'geometryPrecision': '4'
+                            }
 
                             async with session.post( f"{url}/query", data=payload ) as resp:
 
@@ -619,7 +710,7 @@ async def get_arcgis_data(url: str, table_id: str, process_id: str,
 
                         with open(f'{table_id}.geojson', 'w') as json_file:
                             json.dump(feature_collection, json_file)
-                        
+
                         load_geographic_data_to_server(
                             table_id=f"user_data.{table_id}",
                             file_path=f'{table_id}.geojson'
@@ -649,15 +740,23 @@ async def get_arcgis_data(url: str, table_id: str, process_id: str,
     except Exception as error:
         if os.path.exists(f'{table_id}.geojson'):
             os.remove(f'{table_id}.geojson')
-        print(error)
         import_processes[process_id]['status'] = "FAILURE"
         import_processes[process_id]['error'] = str(error)
         import_processes[process_id]['completion_time'] = datetime.datetime.now()
         import_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def upload_geographic_file(file_path: str, new_table_id: str, process_id: str,
-    username: str, title: str, tags: list, description: str, read_access_list: list,
-    write_access_list: list, searchable: bool):
+async def upload_geographic_file(
+    file_path: str,
+    new_table_id: str,
+    process_id: str,
+    username: str,
+    title: str,
+    tags: list,
+    description: str,
+    read_access_list: list,
+    write_access_list: list,
+    searchable: bool
+) -> None:
     """
     Method to upload data from geographic file.
 
@@ -673,7 +772,7 @@ async def upload_geographic_file(file_path: str, new_table_id: str, process_id: 
         media_directory = os.listdir(f"{os.getcwd()}/media/")
         for file in media_directory:
             if new_table_id in file:
-                os.remove(f"{os.getcwd()}/media/{file}")  
+                os.remove(f"{os.getcwd()}/media/{file}")
         await create_table(
             username=username,
             table_id=new_table_id,
@@ -692,16 +791,30 @@ async def upload_geographic_file(file_path: str, new_table_id: str, process_id: 
         media_directory = os.listdir(f"{os.getcwd()}/media/")
         for file in media_directory:
             if new_table_id in file:
-                os.remove(f"{os.getcwd()}/media/{file}")  
+                os.remove(f"{os.getcwd()}/media/{file}")
         import_processes[process_id]['status'] = "FAILURE"
         import_processes[process_id]['error'] = str(error)
         import_processes[process_id]['completion_time'] = datetime.datetime.now()
         import_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def import_geographic_data_from_csv(file_path: str, new_table_id: str, process_id: str,
-    map: str, map_column: str, table_column: str, table_columns: list, map_columns: list, 
-    username: str, title: str, tags: list, description: str, read_access_list: list,
-    write_access_list: list, searchable: bool, app: FastAPI):
+async def import_geographic_data_from_csv(
+    file_path: str,
+    new_table_id: str,
+    process_id: str,
+    map_name: str,
+    map_column: str,
+    table_column: str,
+    table_columns: list,
+    map_columns: list,
+    username: str,
+    title: str,
+    tags: list,
+    description: str,
+    read_access_list: list,
+    write_access_list: list,
+    searchable: bool,
+    app: FastAPI
+) -> None:
     """
     Method to upload data from from a csv file with geographic data.
 
@@ -713,7 +826,7 @@ async def import_geographic_data_from_csv(file_path: str, new_table_id: str, pro
         await upload_csv_to_db_with_geographic_data(
             file_path=file_path,
             new_table_id=new_table_id,
-            map=map,
+            map_name=map_name,
             map_column=map_column,
             table_column=table_column,
             table_columns=table_columns,
@@ -724,7 +837,7 @@ async def import_geographic_data_from_csv(file_path: str, new_table_id: str, pro
         media_directory = os.listdir(f"{os.getcwd()}/media/")
         for file in media_directory:
             if new_table_id in file:
-                os.remove(f"{os.getcwd()}/media/{file}")  
+                os.remove(f"{os.getcwd()}/media/{file}")
         await create_table(
             username=username,
             table_id=new_table_id,
@@ -743,16 +856,28 @@ async def import_geographic_data_from_csv(file_path: str, new_table_id: str, pro
         media_directory = os.listdir(f"{os.getcwd()}/media/")
         for file in media_directory:
             if new_table_id in file:
-                os.remove(f"{os.getcwd()}/media/{file}")  
+                os.remove(f"{os.getcwd()}/media/{file}")
         import_processes[process_id]['status'] = "FAILURE"
         import_processes[process_id]['error'] = str(error)
         import_processes[process_id]['completion_time'] = datetime.datetime.now()
         import_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def import_point_data_from_csv(file_path: str, new_table_id: str, process_id: str,
-    latitude: str, longitude: str, table_columns: list, 
-    username: str, title: str, tags: list, description: str, read_access_list: list,
-    write_access_list: list, searchable: bool, app: FastAPI):
+async def import_point_data_from_csv(
+    file_path: str,
+    new_table_id: str,
+    process_id: str,
+    latitude: str,
+    longitude: str,
+    table_columns: list,
+    username: str,
+    title: str,
+    tags: list,
+    description: str,
+    read_access_list: list,
+    write_access_list: list,
+    searchable: bool,
+    app: FastAPI
+) -> None:
     """
     Method to upload data from csv with lat lng columns.
 
@@ -773,7 +898,7 @@ async def import_point_data_from_csv(file_path: str, new_table_id: str, process_
         media_directory = os.listdir(f"{os.getcwd()}/media/")
         for file in media_directory:
             if new_table_id in file:
-                os.remove(f"{os.getcwd()}/media/{file}")  
+                os.remove(f"{os.getcwd()}/media/{file}")
         await create_table(
             username=username,
             table_id=new_table_id,
@@ -792,16 +917,28 @@ async def import_point_data_from_csv(file_path: str, new_table_id: str, process_
         media_directory = os.listdir(f"{os.getcwd()}/media/")
         for file in media_directory:
             if new_table_id in file:
-                os.remove(f"{os.getcwd()}/media/{file}")  
+                os.remove(f"{os.getcwd()}/media/{file}")
         import_processes[process_id]['status'] = "FAILURE"
         import_processes[process_id]['error'] = str(error)
         import_processes[process_id]['completion_time'] = datetime.datetime.now()
         import_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def import_point_data_from_json_file(file_path: str, new_table_id: str, process_id: str,
-    latitude: str, longitude: str, table_columns: list, 
-    username: str, title: str, tags: list, description: str, read_access_list: list,
-    write_access_list: list, searchable: bool, app: FastAPI):
+async def import_point_data_from_json_file(
+    file_path: str,
+    new_table_id: str,
+    process_id: str,
+    latitude: str,
+    longitude: str,
+    table_columns: list,
+    username: str,
+    title: str,
+    tags: list,
+    description: str,
+    read_access_list: list,
+    write_access_list: list,
+    searchable: bool,
+    app: FastAPI
+) -> None:
     """
     Method to upload data from csv with lat lng columns.
 
@@ -811,7 +948,7 @@ async def import_point_data_from_json_file(file_path: str, new_table_id: str, pr
 
     try:
         df = pd.read_json(file_path)
-        
+
         df.to_csv(f"{os.getcwd()}/media/{new_table_id}.csv", index=False, sep=',', encoding="utf-8")
 
         await upload_csv_to_db_with_latitude_and_longitude(
@@ -826,7 +963,7 @@ async def import_point_data_from_json_file(file_path: str, new_table_id: str, pr
         media_directory = os.listdir(f"{os.getcwd()}/media/")
         for file in media_directory:
             if new_table_id in file:
-                os.remove(f"{os.getcwd()}/media/{file}")  
+                os.remove(f"{os.getcwd()}/media/{file}")
         await create_table(
             username=username,
             table_id=new_table_id,
@@ -845,16 +982,30 @@ async def import_point_data_from_json_file(file_path: str, new_table_id: str, pr
         media_directory = os.listdir(f"{os.getcwd()}/media/")
         for file in media_directory:
             if new_table_id in file:
-                os.remove(f"{os.getcwd()}/media/{file}")  
+                os.remove(f"{os.getcwd()}/media/{file}")
         import_processes[process_id]['status'] = "FAILURE"
         import_processes[process_id]['error'] = str(error)
         import_processes[process_id]['completion_time'] = datetime.datetime.now()
         import_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def import_geographic_data_from_json_file(file_path: str, new_table_id: str, process_id: str,
-    map: str, map_column: str, table_column: str, table_columns: list, map_columns: list, 
-    username: str, title: str, tags: list, description: str, read_access_list: list,
-    write_access_list: list, searchable: bool, app: FastAPI):
+async def import_geographic_data_from_json_file(
+    file_path: str,
+    new_table_id: str,
+    process_id: str,
+    map_name: str,
+    map_column: str,
+    table_column: str,
+    table_columns: list,
+    map_columns: list,
+    username: str,
+    title: str,
+    tags: list,
+    description: str,
+    read_access_list: list,
+    write_access_list: list,
+    searchable: bool,
+    app: FastAPI
+) -> None:
     """
     Method to upload data from from a json file with geographic data.
 
@@ -864,13 +1015,13 @@ async def import_geographic_data_from_json_file(file_path: str, new_table_id: st
 
     try:
         df = pd.read_json(file_path)
-        
+
         df.to_csv(f"{os.getcwd()}/media/{new_table_id}.csv", index=False, sep=',', encoding="utf-8")
 
         await upload_csv_to_db_with_geographic_data(
             file_path=f"{os.getcwd()}/media/{new_table_id}.csv",
             new_table_id=new_table_id,
-            map=map,
+            map_name=map_name,
             map_column=map_column,
             table_column=table_column,
             table_columns=table_columns,
@@ -881,7 +1032,7 @@ async def import_geographic_data_from_json_file(file_path: str, new_table_id: st
         media_directory = os.listdir(f"{os.getcwd()}/media/")
         for file in media_directory:
             if new_table_id in file:
-                os.remove(f"{os.getcwd()}/media/{file}")  
+                os.remove(f"{os.getcwd()}/media/{file}")
         await create_table(
             username=username,
             table_id=new_table_id,
@@ -900,22 +1051,34 @@ async def import_geographic_data_from_json_file(file_path: str, new_table_id: st
         media_directory = os.listdir(f"{os.getcwd()}/media/")
         for file in media_directory:
             if new_table_id in file:
-                os.remove(f"{os.getcwd()}/media/{file}")  
+                os.remove(f"{os.getcwd()}/media/{file}")
         import_processes[process_id]['status'] = "FAILURE"
         import_processes[process_id]['error'] = str(error)
         import_processes[process_id]['completion_time'] = datetime.datetime.now()
         import_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-def load_geographic_data_to_server(table_id: str, file_path: str):
+def load_geographic_data_to_server(
+    table_id: str,
+    file_path: str
+) -> None:
+    """
+    Method used to load a geographic file into the database.
+
+    """
     host = config.DB_HOST
     username = config.DB_USERNAME
     password = config.DB_PASSWORD
     database = config.DB_DATABASE
     subprocess.call(f'ogr2ogr -f "PostgreSQL" "PG:host={host} user={username} dbname={database} password={password} port={config.DB_PORT}" "{file_path}" -lco GEOMETRY_NAME=geom -lco FID=gid -lco PRECISION=no -nln {table_id} -overwrite', shell=True)
 
-async def get_table_columns(table: str, app: FastAPI, new_table_name: str=None) -> list:
+async def get_table_columns(
+    table: str,
+    app: FastAPI,
+    new_table_name: str=None
+) -> list:
     """
     Method to return a list of columns for a table.
+
     """
 
     pool = app.state.database
@@ -943,9 +1106,18 @@ async def get_table_columns(table: str, app: FastAPI, new_table_name: str=None) 
 
         return fields
 
-async def get_table_geojson(scheme: str, table: str,
-    app: FastAPI, filter: str=None, bbox :str=None, limit: int=200000,
-    offset: int=0, properties: str="*", sort_by: str="gid", srid: int=4326) -> list:
+async def get_table_geojson(
+    scheme: str,
+    table: str,
+    app: FastAPI,
+    filter: str=None,
+    bbox :str=None,
+    limit: int=200000,
+    offset: int=0,
+    properties: str="*",
+    sort_by: str="gid",
+    srid: int=4326
+) -> object:
     """
     Method used to retrieve the table geojson.
 
@@ -954,7 +1126,7 @@ async def get_table_geojson(scheme: str, table: str,
     pool = app.state.database
 
     async with pool.acquire() as con:
-        query = f"""
+        query = """
         SELECT
         json_build_object(
             'type', 'FeatureCollection',
@@ -975,48 +1147,53 @@ async def get_table_geojson(scheme: str, table: str,
         if filter != "" :
             query += f"WHERE {filter}"
             count_query += f"WHERE {filter}"
-        
+
         if bbox is not None:
             if filter != "":
-                query += f" AND "
-                count_query += f" AND "
+                query += " AND "
+                count_query += " AND "
             else:
-                query += f" WHERE "
-                count_query += f" WHERE "
+                query += " WHERE "
+                count_query += " WHERE "
             coords = bbox.split(',')
             query += f" ST_INTERSECTS(geom,ST_MakeEnvelope({coords[0]}, {coords[1]}, {coords[2]}, {coords[3]}, 4326)) "
             count_query += f" ST_INTERSECTS(geom,ST_MakeEnvelope({coords[0]}, {coords[1]}, {coords[2]}, {coords[3]}, 4326)) "
-        
+
         if sort_by != "gid":
             order = sort_by.split(':')
             sort = "asc"
             if len(order) == 2 and order[1] == "D":
                 sort = "desc"
             query += f" ORDER BY {order[0]} {sort}"
-        
+
         query += f" OFFSET {offset} LIMIT {limit}"
 
         query += ") AS t;"
-        
+
         geojson = await con.fetchrow(query)
         count = await con.fetchrow(count_query)
-        
+
         formatted_geojson = json.loads(geojson['json_build_object'])
 
-        if formatted_geojson['features'] != None:
+        if formatted_geojson['features'] is not None:
             for feature in formatted_geojson['features']:
                 feature['id'] = feature['properties']['gid']
 
         formatted_geojson['numberMatched'] = count['count']
         formatted_geojson['numberReturned'] = 0
-        if formatted_geojson['features'] != None:
+        if formatted_geojson['features'] is not None:
             formatted_geojson['numberReturned'] = len(formatted_geojson['features'])
-        
+
         return formatted_geojson
 
-async def get_table_bounds(scheme: str, table: str, app: FastAPI) -> list:
+async def get_table_bounds(
+    scheme: str,
+    table: str,
+    app: FastAPI
+) -> list:
     """
     Method used to retrieve the bounds for a given table.
+
     """
 
     pool = app.state.database
@@ -1029,7 +1206,7 @@ async def get_table_bounds(scheme: str, table: str, app: FastAPI) -> list:
         """
 
         table_extent = []
-        
+
         extent = await con.fetchval(query)
 
         extent = extent.replace('BOX(','').replace(')','')

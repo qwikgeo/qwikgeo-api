@@ -129,8 +129,7 @@ async def table(
 
     await utilities.validate_table_access(
         table=table_id,
-        user_name=user_name,
-        app=request.app
+        user_name=user_name
     )
 
     portal_table = await db_models.Table_Pydantic.from_queryset_single(
@@ -186,7 +185,6 @@ async def edit_row_attributes(
     await utilities.validate_table_access(
         table=info.table,
         user_name=user_name,
-        app=request.app,
         write_access=True
     )
 
@@ -280,7 +278,6 @@ async def edit_row_geometry(
     await utilities.validate_table_access(
         table=info.table,
         user_name=user_name,
-        app=request.app,
         write_access=True
     )
 
@@ -342,7 +339,6 @@ async def add_column(
     await utilities.validate_table_access(
         table=info.table,
         user_name=user_name,
-        app=request.app,
         write_access=True
     )
 
@@ -401,7 +397,6 @@ async def delete_column(
     await utilities.validate_table_access(
         table=table,
         user_name=user_name,
-        app=request.app,
         write_access=True
     )
 
@@ -460,7 +455,6 @@ async def add_row(
     await utilities.validate_table_access(
         table=info.table,
         user_name=user_name,
-        app=request.app,
         write_access=True
     )
 
@@ -694,7 +688,6 @@ async def delete_table(
     await utilities.validate_table_access(
         table=info.table,
         user_name=user_name,
-        app=request.app,
         write_access=True
     )
 
@@ -751,8 +744,7 @@ async def statistics(
 
     await utilities.validate_table_access(
         table=info.table,
-        user_name=user_name,
-        app=request.app
+        user_name=user_name
     )
 
     pool = request.app.state.database
@@ -851,8 +843,7 @@ async def bins(
 
     await utilities.validate_table_access(
         table=info.table,
-        user_name=user_name,
-        app=request.app
+        user_name=user_name
     )
 
     pool = request.app.state.database
@@ -940,8 +931,7 @@ async def numeric_breaks(
 
     await utilities.validate_table_access(
         table=info.table,
-        user_name=user_name,
-        app=request.app
+        user_name=user_name
     )
 
     pool = request.app.state.database
@@ -1042,8 +1032,7 @@ async def custom_break_values(
 
     await utilities.validate_table_access(
         table=info.table,
-        user_name=user_name,
-        app=request.app
+        user_name=user_name
     )
 
     pool = request.app.state.database

@@ -227,8 +227,7 @@ async def collection(
 
     await utilities.validate_table_access(
         table=table,
-        user_name=user_name,
-        app=request.app
+        user_name=user_name
     )
 
     table_metadata = await db_models.Table_Pydantic.from_queryset_single(
@@ -342,8 +341,7 @@ async def queryables(
 
     await utilities.validate_table_access(
         table=table,
-        user_name=user_name,
-        app=request.app
+        user_name=user_name
     )
 
     table_metadata = await db_models.Table_Pydantic.from_queryset_single(
@@ -465,8 +463,8 @@ async def items(
     limit: int=100,
     offset: int=0,
     properties: str="*",
-    sortby :str="gid",
-    filter :str=None,
+    sortby: str="gid",
+    filter: str=None,
     srid: int=4326,
     user_name: int=Depends(utilities.get_token_header)
 ):
@@ -476,8 +474,7 @@ async def items(
 
     await utilities.validate_table_access(
         table=table,
-        user_name=user_name,
-        app=request.app
+        user_name=user_name
     )
 
     blacklist_query_parameters = ["bbox","limit","offset","properties","sortby","filter"]
@@ -646,8 +643,7 @@ async def item(
 
     await utilities.validate_table_access(
         table=table,
-        user_name=user_name,
-        app=request.app
+        user_name=user_name
     )
 
     pool = request.app.state.database
@@ -781,8 +777,7 @@ async def tiles(
 
     await utilities.validate_table_access(
         table=table,
-        user_name=user_name,
-        app=request.app
+        user_name=user_name
     )
 
     table_metadata = await db_models.Table_Pydantic.from_queryset_single(
@@ -890,8 +885,7 @@ async def tile(
 
     await utilities.validate_table_access(
         table=table,
-        user_name=user_name,
-        app=request.app
+        user_name=user_name
     )
 
     pbf, tile_cache = await utilities.get_tile(
@@ -1002,8 +996,7 @@ async def tiles_metadata(
 
     await utilities.validate_table_access(
         table=table,
-        user_name=user_name,
-        app=request.app
+        user_name=user_name
     )
 
     table_metadata = await db_models.Table_Pydantic.from_queryset_single(
@@ -1085,8 +1078,7 @@ async def get_tile_cache_size(
 
     await utilities.validate_table_access(
         table=table,
-        user_name=user_name,
-        app=request.app
+        user_name=user_name
     )
 
     size = 0
@@ -1150,8 +1142,7 @@ async def delete_tile_cache(
 
     await utilities.validate_table_access(
         table=table,
-        user_name=user_name,
-        app=request.app
+        user_name=user_name
     )
 
     if os.path.exists(f'{os.getcwd()}/cache/{scheme}_{table}'):

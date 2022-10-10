@@ -45,7 +45,7 @@ class PointJsonUrl(BaseModel):
     searchable: bool=True
 
 class GeographicJsonUrl(BaseModel):
-    map: str
+    map_name: str
     map_column: str
     map_columns: list
     table_columns: list
