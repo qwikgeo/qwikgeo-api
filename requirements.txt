@@ -38,7 +38,7 @@ pandas==1.4.3
 passlib==1.7.4
 prometheus-client==0.14.1
 prometheus-fastapi-instrumentator==5.9.1
-protobuf==4.21.5
+protobuf==4.21.6
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycparser==2.21
