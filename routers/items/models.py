@@ -26,7 +26,6 @@ class EditRowAttributes(BaseModel):
     """Model for editing row attributes"""
 
     table: str
-    database: str
     gid: int
     values: object
 
@@ -46,7 +45,6 @@ class EditRowGeometry(BaseModel):
     """Model for editing row geometry"""
 
     table: str
-    database: str
     gid: int
     geojson: Geojson
 
@@ -54,7 +52,6 @@ class AddColumn(BaseModel):
     """Model for adding a column to a table"""
 
     table: str
-    database: str
     column_name: str
     column_type: Literal['text','integer','bigint','double precision','boolean','time','uuid']
 
@@ -62,7 +59,6 @@ class DeleteColumn(BaseModel):
     """Model for deleting a column from a table"""
 
     table: str
-    database: str
     column_name: str
 
 class RowColumn(BaseModel):
@@ -75,7 +71,6 @@ class AddRow(BaseModel):
     """Model for adding a row to a table"""
 
     table: str
-    database: str
     columns: List[RowColumn]
     geojson: Geojson
 
@@ -83,7 +78,6 @@ class DeleteRow(BaseModel):
     """Model for deleting a row for a table"""
 
     table: str
-    database: str
     gid: int
 
 class Column(BaseModel):
@@ -114,7 +108,6 @@ class DeleteTable(BaseModel):
     """Model for deleting a table"""
 
     table: str
-    database: str
 
 class AggregateModel(BaseModel):
     """Model for aggregating data on a numerical column for a table"""
@@ -131,9 +124,6 @@ class StatisticsModel(BaseModel):
     table: str = Field(
         title="Name of the table to perform analysis on."
     )
-    database: str = Field(
-        title="Name of the database the table belongs to."
-    )
     coordinates: str = Field(
         default=None, title="A list of coordinates to perform statistics in a certain geographical area."
     )
@@ -147,9 +137,6 @@ class BinsModel(BaseModel):
 
     table: str = Field(
         title="Name of the table to perform analysis on."
-    )
-    database: str = Field(
-        title="Name of the database the table belongs to."
     )
     coordinates: str = Field(
         default=None, title="A list of coordinates to perform statistics in a certain geographical area."
@@ -165,9 +152,6 @@ class NumericBreaksModel(BaseModel):
 
     table: str = Field(
         title="Name of the table to perform analysis on."
-    )
-    database: str = Field(
-        title="Name of the database the table belongs to."
     )
     coordinates: str = Field(
         default=None, title="A list of coordinates to perform statistics in a certain geographical area."
@@ -190,9 +174,6 @@ class CustomBreaksModel(BaseModel):
 
     table: str = Field(
         title="Name of the table to perform analysis on."
-    )
-    database: str = Field(
-        title="Name of the database the table belongs to."
     )
     coordinates: str = Field(
         default=None, title="A list of coordinates to perform statistics in a certain geographical area."

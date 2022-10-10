@@ -179,7 +179,10 @@ async def edit_row_attributes(
     info: models.EditRowAttributes,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Update a table's attributes."""
+    """
+    Update a table's attributes.
+    More information at https://docs.qwikgeo.com/items/#edit-row-attributes
+    """
 
     await utilities.validate_table_access(
         table=info.table,
@@ -272,7 +275,10 @@ async def edit_row_geometry(
     info: models.EditRowGeometry,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Update a table's geometry."""
+    """
+    Update a table's geometry.
+    More information at https://docs.qwikgeo.com/items/#edit-row-geometry
+    """
 
     await utilities.validate_table_access(
         table=info.table,
@@ -302,6 +308,14 @@ async def edit_row_geometry(
 @router.post(
     path="/tables/add_column",
     responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {"status": True}
+                }
+            }
+        },
         403: {
             "description": "Forbidden",
             "content": {
@@ -333,7 +347,10 @@ async def add_column(
     info: models.AddColumn,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Create a new column for a table."""
+    """
+    Create a new column for a table.
+    More information at https://docs.qwikgeo.com/items/#add-column
+    """
 
     await utilities.validate_table_access(
         table=info.table,
@@ -360,6 +377,14 @@ async def add_column(
 @router.delete(
     path="/tables/delete_column",
     responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {"status": True}
+                }
+            }
+        },
         403: {
             "description": "Forbidden",
             "content": {
@@ -391,7 +416,10 @@ async def delete_column(
     info: models.DeleteColumn,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Delete a column for a table."""
+    """
+    Delete a column for a table.
+    More information at https://docs.qwikgeo.com/items/#delete-column
+    """
 
     await utilities.validate_table_access(
         table=table,
@@ -418,6 +446,17 @@ async def delete_column(
 @router.post(
     path="/tables/add_row",
     responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "status": True,
+                        "gid": 0
+                    }
+                }
+            }
+        },
         403: {
             "description": "Forbidden",
             "content": {
@@ -449,7 +488,10 @@ async def add_row(
     info: models.AddRow,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Create a new row for a table."""
+    """
+    Create a new row for a table.
+    More information at https://docs.qwikgeo.com/items/#add-row
+    """
 
     await utilities.validate_table_access(
         table=info.table,
@@ -531,6 +573,14 @@ async def add_row(
 @router.delete(
     path="/tables/delete_row",
     responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {"status": True}
+                }
+            }
+        },
         403: {
             "description": "Forbidden",
             "content": {
@@ -562,7 +612,10 @@ async def delete_row(
     info: models.DeleteRow,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Delete a row for a table."""
+    """
+    Delete a row for a table.
+    More information at https://docs.qwikgeo.com/items/#delete-row
+    """
 
     await utilities.validate_table_access(
         table=info.table,
@@ -590,19 +643,11 @@ async def delete_row(
 @router.post(
     path="/tables/create_table",
     responses={
-        403: {
-            "description": "Forbidden",
+        200: {
+            "description": "Successful Response",
             "content": {
                 "application/json": {
-                    "example": {"detail": "No access to table."}
-                }
-            }
-        },
-        404: {
-            "description": "Not Found",
-            "content": {
-                "application/json": {
-                    "example": {"detail": "Table does not exist."}
+                    "example": {"status": True}
                 }
             }
         },
@@ -621,7 +666,10 @@ async def create_table(
     info: models.CreateTable,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Create a new table."""
+    """
+    Create a new table.
+    More information at https://docs.qwikgeo.com/items/#create-table
+    """
 
     pool = request.app.state.database
 
@@ -664,6 +712,14 @@ async def create_table(
 @router.delete(
     path="/tables/delete_table",
     responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {"status": True}
+                }
+            }
+        },
         403: {
             "description": "Forbidden",
             "content": {
@@ -695,7 +751,10 @@ async def delete_table(
     info: models.DeleteTable,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Delete a table."""
+    """
+    Delete a table.
+    More information at https://docs.qwikgeo.com/items/#delete-table
+    """
 
     await utilities.validate_table_access(
         table=info.table,
@@ -721,6 +780,34 @@ async def delete_table(
 @router.post(
     path="/tables/statistics",
     responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "results": {
+                            "count_gid": 19,
+                            "avg_deed_ac": 64.28666666666666,
+                            "distinct_first_name_count_first_name": [
+                                {
+                                    "first_name": "",
+                                    "count": 3
+                                },
+                                {
+                                    "first_name": "COLE",
+                                    "count": 3
+                                },
+                                {
+                                    "first_name": "% BAS",
+                                    "count": 2
+                                }
+                            ]
+                        },
+                        "status": "SUCCESS"
+                    }
+                }
+            }
+        },
         403: {
             "description": "Forbidden",
             "content": {
@@ -752,7 +839,10 @@ async def statistics(
     request: Request,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Retrieve statistics for a table."""
+    """
+    Retrieve statistics for a table.
+    More information at https://docs.qwikgeo.com/items/#statistics
+    """
 
     await utilities.validate_table_access(
         table=info.table,
@@ -820,6 +910,28 @@ async def statistics(
 @router.post(
     path="/tables/bins",
     responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "results": [
+                            {
+                                "min": 0.0,
+                                "max": 145.158,
+                                "count": 15993
+                            },
+                            {
+                                "min": 145.158,
+                                "max": 290.316,
+                                "count": 1088
+                            },
+                        ],
+                        "status": "SUCCESS"
+                    }
+                }
+            }
+        },
         403: {
             "description": "Forbidden",
             "content": {
@@ -851,7 +963,10 @@ async def bins(
     request: Request,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Retrieve a numerical column's bins for a table."""
+    """
+    Retrieve a numerical column's bins for a table.
+    More information at https://docs.qwikgeo.com/items/#bins
+    """
 
     await utilities.validate_table_access(
         table=info.table,
@@ -906,8 +1021,29 @@ async def bins(
 
 @router.post(
     path="/tables/numeric_breaks",
-    description="",
     responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "results": [
+                            {
+                                "min": 0.0,
+                                "max": 145.158,
+                                "count": 15993
+                            },
+                            {
+                                "min": 145.158,
+                                "max": 290.316,
+                                "count": 1088
+                            },
+                        ],
+                        "status": "SUCCESS"
+                    }
+                }
+            }
+        },
         403: {
             "description": "Forbidden",
             "content": {
@@ -939,7 +1075,10 @@ async def numeric_breaks(
     request: Request,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Retrieve a numerical column's breaks for a table."""
+    """
+    Retrieve a numerical column's breaks for a table.
+    More information at https://docs.qwikgeo.com/items/#numeric-breaks
+    """
 
     await utilities.validate_table_access(
         table=info.table,
@@ -1009,6 +1148,28 @@ async def numeric_breaks(
 @router.post(
     path="/tables/custom_break_values",
     responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "results": [
+                            {
+                                "min": 0.0,
+                                "max": 145.158,
+                                "count": 15993
+                            },
+                            {
+                                "min": 145.158,
+                                "max": 290.316,
+                                "count": 1088
+                            },
+                        ],
+                        "status": "SUCCESS"
+                    }
+                }
+            }
+        },
         403: {
             "description": "Forbidden",
             "content": {
@@ -1040,7 +1201,10 @@ async def custom_break_values(
     request: Request,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Retrieve custom break values for a column for a table."""
+    """
+    Retrieve custom break values for a column for a table.
+    More information at https://docs.qwikgeo.com/items/#numeric-breaks
+    """
 
     await utilities.validate_table_access(
         table=info.table,
