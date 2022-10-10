@@ -20,19 +20,19 @@
 Any time an import is submitted it given a process_id to have the import run in the background using [FastAPI's Background Tasks](https://fastapi.tiangolo.com/tutorial/background-tasks/). To check the
 status of an import, you can call this endpoint with the process_id.
 
-## Example Call
+### Example Call
 ```shell
-/api/v1/imports/status/472e29dc-91a8-41d3-b05f-cee34006e3f7
+https://api.qwikgeo.com/api/v1/imports/status/472e29dc-91a8-41d3-b05f-cee34006e3f7
 ```
 
-## Example Output - Still Running
+### Example Output - Still Running
 ```json
 {
     "status": "PENDING"
 }
 ```
 
-## Example Output - Complete
+### Example Output - Complete
 ```json
 {
     "status": "SUCCESS",
@@ -42,7 +42,7 @@ status of an import, you can call this endpoint with the process_id.
 }
 ```
 
-## Example Output - Error
+### Example Output - Error
 ```json
 {
     "status": "FAILURE",
@@ -71,7 +71,7 @@ Example: Download a point dataset of Tennesse State Parks.
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/imports/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/imports/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -94,7 +94,7 @@ Example: Import geojson from [file](/data/states.geojson).
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/imports/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/imports/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -123,7 +123,7 @@ and joining to the `states` map based off of the `state_abbr` column.
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/imports/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/imports/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -149,7 +149,7 @@ Example: A csv [file](/data/us-states-capitals.csv) with latitude and longitude 
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/imports/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/imports/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -177,7 +177,7 @@ Example: Import state date from a json [file](/data/states.json).
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/imports/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/imports/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -203,7 +203,7 @@ Example: A json [file](/data/cities.json) that contains cities for the entire wo
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/imports/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/imports/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -238,7 +238,7 @@ Example: Import state information from a gitlab url
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/imports/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/imports/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -265,7 +265,7 @@ Example: Import state centroids from a gitlab url
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/imports/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/imports/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```
 
@@ -288,6 +288,6 @@ Example: Input large earthquakes for the past month
 ```json
 {
   "process_id": "c8d7b8d8-3e82-4f93-b441-55a5f51c4171",
-  "url": "http://127.0.0.1:8000/api/v1/imports/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
+  "url": "https://api.qwikgeo.com/api/v1/imports/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171"
 }
 ```

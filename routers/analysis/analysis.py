@@ -11,13 +11,17 @@ router = APIRouter()
 analysis_processes = {}
 
 @router.get(
-    path="/status/{process_id}"
+    path="/status/{process_id}",
+    response_model=models.StatusResponseModel
 )
 def status(
     process_id: str,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Return status of an analysis."""
+    """
+    Return status of an analysis.
+    https://docs.qwikgeo.com/analysis/#analysis-status
+    """
 
     if process_id not in analysis_processes:
         return {"status": "UNKNOWN", "error": "This process_id does not exist."}

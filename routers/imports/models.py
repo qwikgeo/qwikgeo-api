@@ -1,14 +1,37 @@
+"""QwikGeo API - Imports - Models"""
+
 from pydantic import BaseModel, Field
 
+class StatusResponseModel(BaseModel):
+    """Model for imports response"""
+
+    status: str = Field(
+        default="SUCCESS"
+    )
+    new_table_id: str = Field(
+        default="shnxppipxrppsdkozuroilkubktfodibtqorhucjvxlcdrqyhh",
+        title="50 character new table_id in postgresql."
+    )
+    completion_time: str = Field(
+        default="2022-07-06T19:33:17.950059"
+    )
+    run_time_in_seconds: float = Field(
+        default=1.78599
+    )
+
 class BaseResponseModel(BaseModel):
+    """Model for base response"""
+
     process_id: str = Field(
         default="472e29dc-91a8-41d3-b05f-cee34006e3f7"
     )
     url: str = Field(
-        default="http://127.0.0.1:8000/api/v1/analysis/status/472e29dc-91a8-41d3-b05f-cee34006e3f7"
+        default="https://api.qwikgeo.com/api/v1/analysis/status/472e29dc-91a8-41d3-b05f-cee34006e3f7"
     )
 
 class ArcgisModel(BaseModel):
+    """Model for importing arcgis data"""
+
     url: str = Field(
         title="The url that contains the service to download."
     )
@@ -28,6 +51,8 @@ class ArcgisModel(BaseModel):
     searchable: bool=True
 
 class PointJsonUrl(BaseModel):
+    """Model for importing json data with point data"""
+
     latitude: str
     longitude: str
     table_columns: list
@@ -45,6 +70,8 @@ class PointJsonUrl(BaseModel):
     searchable: bool=True
 
 class GeographicJsonUrl(BaseModel):
+    """Model for importing json data with geographic boundaries"""
+
     map_name: str
     map_column: str
     map_columns: list
@@ -64,6 +91,8 @@ class GeographicJsonUrl(BaseModel):
     searchable: bool=True
 
 class GeojsonUrl(BaseModel):
+    """Model for importing geojson data from a url"""
+
     url: str
     title: str = Field(
         title="The name of the dataset within GeoPortal."
