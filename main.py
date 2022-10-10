@@ -1,8 +1,8 @@
 """QwikGeo API"""
 
 from fastapi import FastAPI, Request
-from tortoise.contrib.fastapi import register_tortoise
 from fastapi.middleware.cors import CORSMiddleware
+from tortoise.contrib.fastapi import register_tortoise
 from prometheus_fastapi_instrumentator import Instrumentator
 
 import db
@@ -93,23 +93,26 @@ app.include_router(
     tags=["Collections"],
 )
 
-# Register Start/Stop application event handler to setup/stop the database connection
 @app.on_event("startup")
 async def startup_event():
     """Application startup: register the database connection and create table list."""
+
     await db.connect_to_db(app)
-    
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Application shutdown: de-register the database connection."""
+
     await db.close_db_connection(app)
 
-@app.get("/api/v1/", tags=["Landing Page"])
-async def landing_page(request: Request):
-    """
-    Method to show landing page.
-    """
+@app.get(
+    path="/api/v1/",
+    tags=["Landing Page"]
+)
+async def landing_page(
+    request: Request
+):
+    """Method to show landing page."""
 
     url = str(request.base_url)
 
@@ -144,11 +147,12 @@ async def landing_page(request: Request):
         "description": DESCRIPTION
     }
 
-@app.get("/api/v1/conformance", tags=["Conformance"])
-async def conformance(request: Request):
-    """
-    Method to show conformance
-    """
+@app.get(
+    path="/api/v1/conformance",
+    tags=["Conformance"]
+)
+async def conformance():
+    """Method to show conformance."""
 
     return {
         "conformsTo": [
@@ -158,11 +162,12 @@ async def conformance(request: Request):
         ]
     }
 
-@app.get("/api/v1/health_check", tags=["Health"])
+@app.get(
+    path="/api/v1/health_check",
+    tags=["Health"]
+)
 async def health():
-    """
-    Method used to verify server is healthy.
-    """
+    """Method used to verify server is healthy."""
 
     return {"status": "UP"}
 
