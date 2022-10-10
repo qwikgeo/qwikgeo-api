@@ -122,7 +122,6 @@ async def tables(
 )
 async def table(
     table_id: str,
-    request: Request,
     user_name: int=Depends(utilities.get_token_header)
 ):
     """Get a table."""
@@ -623,14 +622,15 @@ async def create_table(
     user_name: int=Depends(utilities.get_token_header)
 ):
     """Create a new table."""
-    # TODO
 
     pool = request.app.state.database
+
+    new_table_id = utilities.get_new_table_id()
 
     async with pool.acquire() as con:
 
         query = f"""
-            CREATE TABLE "{info.table}"(
+            CREATE TABLE "user_data.{new_table_id}"(
             gid SERIAL PRIMARY KEY
         """
 
@@ -642,10 +642,22 @@ async def create_table(
         await con.fetch(query)
 
         geom_query = f"""
-            SELECT AddGeometryColumn ('public','{info.table}','geom',{info.srid},'{info.geometry_type}',2);
+            SELECT AddGeometryColumn ('user_data','{new_table_id}','geom',{info.srid},'{info.geometry_type}',2);
         """
 
         await con.fetch(geom_query)
+
+        await utilities.create_table(
+            username=user_name,
+            table_id=new_table_id,
+            title=info.title,
+            tags=info.tags,
+            description=info.description,
+            searchable=info.searchable,
+            read_access_list=info.read_access_list,
+            write_access_list=info.write_access_list
+
+        )
 
         return {"status": True}
 
