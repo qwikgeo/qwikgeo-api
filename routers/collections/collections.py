@@ -1,7 +1,6 @@
 """QwikGeo API - Collections"""
 
 import os
-import shutil
 from typing import Optional
 from functools import reduce
 from fastapi import Request, APIRouter, Depends, status, Response
@@ -1071,7 +1070,6 @@ async def tiles_metadata(
 async def get_tile_cache_size(
     scheme: str,
     table: str,
-    request: Request,
     user_name: int=Depends(utilities.get_token_header)
 ):
     """Get size of cache for table."""
@@ -1081,9 +1079,13 @@ async def get_tile_cache_size(
         user_name=user_name
     )
 
+    table_metadata = await db_models.Table_Pydantic.from_queryset_single(
+        db_models.Table.get(table_id=table)
+    )
+
     size = 0
 
-    cache_path = f'{os.getcwd()}/cache/{scheme}_{table}'
+    cache_path = f'{os.getcwd()}/cache/{scheme}_{table_metadata.table_id}'
 
     if os.path.exists(cache_path):
         for path, dirs, files in os.walk(cache_path):
@@ -1135,7 +1137,6 @@ async def get_tile_cache_size(
 async def delete_tile_cache(
     scheme: str,
     table: str,
-    request: Request,
     user_name: int=Depends(utilities.get_token_header)
 ):
     """Delete cache for a table."""
@@ -1145,8 +1146,11 @@ async def delete_tile_cache(
         user_name=user_name
     )
 
-    if os.path.exists(f'{os.getcwd()}/cache/{scheme}_{table}'):
-        shutil.rmtree(f'{os.getcwd()}/cache/{scheme}_{table}')
-        return {"status": "deleted"}
-    else:
-        return {"error": f"No cache at {os.getcwd()}/cache/{scheme}_{table}"}
+    table_metadata = await db_models.Table_Pydantic.from_queryset_single(
+        db_models.Table.get(table_id=table)
+    )
+
+    utilities.delete_user_tile_cache(table_metadata.table_id)
+
+    return {"status": "deleted"}
+

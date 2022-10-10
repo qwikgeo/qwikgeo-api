@@ -8,6 +8,7 @@ import string
 import uuid
 import datetime
 import subprocess
+import shutil
 import jwt
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, FastAPI, HTTPException, status
@@ -1216,3 +1217,14 @@ async def get_table_bounds(
             table_extent.append(float(corner.split(' ')[1]))
 
         return table_extent
+
+def delete_user_tile_cache(
+    table: str
+) -> None:
+    """
+    Method to remove tile cache for a user's table    
+
+    """
+
+    if os.path.exists(f'{os.getcwd()}/cache/user_data_{table}'):
+        shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table}')
