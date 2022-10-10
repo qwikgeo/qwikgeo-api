@@ -1085,7 +1085,7 @@ async def get_tile_cache_size(
 
     size = 0
 
-    cache_path = f'{os.getcwd()}/cache/{scheme}_{table_metadata.table_id}'
+    cache_path = f'{os.getcwd()}/cache/user_data_{table_metadata.table_id}'
 
     if os.path.exists(cache_path):
         for path, dirs, files in os.walk(cache_path):
