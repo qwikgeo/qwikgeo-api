@@ -4,12 +4,12 @@ from fastapi import FastAPI, Request
 from tortoise.contrib.fastapi import register_tortoise
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
-from tortoise import Tortoise
 
 import db
 import config
 from routers.authentication import authentication
 from routers.groups import groups
+from routers.users import users
 from routers.items import items
 from routers.imports import imports
 from routers.analysis import analysis
@@ -61,6 +61,12 @@ app.include_router(
     groups.router,
     prefix="/api/v1/groups",
     tags=["Groups"],
+)
+
+app.include_router(
+    users.router,
+    prefix="/api/v1/users",
+    tags=["Users"],
 )
 
 app.include_router(
@@ -143,8 +149,6 @@ async def conformance(request: Request):
     """
     Method to show conformance
     """
-
-    url = str(request.base_url)
 
     return {
         "conformsTo": [

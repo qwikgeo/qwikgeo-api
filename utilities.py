@@ -17,7 +17,7 @@ from tortoise.expressions import Q
 import tortoise
 from tortoise.query_utils import Prefetch
 from functools import reduce
-from jwt.exceptions import ExpiredSignatureError
+from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError, DecodeError
 
 import db_models
 import config
@@ -137,15 +137,13 @@ async def create_table(username: str, table_id: str, title: str,
     return item
 
 async def get_token_header(token: str=Depends(oauth2_scheme)):
-    expired_credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Credentials expired",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
     try:
         user = jwt.decode(token, config.SECRET_KEY, algorithms=["HS256"])
-    except ExpiredSignatureError:
-        raise expired_credentials_exception
+    except (ExpiredSignatureError, InvalidSignatureError, DecodeError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail=f"JWT Error: {str(exc)}"
+        ) from exc
     return user['username']
 
 async def get_user_groups(username: str) -> list:
