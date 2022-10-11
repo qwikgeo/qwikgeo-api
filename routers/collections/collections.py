@@ -82,7 +82,10 @@ async def collections(
     request: Request,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Get a list of tables available to query."""
+    """
+    Get a list of collections available to query.
+    More information at https://docs.qwikgeo.com/collections/#collections
+    """
 
     url = str(request.base_url)
 
@@ -225,7 +228,10 @@ async def collection(
     request: Request,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Get information about a collection."""
+    """
+    Get information about a collection.
+    More information at https://docs.qwikgeo.com/collections/#collection
+    """
 
     await utilities.validate_table_access(
         table=table,
@@ -251,6 +257,12 @@ async def collection(
             {
                 "type": "application/json",
                 "rel": "self",
+                "title": "This document as JSON",
+                "href": f"{url}api/v1/collections/{scheme}.{table}"
+            },
+            {
+                "type": "application/json",
+                "rel": "items",
                 "title": "Items as GeoJSON",
                 "href": f"{url}api/v1/collections/{scheme}.{table}/items"
             },
@@ -339,7 +351,10 @@ async def queryables(
     request: Request,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Get queryable information about a collection."""
+    """
+    Get queryable information about a collection.
+    More information at https://docs.qwikgeo.com/collections/#queryables
+    """
 
     await utilities.validate_table_access(
         table=table,
@@ -470,7 +485,10 @@ async def items(
     srid: int=4326,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Get geojson from a collection."""
+    """
+    Get geojson from a collection.
+    More information at https://docs.qwikgeo.com/collections/#items
+    """
 
     url = str(request.base_url)
 
@@ -790,7 +808,10 @@ async def item(
     srid: int=4326,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Get geojson for one item of a collection."""
+    """
+    Get geojson for one item of a collection.
+    More information at https://docs.qwikgeo.com/collections/#item
+    """
 
     url = str(request.base_url)
 
@@ -1304,7 +1325,10 @@ async def tiles(
     request: Request,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Get queryable information about a collection."""
+    """
+    Get tile information about a collection.
+    More information at https://docs.qwikgeo.com/collections/#tiles
+    """
 
     await utilities.validate_table_access(
         table=table,
@@ -1412,7 +1436,10 @@ async def tile(
     cql_filter: Optional[str] = None,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Get a vector tile for a given table."""
+    """
+    Get a vector tile for a given table.
+    More information at https://docs.qwikgeo.com/collections/#tile
+    """
 
     await utilities.validate_table_access(
         table=table,
@@ -1523,7 +1550,10 @@ async def tiles_metadata(
     request: Request,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Get tile metadata for a given table."""
+    """
+    Get tile metadata for a given table.
+    More information at https://docs.qwikgeo.com/collections/#tiles-metadata
+    """
 
     await utilities.validate_table_access(
         table=table,
@@ -1604,7 +1634,10 @@ async def get_tile_cache_size(
     table: str,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Get size of cache for table."""
+    """
+    Get size of cache for table.
+    More information at https://docs.qwikgeo.com/collections/#cache-size
+    """
 
     await utilities.validate_table_access(
         table=table,
@@ -1671,7 +1704,10 @@ async def delete_tile_cache(
     table: str,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Delete cache for a table."""
+    """
+    Delete cache for a table.
+    More information at https://docs.qwikgeo.com/collections/#delete-cache
+    """
 
     await utilities.validate_table_access(
         table=table,

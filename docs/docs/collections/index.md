@@ -2,31 +2,33 @@
 
 | Method | URL                                                                              | Description                             |
 | ------ | -------------------------------------------------------------------------------- | ----------------------------------------|
-| `GET`  | `/api/v1/collections`                                                       | [Collections](#collections)                  |
-| `GET`  | `/api/v1/collections/{name}`                                                | [Collection](#collection)    |
-| `GET`  | `/api/v1/collections/{name}/items`                                          | [Items](#items)                        |
-| `POST`  | `/api/v1/collections/{name}/items`                                         | [Create Item](#create-item)                        |
-| `GET`  | `/api/v1/collections/{name}/items/{id}`                                     | [Item](#item)                          |
-| `PUT`  | `/api/v1/collections/{name}/items/{id}`                                     | [Update Item](#update-item)                          |
-| `DELETE`  | `/api/v1/collections/{name}/items/{id}`                                  | [Delete Item](#delete-item)                          |
-| `PATCH`  | `/api/v1/collections/{name}/items/{id}`                                   | [Modify Item](#modify-item)                          |
+| `GET`  | `https:/api.qwikgeo.com/api/v1/collections`                              | [Collections](#collections)                  |
+| `GET`  | `https:/api.qwikgeo.com/api/v1/collections/{scheme}.{table}`                       | [Collection](#collection)    |
+| `GET`  | `https:/api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items`                 | [Items](#items)                        |
+| `POST`  | `https:/api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items`                | [Create Item](#create-item)                        |
+| `GET`  | `https:/api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items/{id}`            | [Item](#item)                          |
+| `PUT`  | `https:/api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items/{id}`            | [Update Item](#update-item)                          |
+| `DELETE`  | `https:/api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items/{id}`         | [Delete Item](#delete-item)                          |
+| `PATCH`  | `https:/api.qwikgeo.com/api/v1/collections/{scheme}.table}/items/{id}`          | [Modify Item](#modify-item)                          |
+| `GET`  | `https:/api.qwikgeo.com/api/v1/collections/{scheme}.{table}/queryables`          | [Queryables](#queryables)                          |
+| `GET`  | `https:/api.qwikgeo.com/api/v1/collections/{scheme}.{table}/tiles`          | [Tiles](#tiles)                          |
+| `GET`  | `https:/api.qwikgeo.com/api/v1/collections/{scheme}.{table}/tiles/{tile_matrix_set_id}/{tile_matrix}/{tile_row}/{tile_col}`          | [Tile](#tile)                          |
+| `GET`  | `https:/api.qwikgeo.com/api/v1/collections/{scheme}.{table}/tiles/{tile_matrix_set_id}/metadata`          | [Tiles Metadata](#tiles-metadata)                          |
+| `GET`  | `https:/api.qwikgeo.com/api/v1/collections/{scheme}.{table}/tiles/cache_size`          | [Cache Size](#cache-size)                          |
+| `DELETE`  | `https:/api.qwikgeo.com/api/v1/collections/{scheme}.{table}/tiles/cache`          | [Delete Cache](#delete-cache)                          |
 
 ## Endpoint Description's
 
 ## Collections
 Collection endpoint returns a list of all available tables to query.
 
-Collections endpoint is available at `/api/v1/collections`
+Collections endpoint is available at `https:/api.qwikgeo.com/api/v1/collections`
 
-```shell
-curl https://api.qwikgeo.com/api/v1/collections
-```
-
-Example Response
+### Example Response
 ```json
 [
     {
-        "id": "user_data.zip_centroids",
+        "id": "{scheme}.{table}",
         "title": "zip_centroids",
         "description": "zip_centroids",
         "keywords": [
@@ -37,7 +39,7 @@ Example Response
                 "type": "application/json",
                 "rel": "self",
                 "title": "This document as JSON",
-                "href": "https://api.qwikgeo.com/api/v1/collections/user_data.zip_centroids"
+                "href": "https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}"
             }
         ],
         "geometry": "point",
@@ -60,16 +62,12 @@ Example Response
 ## Collection
 Collection endpoint returns information about a single table.
 
-Collections endpoint is available at `/api/v1/collections/{item}`
+Collection endpoint is available at `https:/api.qwikgeo.com/api/v1/collections/{scheme}.{table}`
 
-```shell
-curl https://api.qwikgeo.com/api/v1/collections/user_data.zip_centroids
-```
-
-Example Response
+### Example Response
 ```json
 {
-    "id": "user_data.zip_centroids",
+    "id": "{scheme}.{table}",
     "title": "Zip Centroids",
     "description": "",
     "keywords": [],
@@ -78,19 +76,19 @@ Example Response
             "type": "application/json",
             "rel": "self",
             "title": "Items as GeoJSON",
-            "href": "https://api.qwikgeo.com/api/v1/collections/user_data.zip_centroids/items"
+            "href": "https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items"
         },
         {
             "type": "application/json",
             "rel": "queryables",
             "title": "Queryables for this collection as JSON",
-            "href": "https://api.qwikgeo.com/api/v1/collections/user_data.zip_centroids/queryables"
+            "href": "https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/queryables"
         },
         {
             "type": "application/json",
             "rel": "tiles",
             "title": "Tiles as JSON",
-            "href": "https://api.qwikgeo.com/api/v1/collections/user_data.zip_centroids/tiles"
+            "href": "https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/tiles"
         }
     ],
     "geometry": "point",
@@ -112,11 +110,7 @@ Example Response
 ## Items
 Items endpoint returns a geojson feature collection for a collection.
 
-Items endpoint is available at `/api/v1/collections/{item}/items`
-
-```shell
-curl https://api.qwikgeo.com/api/v1/collections/user_data.states/items
-```
+Items endpoint is available at `https:/api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items`
 
 ### Parameters
 * `bbox=mix,miny,maxx,maxy` - filter features in response to ones intersecting a bounding box (in lon/lat or specified CRS). Ex. `17,-48,69,-161`
@@ -131,7 +125,7 @@ curl https://api.qwikgeo.com/api/v1/collections/user_data.states/items
 * `offset=N` - starts the response at an offset.
 * `srid=srid_number` - The srid number for data. Default is 4326.
 
-Example Response
+### Example Response
 ```json
 {
     "type": "FeatureCollection",
@@ -163,13 +157,13 @@ Example Response
             "type": "application/json",
             "rel": "self",
             "title": "This document as GeoJSON",
-            "href": "https://api.qwikgeo.com/api/v1/collections/user_data.states/items"
+            "href": "https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items"
         },
         {
             "type": "application/json",
             "title": "States",
             "rel": "collection",
-            "href": "https://api.qwikgeo.com/api/v1/collections/user_data.states"
+            "href": "https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}"
         }
     ]
 }
@@ -178,13 +172,9 @@ Example Response
 ## Create Item
 Create item endpoint allows you to add an item to a collection.
 
-Items endpoint is available at `/api/v1/collections/{item}/items`
+Create Item endpoint is available at `https:/api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items`
 
-```shell
-curl https://api.qwikgeo.com/api/v1/collections/user_data.parks/items
-```
-
-Example Input
+### Example Input
 ```json
 {
     "type": "Feature",
@@ -214,7 +204,7 @@ Example Input
 }
 ```
 
-Example Response
+### Example Response
 ```json
 {
     "type": "Feature",
@@ -249,18 +239,14 @@ Example Response
 
 Item endpoint returns a geojson feature collection for a single feature in a collection.
 
-Item endpoint is available at `/api/v1/collections/{item}/items/{id}`
-
-```shell
-curl https://api.qwikgeo.com/api/v1/collections/user_data.states/items/5
-```
+Item endpoint is available at `https:/api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items/{id}`
 
 ### Parameters
 * `properties=PROP-LIST`- return only specific properties (comma-separated).
   If PROP-LIST is empty, no properties are returned.
   If not present, all properties are returned.
 
-Example Response
+### Example Response
 ```json
 {
     "type": "FeatureCollection",
@@ -287,19 +273,19 @@ Example Response
                     "type": "application/json",
                     "rel": "self",
                     "title": "This document as GeoJSON",
-                    "href": "https://api.qwikgeo.com/api/v1/collections/user_data.states/items/1"
+                    "href": "https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items/{id}"
                 },
                 {
                     "type": "application/json",
                     "title": "items as GeoJSON",
                     "rel": "items",
-                    "href": "https://api.qwikgeo.com/api/v1/collections/user_data.states/items"
+                    "href": "https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items"
                 },
                 {
                     "type": "application/json",
                     "title": "States",
                     "rel": "collection",
-                    "href": "https://api.qwikgeo.com/api/v1/collections/user_data.states"
+                    "href": "https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}"
                 }
             ]
         }
@@ -310,13 +296,9 @@ Example Response
 ## Update Item
 Update item endpoint allows update an item in a collection. You must pass in all properties to update an item.
 
-Items endpoint is available at `/api/v1/collections/{item}/items/{id}`
+Update Item endpoint is available at `https:/api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items/{id}`
 
-```shell
-curl https://api.qwikgeo.com/api/v1/collections/user_data.parks/items/1
-```
-
-Example Input
+### Example Input
 ```json
 {
     "type": "Feature",
@@ -347,7 +329,7 @@ Example Input
 }
 ```
 
-Example Response
+### Example Response
 ```json
 {
     "type": "Feature",
@@ -381,13 +363,9 @@ Example Response
 ## Delete Item
 Delete item endpoint allows delete an item in a collection.
 
-Items endpoint is available at `/api/v1/collections/{item}/items/{id}`
+Delete Item endpoint is available at `https:/api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items/{id}`
 
-```shell
-curl https://api.qwikgeo.com/api/v1/collections/user_data.parks/items/1
-```
-
-Example Response
+### Example Response
 ```json
 {
     "status": true
@@ -395,15 +373,11 @@ Example Response
 ```
 
 ## Modify Item
-Update item endpoint allows update part of an item in a collection. You do not have to pass all properties.
+Modify item endpoint allows update part of an item in a collection. You do not have to pass all properties.
 
-Items endpoint is available at `/api/v1/collections/{item}/items/{id}`
+Modify Item endpoint is available at `https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items/{id}`
 
-```shell
-curl https://api.qwikgeo.com/api/v1/collections/user_data.parks/items/1
-```
-
-Example Input
+### Example Input
 ```json
 {
     "type": "Feature",
@@ -421,7 +395,7 @@ Example Input
 }
 ```
 
-Example Response
+### Example Response
 ```json
 {
     "type": "Feature",
@@ -438,3 +412,174 @@ Example Response
     "id": 1
 }
 ```
+
+## Queryables
+Queryables endpoint allows you to see queryable information about a collection.
+
+Queryables endpoint is available at `https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/queryables`
+
+### Example Response
+```json
+{
+    "$id": "https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/queryables",
+    "title": "Tennessee State Parks",
+    "type": "object",
+    "$schema": "http://json-schema.org/draft/2019-09/schema",
+    "properties": {
+        "objectid": {
+            "title": "objectid",
+            "type": "numeric"
+        },
+        "manage_area": {
+            "title": "manage_area",
+            "type": "numeric"
+        },
+        "gid": {
+            "title": "gid",
+            "type": "numeric"
+        }
+    }
+}
+```
+
+## Tiles
+Tiles endpoint allows you to get information about generating tiles for a collection.
+
+Tiles endpoint is available at `https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/tiles`
+
+### Example Response
+```json
+{
+    "id": "{scheme}.{table}",
+    "title": "Tennessee State Parks",
+    "description": "",
+    "links": [
+        {
+            "type": "application/json",
+            "rel": "self",
+            "title": "This document as JSON",
+            "href": "https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/tiles"
+        },
+        {
+            "type": "application/vnd.mapbox-vector-tile",
+            "rel": "item",
+            "title": "This collection as Mapbox vector tiles",
+            "href": "https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/tiles/{tile_matrix_set_id}/{tile_matrix}/{tile_row}/{tile_col}",
+            "templated": true
+        },
+        {
+            "type": "application/json",
+            "rel": "describedby",
+            "title": "Metadata for this collection in the TileJSON format",
+            "href": "https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/tiles/{tile_matrix_set_id}/metadata",
+            "templated": true
+        }
+    ],
+    "tileMatrixSetLinks": [
+        {
+            "tileMatrixSet": "WorldCRS84Quad",
+            "tileMatrixSetURI": "http://schemas.opengis.net/tms/1.0/json/examples/WorldCRS84Quad.json"
+        }
+    ]
+}
+```
+
+## Tile
+
+Tile endpoint is available at `https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/tiles/{tile_matrix_set_id}/{tile_matrix}/{tile_row}/{tile_col}`
+
+### Fields
+
+If you have a table with a large amount of fields you can limit the amount of fields returned using the fields parameter.
+
+#### Note
+
+If you use the fields parameter the tile will not be cached on the server.
+
+For example, if we only want the `state_fips` field.
+
+`https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/tiles/{tile_matrix_set_id}/{tile_matrix}/{tile_row}/{tile_col}?fields=state_fips`
+
+### CQL Filtering
+
+CQL filtering is enabled via [pygeofilter](https://pygeofilter.readthedocs.io/en/latest/index.html). This allows you to dynamically filter your tiles database size for larger tiles.
+
+For example, filter the states layer to only show states with a population greater than 1,000,000.
+
+`https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/tiles/{tile_matrix_set_id}/{tile_matrix}/{tile_row}/{tile_col}?cql_filter=population>1000000`
+
+[Geoserver](https://docs.geoserver.org/stable/en/user/tutorials/cql/cql_tutorial.html) has examples of using cql filters.
+
+#### Spatial Filters
+
+| Filters | 
+| --- |
+| Intersects |
+| Equals |
+| Disjoint |
+| Touches |
+| Within |
+| Overlaps |
+| Crosses |
+| Contains |
+
+#### Note
+
+If you use the cql_filter parameter the tile will not be cached on the server.
+
+## Tiles Metadata
+Tiles metadata endpoint allows you to get information about tiles for a collection.
+
+Tiles endpoint is available at `https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/tiles/{tile_matrix_set_id}/metadata`
+
+### Example Response
+```json
+{
+    "tilejson": "3.0.0",
+    "name": "{scheme}.{table}",
+    "tiles": "https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/tiles/WorldCRS84Quad/{tile_matrix}/{tile_row}/{tile_col}?f=mvt",
+    "minzoom": "0",
+    "maxzoom": "22",
+    "attribution": null,
+    "description": "",
+    "vector_layers": [
+        {
+            "id": "{scheme}.{table}",
+            "description": "",
+            "minzoom": 0,
+            "maxzoom": 22,
+            "fields": {
+                "objectid": "numeric",
+                "manage_area": "numeric",
+                "gid": "numeric"
+            }
+        }
+    ]
+}
+```
+
+## Cache Size
+Cache Size endpoint allows you to determine the size of a vector tile cache for each table.
+
+Cache Size endpoint is available at `https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/tiles/cache_size`
+
+Example Response
+```json
+{
+  "size_in_gigabytes": 0.004711238
+}
+```
+
+## Delete Cache
+The delete cache endpoint allows you to delete any vector tile cache on the server.
+
+Delete Cache endpoint is available at `https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/tiles/cache`
+
+### Example Response
+```json
+{
+  "size_in_gigabytes": 0.004711238
+}
+```
+
+
