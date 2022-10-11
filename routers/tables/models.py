@@ -1,4 +1,4 @@
-"""QwikGeo API - Items - Models"""
+"""QwikGeo API - Tables - Models"""
 
 from typing import Literal, List, Optional
 from pydantic import BaseModel, Field
@@ -6,14 +6,12 @@ from pydantic import BaseModel, Field
 class AddColumn(BaseModel):
     """Model for adding a column to a table"""
 
-    table: str
     column_name: str
     column_type: Literal['text','integer','bigint','double precision','boolean','time','uuid']
 
 class DeleteColumn(BaseModel):
     """Model for deleting a column from a table"""
 
-    table: str
     column_name: str
 
 class Column(BaseModel):
@@ -40,11 +38,6 @@ class CreateTable(BaseModel):
     geometry_type: Literal['POINT','LINESTRING','POLYGON']
     srid: int=4326
 
-class DeleteTable(BaseModel):
-    """Model for deleting a table"""
-
-    table: str
-
 class AggregateModel(BaseModel):
     """Model for aggregating data on a numerical column for a table"""
 
@@ -57,9 +50,6 @@ class AggregateModel(BaseModel):
 class StatisticsModel(BaseModel):
     """Model for performing statistics on a numerical column for a table"""
 
-    table: str = Field(
-        title="Name of the table to perform analysis on."
-    )
     coordinates: str = Field(
         default=None, title="A list of coordinates to perform statistics in a certain geographical area."
     )
@@ -71,9 +61,6 @@ class StatisticsModel(BaseModel):
 class BinsModel(BaseModel):
     """Model for creating bins on a numerical column for a table"""
 
-    table: str = Field(
-        title="Name of the table to perform analysis on."
-    )
     coordinates: str = Field(
         default=None, title="A list of coordinates to perform statistics in a certain geographical area."
     )
@@ -86,9 +73,6 @@ class BinsModel(BaseModel):
 class NumericBreaksModel(BaseModel):
     """Model for creating numerical breaks on a numerical column for a table"""
 
-    table: str = Field(
-        title="Name of the table to perform analysis on."
-    )
     coordinates: str = Field(
         default=None, title="A list of coordinates to perform statistics in a certain geographical area."
     )
@@ -108,9 +92,6 @@ class BinModel(BaseModel):
 class CustomBreaksModel(BaseModel):
     """Model for creating custom breaks on a numerical column for a table"""
 
-    table: str = Field(
-        title="Name of the table to perform analysis on."
-    )
     coordinates: str = Field(
         default=None, title="A list of coordinates to perform statistics in a certain geographical area."
     )

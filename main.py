@@ -11,6 +11,7 @@ from routers.authentication import authentication
 from routers.groups import groups
 from routers.users import users
 from routers.items import items
+from routers.tables import tables
 from routers.imports import imports
 from routers.analysis import analysis
 from routers.collections import collections
@@ -73,6 +74,12 @@ app.include_router(
     items.router,
     prefix="/api/v1/items",
     tags=["Items"],
+)
+
+app.include_router(
+    tables.router,
+    prefix="/api/v1/tables",
+    tags=["Tables"],
 )
 
 app.include_router(
