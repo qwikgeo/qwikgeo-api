@@ -17,7 +17,7 @@ Tables endpoint provides a listing of all the tables available to query as vecto
 Tables endpoint is available at `/api/v1/table/tables.json`
 
 ```shell
-curl http://localhost:8000/api/v1/table/tables.json
+curl https://api.qwikgeo.com/api/v1/table/tables.json
 ```
 
 Example Response
@@ -42,7 +42,7 @@ Table endpoint is available at `/api/v1/table/{database}/{scheme}/{table}.json`
 For example, `states` table in `public` schema in `data` database will be available at `/api/v1/table/data/public/states.json`
 
 ```shell
-curl http://localhost:8000/api/v1/table/data/public/states.json
+curl https://api.qwikgeo.com/api/v1/table/data/public/states.json
 ```
 
 Example Response
@@ -153,7 +153,7 @@ Table [TileJSON](https://github.com/mapbox/tilejson-spec) endpoint is available 
 For example, `states` table in `public` schema in `data` database will be available at `/api/v1/tiles/data/public/states.json`
 
 ```shell
-curl http://localhost:8000/api/v1/tiles/data/public/states.json
+curl https://api.qwikgeo.com/api/v1/tiles/data/public/states.json
 ```
 
 Example Response
@@ -191,7 +191,7 @@ In your request you have to pass the following.
 Cache Size endpoint allows you to determine the size of a vector tile cache for each table.
 
 ```shell
-curl http://localhost:8000/api/v1/api/v1/tiles/cache_size
+curl https://api.qwikgeo.com/api/v1/api/v1/tiles/cache_size
 ```
 
 Example Response

@@ -1,15 +1,18 @@
 """QwikGeo API - Collections"""
 
 import os
+import json
+import shutil
 from typing import Optional
 from functools import reduce
-from fastapi import Request, APIRouter, Depends, status, Response
+from fastapi import Request, APIRouter, Depends, status, Response, HTTPException
 from starlette.responses import FileResponse
 from pygeofilter.backends.sql import to_sql_where
 from pygeofilter.parsers.ecql import parse
 from tortoise.expressions import Q
 from tortoise.query_utils import Prefetch
 
+import routers.collections.models as models
 import utilities
 import db_models
 import config
@@ -559,6 +562,157 @@ async def items(
 
         return results
 
+@router.post(
+    path="/{scheme}.{table}/items",
+    responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                -88.8892,
+                                36.201015
+                            ]
+                        },
+                        "properties": {},
+                        "id": 1
+                    }                       
+                }
+            }
+        },
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def create_item(
+    scheme: str,
+    table: str,
+    info: models.Geojson,
+    request: Request,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """
+    Create a new item to a collection.
+    More information at https://docs.qwikgeo.com/collections/#create-item
+    """
+
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name,
+        write_access=True
+    )
+
+    pool = request.app.state.database
+
+    async with pool.acquire() as con:
+
+        sql_field_query = f"""
+        SELECT column_name, data_type
+        FROM information_schema.columns
+        WHERE table_name = '{table}'
+        AND column_name != 'geom'
+        AND column_name != 'gid';
+        """
+
+        db_fields = await con.fetch(sql_field_query)
+
+        db_columns = []
+
+        db_column_types = {}
+
+        for field in db_fields:
+            db_columns.append(field['column_name'])
+            db_column_types[field['column_name']] = {
+                "used": False,
+                "type": field['data_type']
+            }
+
+        string_columns = ",".join(db_columns)
+
+        input_columns = ""
+        values = ""
+        
+        for column in info.properties:
+            if column not in db_columns:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"""Column: {column} is not a column for {table}.
+                    Please use one of the following columns. {string_columns}"""
+                )
+            input_columns += f""""{column}","""
+            if db_column_types[column]['type'] in config.NUMERIC_FIELDS:
+                values += f"""{float(info.properties[column])},"""
+            else:
+                values += f"""'{info.properties[column]}',"""
+            
+            db_column_types[column]['used'] = True
+        
+        for column in db_column_types:
+            if db_column_types[column]['used'] == False:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"""Column {column} was not used. Add {column} to your properties."""
+                )
+
+        input_columns = input_columns[:-1]
+        values = values[:-1]
+
+        query = f"""
+            INSERT INTO user_data."{table}" ({input_columns})
+            VALUES ({values})
+            RETURNING gid;
+        """
+
+        result = await con.fetch(query)
+
+        geojson = {
+            "type": info.geometry.type,
+            "coordinates": json.loads(json.dumps(info.geometry.coordinates))
+        }
+
+        geom_query = f"""
+            UPDATE user_data."{table}"
+            SET geom = ST_GeomFromGeoJSON('{json.dumps(geojson)}')
+            WHERE gid = {result[0]['gid']};
+        """
+
+        await con.fetch(geom_query)
+
+        if os.path.exists(f'{os.getcwd()}/cache/user_data{table}'):
+            shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table}')
+
+        info.properties['gid'] = result[0]['gid']
+
+        info.id = result[0]['gid']
+
+        return info
+
 @router.get(
     path="/{scheme}.{table}/items/{id}",
     responses={
@@ -696,6 +850,384 @@ async def item(
         ]
 
         return results['features'][0]
+
+@router.put(
+    path="/{scheme}.{table}/items/{id}",
+    responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                -88.8892,
+                                36.201015
+                            ]
+                        },
+                        "properties": {},
+                        "id": 1
+                    }                       
+                }
+            }
+        },
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def update_item(
+    scheme: str,
+    table: str,
+    id: int,
+    info: models.Geojson,
+    request: Request,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """
+    Update an item in a collection.
+    More information at https://docs.qwikgeo.com/collections/#update-item
+    """
+
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name,
+        write_access=True
+    )
+
+    pool = request.app.state.database
+
+    async with pool.acquire() as con:
+
+        sql_field_query = f"""
+        SELECT column_name, data_type
+        FROM information_schema.columns
+        WHERE table_name = '{table}'
+        AND column_name != 'geom'
+        AND column_name != 'gid';
+        """
+
+        db_fields = await con.fetch(sql_field_query)
+
+        db_columns = []
+
+        db_column_types = {}
+
+        for field in db_fields:
+            db_columns.append(field['column_name'])
+            db_column_types[field['column_name']] = {
+                "type": field['data_type'],
+                "used": False,
+            }
+
+        string_columns = ",".join(db_columns)
+
+        exist_query = f"""
+        SELECT count(*)
+        FROM user_data."{table}"
+        WHERE gid = {id}
+        """
+
+        exists = await con.fetchrow(exist_query)
+
+        if exists['count'] == 0:
+            raise HTTPException(
+                    status_code=400,
+                    detail=f"""Item {info.id} does not exist."""
+                )
+
+        query = f"""
+            UPDATE user_data."{table}"
+            SET 
+        """
+        
+        for column in info.properties:
+            if column not in db_columns:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"""Column: {column} is not a column for {table}.
+                    Please use one of the following columns. {string_columns}"""
+                )
+            if db_column_types[column]['type'] in config.NUMERIC_FIELDS:
+                query += f"{column} = {info.properties[column]},"
+            else:
+                query += f"{column} = '{info.properties[column]}',"
+            
+            db_column_types[column]['used'] = True
+        
+        for column in db_column_types:
+            if db_column_types[column]['used'] == False:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"""Column {column} was not used. Add {column} to your properties."""
+                )
+
+        query = query[:-1]
+
+        query += f" WHERE gid = {info.id};"
+
+        await con.fetch(query)
+
+        geojson = {
+            "type": info.geometry.type,
+            "coordinates": json.loads(json.dumps(info.geometry.coordinates))
+        }
+
+        geom_query = f"""
+            UPDATE user_data."{table}"
+            SET geom = ST_GeomFromGeoJSON('{json.dumps(geojson)}')
+            WHERE gid = {id};
+        """
+
+        await con.fetch(geom_query)
+
+        if os.path.exists(f'{os.getcwd()}/cache/user_data_{table}'):
+            shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table}')
+
+        return info
+
+@router.patch(
+    path="/{scheme}.{table}/items/{id}",
+    responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                -88.8892,
+                                36.201015
+                            ]
+                        },
+                        "properties": {},
+                        "id": 1
+                    }                       
+                }
+            }
+        },
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def modify_item(
+    scheme: str,
+    table: str,
+    id: int,
+    info: models.Geojson,
+    request: Request,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """
+    Modify an item in a collection.
+    More information at https://docs.qwikgeo.com/collections/#modify-item
+    """
+
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name,
+        write_access=True
+    )
+
+    pool = request.app.state.database
+
+    async with pool.acquire() as con:
+
+        sql_field_query = f"""
+        SELECT column_name, data_type
+        FROM information_schema.columns
+        WHERE table_name = '{table}'
+        AND column_name != 'geom'
+        AND column_name != 'gid';
+        """
+
+        db_fields = await con.fetch(sql_field_query)
+
+        db_columns = []
+
+        db_column_types = {}
+
+        for field in db_fields:
+            db_columns.append(field['column_name'])
+            db_column_types[field['column_name']] = {
+                "type": field['data_type']
+            }
+
+        string_columns = ",".join(db_columns)
+
+        exist_query = f"""
+        SELECT count(*)
+        FROM user_data."{table}"
+        WHERE gid = {id}
+        """
+
+        exists = await con.fetchrow(exist_query)
+
+        if exists['count'] == 0:
+            raise HTTPException(
+                    status_code=400,
+                    detail=f"""Item {info.id} does not exist."""
+                )
+
+        query = f"""
+            UPDATE user_data."{table}"
+            SET 
+        """
+        
+        for column in info.properties:
+            if column not in db_columns:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"""Column: {column} is not a column for {table}.
+                    Please use one of the following columns. {string_columns}"""
+                )
+            if db_column_types[column]['type'] in config.NUMERIC_FIELDS:
+                query += f"{column} = {info.properties[column]},"
+            else:
+                query += f"{column} = '{info.properties[column]}',"
+
+        query = query[:-1]
+
+        query += f" WHERE gid = {id};"
+
+        await con.fetch(query)
+
+        geojson = {
+            "type": info.geometry.type,
+            "coordinates": json.loads(json.dumps(info.geometry.coordinates))
+        }
+
+        geom_query = f"""
+            UPDATE user_data."{table}"
+            SET geom = ST_GeomFromGeoJSON('{json.dumps(geojson)}')
+            WHERE gid = {id};
+        """
+
+        await con.fetch(geom_query)
+
+        if os.path.exists(f'{os.getcwd()}/cache/user_data_{table}'):
+            shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table}')
+
+        return info
+
+@router.delete(
+    path="/{scheme}.{table}/items/{id}",
+    responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "status": True
+                    }                       
+                }
+            }
+        },
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def delete_item(
+    scheme: str,
+    table: str,
+    id: int,
+    request: Request,
+    user_name: int=Depends(utilities.get_token_header)
+):
+    """
+    Delete an item in a collection.
+    More information at https://docs.qwikgeo.com/collections/#delete-item
+    """
+
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name,
+        write_access=True
+    )
+
+    pool = request.app.state.database
+
+    async with pool.acquire() as con:
+        query = f"""
+            DELETE FROM user_data."{table}"
+            WHERE gid = {id};
+        """
+
+        await con.fetch(query)
+
+        if os.path.exists(f'{os.getcwd()}/cache/user_data_{table}'):
+            shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table}')
+
+        return {"status": True}
 
 @router.get(
     path="/{scheme}.{table}/tiles",

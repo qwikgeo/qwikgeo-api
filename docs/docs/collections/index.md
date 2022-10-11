@@ -3,9 +3,13 @@
 | Method | URL                                                                              | Description                             |
 | ------ | -------------------------------------------------------------------------------- | ----------------------------------------|
 | `GET`  | `/api/v1/collections`                                                       | [Collections](#collections)                  |
-| `GET`  | `/api/v1/collections/{name}`                                                | [Feature Collection](#feature-collection)    |
-| `GET`  | `/api/v1/collections/{name}/items`                                          | [Features](#features)                        |
-| `GET`  | `/api/v1/collections/{name}/items/{id}`                                     | [Feature](#feature)                          |
+| `GET`  | `/api/v1/collections/{name}`                                                | [Collection](#collection)    |
+| `GET`  | `/api/v1/collections/{name}/items`                                          | [Items](#items)                        |
+| `POST`  | `/api/v1/collections/{name}/items`                                         | [Create Item](#create-item)                        |
+| `GET`  | `/api/v1/collections/{name}/items/{id}`                                     | [Item](#item)                          |
+| `PUT`  | `/api/v1/collections/{name}/items/{id}`                                     | [Update Item](#update-item)                          |
+| `DELETE`  | `/api/v1/collections/{name}/items/{id}`                                  | [Delete Item](#delete-item)                          |
+| `PATCH`  | `/api/v1/collections/{name}/items/{id}`                                   | [Modify Item](#modify-item)                          |
 
 ## Endpoint Description's
 
@@ -15,7 +19,7 @@ Collection endpoint returns a list of all available tables to query.
 Collections endpoint is available at `/api/v1/collections`
 
 ```shell
-curl http://localhost:8000/api/v1/collections
+curl https://api.qwikgeo.com/api/v1/collections
 ```
 
 Example Response
@@ -36,6 +40,7 @@ Example Response
                 "href": "https://api.qwikgeo.com/api/v1/collections/user_data.zip_centroids"
             }
         ],
+        "geometry": "point",
         "extent": {
             "spatial": {
                 "bbox": [
@@ -52,32 +57,43 @@ Example Response
   {},...
 ```
 
-## Feature Collection
-Feature Collection endpoint returns information about a single table.
+## Collection
+Collection endpoint returns information about a single table.
 
 Collections endpoint is available at `/api/v1/collections/{item}`
 
 ```shell
-curl http://localhost:8000/api/v1/collections/user_data.zip_centroids
+curl https://api.qwikgeo.com/api/v1/collections/user_data.zip_centroids
 ```
 
 Example Response
 ```json
 {
     "id": "user_data.zip_centroids",
-    "title": "user_data.zip_centroids",
-    "description": "user_data.zip_centroids",
-    "keywords": [
-        "user_data.zip_centroids"
-    ],
+    "title": "Zip Centroids",
+    "description": "",
+    "keywords": [],
     "links": [
         {
             "type": "application/json",
             "rel": "self",
             "title": "Items as GeoJSON",
             "href": "https://api.qwikgeo.com/api/v1/collections/user_data.zip_centroids/items"
+        },
+        {
+            "type": "application/json",
+            "rel": "queryables",
+            "title": "Queryables for this collection as JSON",
+            "href": "https://api.qwikgeo.com/api/v1/collections/user_data.zip_centroids/queryables"
+        },
+        {
+            "type": "application/json",
+            "rel": "tiles",
+            "title": "Tiles as JSON",
+            "href": "https://api.qwikgeo.com/api/v1/collections/user_data.zip_centroids/tiles"
         }
     ],
+    "geometry": "point",
     "extent": {
         "spatial": {
             "bbox": [
@@ -93,13 +109,13 @@ Example Response
 }
 ```
 
-## Features
-Features endpoint returns a geojson feature collection for a feature collection.
+## Items
+Items endpoint returns a geojson feature collection for a collection.
 
-Collections endpoint is available at `/api/v1/collections/{item}/items`
+Items endpoint is available at `/api/v1/collections/{item}/items`
 
 ```shell
-curl http://localhost:8000/api/v1/collections/user_data.states/items
+curl https://api.qwikgeo.com/api/v1/collections/user_data.states/items
 ```
 
 ### Parameters
@@ -135,21 +151,108 @@ Example Response
                 "sub_region": "Mountain",
                 "state_abbr": "NV",
                 "population": 2994047
-            }
+            },
+            "id": 1
         },
         ...
+    ],
+    "numberMatched": 57,
+    "numberReturned": 1,
+    "links": [
+        {
+            "type": "application/json",
+            "rel": "self",
+            "title": "This document as GeoJSON",
+            "href": "https://api.qwikgeo.com/api/v1/collections/user_data.states/items"
+        },
+        {
+            "type": "application/json",
+            "title": "States",
+            "rel": "collection",
+            "href": "https://api.qwikgeo.com/api/v1/collections/user_data.states"
+        }
     ]
 }
 ```
 
-## Feature
+## Create Item
+Create item endpoint allows you to add an item to a collection.
 
-Feature endpoint returns a geojson feature collection for a single feature in a feature collection.
-
-Collections endpoint is available at `/api/v1/collections/{item}/items/{id}`
+Items endpoint is available at `/api/v1/collections/{item}/items`
 
 ```shell
-curl http://localhost:8000/api/v1/collections/user_data.states/items/5
+curl https://api.qwikgeo.com/api/v1/collections/user_data.parks/items
+```
+
+Example Input
+```json
+{
+    "type": "Feature",
+    "geometry": {
+        "type": "Point",
+        "coordinates": [
+            -88.8892,
+            36.201015
+        ]
+    },
+    "properties": {      
+        "objectid": 45,  
+        "manage_area": 2,
+        "am_first_name": "Ryan",
+        "am_last_name": "Forbess",
+        "am_title": "Area Manager",
+        "am_email": "Ryan.Forbess@tn.gov",
+        "am_phone": "731-358-9724",
+        "pm_first_name": "Michael",
+        "pm_last_name": "Beasley",
+        "pm_email": "Michael.Beasley@tn.gov",
+        "pm_title": "Park Manager 1",
+        "pm_phone": "731-253-9652",
+        "park_name": "Big Cypress Tree State Park",
+        "tsp_uid": "TSP-0314"
+    }
+}
+```
+
+Example Response
+```json
+{
+    "type": "Feature",
+    "geometry": {
+        "type": "Point",
+        "coordinates": [
+            -88.8892,
+            36.201015
+        ]
+    },
+    "properties": {      
+        "objectid": 45,  
+        "manage_area": 2,
+        "am_first_name": "Ryan",
+        "am_last_name": "Forbess",
+        "am_title": "Area Manager",
+        "am_email": "Ryan.Forbess@tn.gov",
+        "am_phone": "731-358-9724",
+        "pm_first_name": "Michael",
+        "pm_last_name": "Beasley",
+        "pm_email": "Michael.Beasley@tn.gov",
+        "pm_title": "Park Manager 1",
+        "pm_phone": "731-253-9652",
+        "park_name": "Big Cypress Tree State Park",
+        "tsp_uid": "TSP-0314"
+    },
+    "id": 63
+}
+```
+
+## Item
+
+Item endpoint returns a geojson feature collection for a single feature in a collection.
+
+Item endpoint is available at `/api/v1/collections/{item}/items/{id}`
+
+```shell
+curl https://api.qwikgeo.com/api/v1/collections/user_data.states/items/5
 ```
 
 ### Parameters
@@ -177,8 +280,161 @@ Example Response
                 "sub_region": "Mountain",
                 "state_abbr": "NV",
                 "population": 2994047
-            }
+            },
+            "id": 1,
+            "links": [
+                {
+                    "type": "application/json",
+                    "rel": "self",
+                    "title": "This document as GeoJSON",
+                    "href": "https://api.qwikgeo.com/api/v1/collections/user_data.states/items/1"
+                },
+                {
+                    "type": "application/json",
+                    "title": "items as GeoJSON",
+                    "rel": "items",
+                    "href": "https://api.qwikgeo.com/api/v1/collections/user_data.states/items"
+                },
+                {
+                    "type": "application/json",
+                    "title": "States",
+                    "rel": "collection",
+                    "href": "https://api.qwikgeo.com/api/v1/collections/user_data.states"
+                }
+            ]
         }
     ]
+}
+```
+
+## Update Item
+Update item endpoint allows update an item in a collection. You must pass in all properties to update an item.
+
+Items endpoint is available at `/api/v1/collections/{item}/items/{id}`
+
+```shell
+curl https://api.qwikgeo.com/api/v1/collections/user_data.parks/items/1
+```
+
+Example Input
+```json
+{
+    "type": "Feature",
+    "geometry": {
+        "type": "Point",
+        "coordinates": [
+            -88.8892,
+            36.201015
+        ]
+    },
+    "properties": {      
+        "objectid": 45,  
+        "manage_area": 2,
+        "am_first_name": "Ryan",
+        "am_last_name": "Forbess",
+        "am_title": "Area Manager",
+        "am_email": "Ryan.Forbess@tn.gov",
+        "am_phone": "731-358-9724",
+        "pm_first_name": "Michael",
+        "pm_last_name": "Beasley",
+        "pm_email": "Michael.Beasley@tn.gov",
+        "pm_title": "Park Manager 1",
+        "pm_phone": "731-253-9652",
+        "park_name": "Big Cypress Tree State Park",
+        "tsp_uid": "TSP-0314"
+    },
+    "id": 1
+}
+```
+
+Example Response
+```json
+{
+    "type": "Feature",
+    "geometry": {
+        "type": "Point",
+        "coordinates": [
+            -88.8892,
+            36.201015
+        ]
+    },
+    "properties": {      
+        "objectid": 45,  
+        "manage_area": 2,
+        "am_first_name": "Ryan",
+        "am_last_name": "Forbess",
+        "am_title": "Area Manager",
+        "am_email": "Ryan.Forbess@tn.gov",
+        "am_phone": "731-358-9724",
+        "pm_first_name": "Michael",
+        "pm_last_name": "Beasley",
+        "pm_email": "Michael.Beasley@tn.gov",
+        "pm_title": "Park Manager 1",
+        "pm_phone": "731-253-9652",
+        "park_name": "Big Cypress Tree State Park",
+        "tsp_uid": "TSP-0314"
+    },
+    "id": 1
+}
+```
+
+## Delete Item
+Delete item endpoint allows delete an item in a collection.
+
+Items endpoint is available at `/api/v1/collections/{item}/items/{id}`
+
+```shell
+curl https://api.qwikgeo.com/api/v1/collections/user_data.parks/items/1
+```
+
+Example Response
+```json
+{
+    "status": true
+}
+```
+
+## Modify Item
+Update item endpoint allows update part of an item in a collection. You do not have to pass all properties.
+
+Items endpoint is available at `/api/v1/collections/{item}/items/{id}`
+
+```shell
+curl https://api.qwikgeo.com/api/v1/collections/user_data.parks/items/1
+```
+
+Example Input
+```json
+{
+    "type": "Feature",
+    "geometry": {
+        "type": "Point",
+        "coordinates": [
+            -88.8892,
+            36.201015
+        ]
+    },
+    "properties": {      
+        "park_name": "Big Cypress Tree State Park (New)"
+    },
+    "id": 1
+}
+```
+
+Example Response
+```json
+{
+    "type": "Feature",
+    "geometry": {
+        "type": "Point",
+        "coordinates": [
+            -88.8892,
+            36.201015
+        ]
+    },
+    "properties": {      
+        "park_name": "Big Cypress Tree State Park (New)",
+    },
+    "id": 1
 }
 ```

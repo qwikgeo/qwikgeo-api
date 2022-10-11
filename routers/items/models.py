@@ -1,52 +1,7 @@
 """QwikGeo API - Items - Models"""
 
-from typing import NamedTuple, Union, Literal, List, Optional
+from typing import Literal, List, Optional
 from pydantic import BaseModel, Field
-from typing_extensions import Annotated
-
-LonField = Annotated[
-    Union[float, int],
-    Field(
-        title='Coordinate longitude',
-        gt=-180,
-        lt=180,
-    ),
-]
-
-LatField = Annotated[
-    Union[float, int],
-    Field(
-        title='Coordinate latitude',
-        gt=-90,
-        lt=90,
-    ),
-]
-
-class EditRowAttributes(BaseModel):
-    """Model for editing row attributes"""
-
-    table: str
-    gid: int
-    values: object
-
-class Coordinates(NamedTuple):
-    """Class for creating coordinates"""
-
-    lon: LonField
-    lat: LatField
-
-class Geojson(BaseModel):
-    """Model for geojson"""
-
-    type: Literal['Point','MultiPoint','LineString','MultiLineString','Polygon','MultiPolygon']
-    coordinates: Coordinates
-
-class EditRowGeometry(BaseModel):
-    """Model for editing row geometry"""
-
-    table: str
-    gid: int
-    geojson: Geojson
 
 class AddColumn(BaseModel):
     """Model for adding a column to a table"""
@@ -60,25 +15,6 @@ class DeleteColumn(BaseModel):
 
     table: str
     column_name: str
-
-class RowColumn(BaseModel):
-    """Model for a row in a table"""
-
-    column_name: str
-    value: str
-
-class AddRow(BaseModel):
-    """Model for adding a row to a table"""
-
-    table: str
-    columns: List[RowColumn]
-    geojson: Geojson
-
-class DeleteRow(BaseModel):
-    """Model for deleting a row for a table"""
-
-    table: str
-    gid: int
 
 class Column(BaseModel):
     """Model for adding a column"""
