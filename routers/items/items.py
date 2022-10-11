@@ -1243,3 +1243,80 @@ async def custom_break_values(
             "results": results,
             "status": "SUCCESS"
         }
+
+@router.get(
+    path="/tables/table/{table}/autocomplete",
+    responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": ["str","str"]                    
+                }
+            }
+        },
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def table_autocomplete(    
+    table: str,
+    column: str,
+    q: str,
+    request: Request,
+    limit: int=10,    
+    user_name: int=Depends(utilities.get_token_header),
+    
+):
+    """
+    Retrieve distinct values for a column in a table.
+    More information at https://docs.qwikgeo.com/items/#table-autocomplete
+    """
+
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name
+    )
+
+    pool = request.app.state.database
+
+    async with pool.acquire() as con:
+
+        results = []
+
+        query = f"""
+            SELECT distinct("{column}")
+            FROM user_data.{table}
+            WHERE "{column}" ilike '%{q}%'
+            ORDER BY "{column}"
+            LIMIT {limit}
+        """
+
+        data = await con.fetch(query)
+
+        for row in data:
+            results.append(row[column])        
+
+        return results
