@@ -139,8 +139,14 @@ async def landing_page(
             {
                 "rel": "service-desc",
                 "type": "application/vnd.oai.openapi+json;version=3.0",
-                "title": "The OpenAPI definition as JSON",
+                "title": "the OpenAPI definition as JSON",
                 "href": f"{url}openapi.json"
+            },
+            {
+                "rel": "service-doc",
+                "type": "text/html",
+                "title": "the API documentation",
+                "href": f"{url}docs"
             }
         ],
         "title": "QwikGeo API",
@@ -158,6 +164,7 @@ async def conformance():
         "conformsTo": [
             "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core",
             "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/geojson",
+            "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/oas30",
             "http://www.opengis.net/spec/ogcapi-tiles-1/1.0/conf/core"
         ]
     }
