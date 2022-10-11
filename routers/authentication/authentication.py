@@ -40,7 +40,10 @@ router = APIRouter()
 async def create_token(
     form_data: models.Login
 ):
-    """Create a JWT token to authenticate with api via a valid username and password."""
+    """
+    Create a JWT token to authenticate with api via a valid username and password.
+    More information at https://docs.qwikgeo.com/authentication/#token
+    """
 
     user = await utilities.authenticate_user(form_data.username, form_data.password)
 
@@ -82,7 +85,10 @@ async def create_token(
 async def google_token_authenticate(
     info: models.GoogleTokenAuthenticate
 ):
-    """Create a JWT token to authenticate with api via a valid Google JWT."""
+    """
+    Create a JWT token to authenticate with api via a valid Google JWT.
+    More information at https://docs.qwikgeo.com/authentication/#google-token-authenticate
+    """
 
     try:
         user = id_token.verify_oauth2_token(info.token, requests.Request(), config.GOOGLE_CLIENT_ID)
