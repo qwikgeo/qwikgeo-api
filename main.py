@@ -107,12 +107,59 @@ async def shutdown_event():
 
 @app.get(
     path="/api/v1/",
-    tags=["Landing Page"]
+    tags=["Landing Page"],
+    responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "links": [
+                            {
+                                "rel": "self",
+                                "type": "application/json",
+                                "title": "This document as JSON",
+                                "href": "https://api.qwikgeo.com/api/v1/"
+                            },
+                            {
+                                "rel": "conformance",
+                                "type": "application/json",
+                                "title": "Conformance",
+                                "href": "https://api.qwikgeo.com/api/v1/conformance"
+                            },
+                            {
+                                "rel": "data",
+                                "type": "application/json",
+                                "title": "Collections",
+                                "href": "https://api.qwikgeo.com/api/v1/collections"
+                            },
+                            {
+                                "rel": "service-desc",
+                                "type": "application/vnd.oai.openapi+json;version=3.0",
+                                "title": "The OpenAPI definition as JSON",
+                                "href": "https://api.qwikgeo.com/openapi.json"
+                            }
+                        ],
+                        "title": "QwikGeo API",
+                        "description": DESCRIPTION
+                    }
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
 )
 async def landing_page(
     request: Request
 ):
-    """Method to show landing page."""
+    """Get landing page."""
 
     url = str(request.base_url)
 
@@ -149,10 +196,36 @@ async def landing_page(
 
 @app.get(
     path="/api/v1/conformance",
-    tags=["Conformance"]
+    tags=["Conformance"],
+    responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "conformsTo": [
+                            "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core",
+                            "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/geojson",
+                            "http://www.opengis.net/spec/ogcapi-features-3/1.0/conf/filter",
+                            "http://www.opengis.net/spec/ogcapi-features-4/1.0/req/features",
+                            "http://www.opengis.net/spec/ogcapi-tiles-1/1.0/conf/core"
+                        ]
+                    }
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
 )
 async def conformance():
-    """Method to show conformance."""
+    """Get conformance of api."""
 
     return {
         "conformsTo": [
