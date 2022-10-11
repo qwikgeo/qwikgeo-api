@@ -239,7 +239,25 @@ async def conformance():
 
 @app.get(
     path="/api/v1/health_check",
-    tags=["Health"]
+    tags=["Health"],
+    responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {"status": "UP"}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
 )
 async def health():
     """Method used to verify server is healthy."""
