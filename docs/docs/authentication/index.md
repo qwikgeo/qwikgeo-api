@@ -34,7 +34,7 @@ Token endpoint is available at `https://api.qwikgeo.com/api/v1/authentication/to
 ## Google Token Authenticate
 
 ### Description
-The token endpoint allows you to receive a JWT token to authenticate with the API via a Google JWT Token.
+The google token authenticate endpoint allows you to receive a JWT token to authenticate with the API via a Google JWT Token.
 
 Google Token Authenticate endpoint is available at `https://api.qwikgeo.com/api/v1/authentication/google_token_authenticate`
 
