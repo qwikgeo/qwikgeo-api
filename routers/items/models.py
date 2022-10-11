@@ -183,11 +183,3 @@ class CustomBreaksModel(BaseModel):
     filter: str=None
     column: str
     breaks: List[BinModel]
-
-class TableAutocomplete(BaseModel):
-    """Model for table autocomplete"""
-    
-    table: str
-    column: str
-    q: str
-    limit: int=10
