@@ -12,6 +12,7 @@
 | `POST`  | `/api/v1/items/tables/bins`                                                           | [Bins](#bins)                               |
 | `POST`  | `/api/v1/items/tables/numeric_breaks`                                                 | [Numeric Breaks](#numeric-breaks)           |
 | `POST`  | `/api/v1/items/tables/custom_break_values`                                            | [Custom Break Values](#custom-break-values) |
+| `GET`   | `/api/v1/items/tables/table/{table}/autocomplete`                                      | [Table Autocomplete](#table-autocomplete) |
 
 ## Endpoint Description's
 
@@ -515,4 +516,33 @@ off of the column `population` for the table `zip_centroids` using a quantile br
     ],
     "status": "SUCCESS"
 }
+```
+
+## Table Autocomplete
+
+### Description
+Return a list of possible values from a column in a table in alphabetical order.
+
+### Parameters
+* `q=q` - The search term used when performing a lookup
+* `column=column` - Name of the column to perform lookup against
+
+Example: Search for possible park names in Tennessee that contain `bi`.
+
+### Example Input
+```shell
+curl https://api.qwikgeo.com/api/v1/items/tables/table/{table}/autocomplete?q=bi&column=park_name
+```
+
+### Example Output
+```json
+[
+    "Bicentennial Capitol Mall State Park",
+    "Big Cypress Tree State Park",
+    "Big Hill Pond State Park",
+    "Big Ridge State Park",
+    "Cordell Hull Birthplace State Park",
+    "David Crockett Birthplace State Park",
+    "Seven Islands State Birding Park"
+]
 ```
