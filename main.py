@@ -158,6 +158,8 @@ async def conformance():
         "conformsTo": [
             "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core",
             "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/geojson",
+            "http://www.opengis.net/spec/ogcapi-features-3/1.0/conf/filter",
+            "http://www.opengis.net/spec/ogcapi-features-4/1.0/req/features",
             "http://www.opengis.net/spec/ogcapi-tiles-1/1.0/conf/core"
         ]
     }

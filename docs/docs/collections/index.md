@@ -3,9 +3,9 @@
 | Method | URL                                                                              | Description                             |
 | ------ | -------------------------------------------------------------------------------- | ----------------------------------------|
 | `GET`  | `/api/v1/collections`                                                       | [Collections](#collections)                  |
-| `GET`  | `/api/v1/collections/{name}`                                                | [Feature Collection](#feature-collection)    |
-| `GET`  | `/api/v1/collections/{name}/items`                                          | [Features](#features)                        |
-| `GET`  | `/api/v1/collections/{name}/items/{id}`                                     | [Feature](#feature)                          |
+| `GET`  | `/api/v1/collections/{name}`                                                | [Collection](#collection)    |
+| `GET`  | `/api/v1/collections/{name}/items`                                          | [Items](#items)                        |
+| `GET`  | `/api/v1/collections/{name}/items/{id}`                                     | [Item](#item)                          |
 
 ## Endpoint Description's
 
@@ -15,7 +15,7 @@ Collection endpoint returns a list of all available tables to query.
 Collections endpoint is available at `/api/v1/collections`
 
 ```shell
-curl http://localhost:8000/api/v1/collections
+curl https://api.qwikgeo.com/api/v1/collections
 ```
 
 Example Response
@@ -36,6 +36,7 @@ Example Response
                 "href": "https://api.qwikgeo.com/api/v1/collections/user_data.zip_centroids"
             }
         ],
+        "geometry": "point",
         "extent": {
             "spatial": {
                 "bbox": [
@@ -52,32 +53,43 @@ Example Response
   {},...
 ```
 
-## Feature Collection
-Feature Collection endpoint returns information about a single table.
+## Collection
+Collection endpoint returns information about a single table.
 
 Collections endpoint is available at `/api/v1/collections/{item}`
 
 ```shell
-curl http://localhost:8000/api/v1/collections/user_data.zip_centroids
+curl https://api.qwikgeo.com/api/v1/collections/user_data.zip_centroids
 ```
 
 Example Response
 ```json
 {
     "id": "user_data.zip_centroids",
-    "title": "user_data.zip_centroids",
-    "description": "user_data.zip_centroids",
-    "keywords": [
-        "user_data.zip_centroids"
-    ],
+    "title": "Zip Centroids",
+    "description": "",
+    "keywords": [],
     "links": [
         {
             "type": "application/json",
             "rel": "self",
             "title": "Items as GeoJSON",
             "href": "https://api.qwikgeo.com/api/v1/collections/user_data.zip_centroids/items"
+        },
+        {
+            "type": "application/json",
+            "rel": "queryables",
+            "title": "Queryables for this collection as JSON",
+            "href": "https://api.qwikgeo.com/api/v1/collections/user_data.zip_centroids/queryables"
+        },
+        {
+            "type": "application/json",
+            "rel": "tiles",
+            "title": "Tiles as JSON",
+            "href": "https://api.qwikgeo.com/api/v1/collections/user_data.zip_centroids/tiles"
         }
     ],
+    "geometry": "point",
     "extent": {
         "spatial": {
             "bbox": [
@@ -93,13 +105,13 @@ Example Response
 }
 ```
 
-## Features
-Features endpoint returns a geojson feature collection for a feature collection.
+## Items
+Items endpoint returns a geojson feature collection for a collection.
 
-Collections endpoint is available at `/api/v1/collections/{item}/items`
+Items endpoint is available at `/api/v1/collections/{item}/items`
 
 ```shell
-curl http://localhost:8000/api/v1/collections/user_data.states/items
+curl https://api.qwikgeo.com/api/v1/collections/user_data.states/items
 ```
 
 ### Parameters
@@ -135,21 +147,38 @@ Example Response
                 "sub_region": "Mountain",
                 "state_abbr": "NV",
                 "population": 2994047
-            }
+            },
+            "id": 1
         },
         ...
+    ],
+    "numberMatched": 57,
+    "numberReturned": 1,
+    "links": [
+        {
+            "type": "application/json",
+            "rel": "self",
+            "title": "This document as GeoJSON",
+            "href": "https://api.qwikgeo.com/api/v1/collections/user_data.states/items"
+        },
+        {
+            "type": "application/json",
+            "title": "States",
+            "rel": "collection",
+            "href": "https://api.qwikgeo.com/api/v1/collections/user_data.states"
+        }
     ]
 }
 ```
 
-## Feature
+## Item
 
-Feature endpoint returns a geojson feature collection for a single feature in a feature collection.
+Item endpoint returns a geojson feature collection for a single feature in a collection.
 
-Collections endpoint is available at `/api/v1/collections/{item}/items/{id}`
+Item endpoint is available at `/api/v1/collections/{item}/items/{id}`
 
 ```shell
-curl http://localhost:8000/api/v1/collections/user_data.states/items/5
+curl https://api.qwikgeo.com/api/v1/collections/user_data.states/items/5
 ```
 
 ### Parameters
@@ -177,7 +206,28 @@ Example Response
                 "sub_region": "Mountain",
                 "state_abbr": "NV",
                 "population": 2994047
-            }
+            },
+            "id": 1,
+            "links": [
+                {
+                    "type": "application/json",
+                    "rel": "self",
+                    "title": "This document as GeoJSON",
+                    "href": "https://api.qwikgeo.com/api/v1/collections/user_data.states/items/1"
+                },
+                {
+                    "type": "application/json",
+                    "title": "items as GeoJSON",
+                    "rel": "items",
+                    "href": "https://api.qwikgeo.com/api/v1/collections/user_data.states/items"
+                },
+                {
+                    "type": "application/json",
+                    "title": "States",
+                    "rel": "collection",
+                    "href": "https://api.qwikgeo.com/api/v1/collections/user_data.states"
+                }
+            ]
         }
     ]
 }

@@ -4,8 +4,6 @@
 | ------ | -------------------------------------------------------------------------------- | ------------------------------------------- |
 | `POST`  | `/api/v1/items/tables/add_column`                                                     | [Add Column](#add-column)                   |
 | `DELETE`  | `/api/v1/items/tables/delete_column`                                                | [Delete Column](#delete-column)             |
-| `POST`  | `/api/v1/items/tables/add_row`                                                        | [Add Row](#add-row)                         |
-| `DELETE`  | `/api/v1/items/tables/delete_row`                                                   | [Delete Row](#delete-row)                   |
 | `DELETE`  | `/api/v1/items/tables/delete_table`                                                 | [Delete Table](#delete-table)               |
 | `POST`  | `/api/v1/items/tables/create_table`                                                   | [Create Table](#create-table)               |
 | `POST`  | `/api/v1/items/tables/statistics`                                                     | [Statistics](#statistics)                   |
@@ -15,62 +13,6 @@
 | `GET`   | `/api/v1/items/tables/table/{table}/autocomplete`                                      | [Table Autocomplete](#table-autocomplete) |
 
 ## Endpoint Description's
-
-## Edit Row Attributes
-
-### Description
-Edit Row Attributes endpoint allows you to edit one/all atrributes for a row at a time.
-In the example below we are changing the `objectid` and `last_name` columns for the row with a gid of `1`.
-
-
-Example: 
-### Example Input 
-```json
-{
-    "table": "mclean_county_parcels",
-    "gid": 1,
-    "values": {
-        "objectid": "1",
-        "last_name": "sample"
-    }
-}
-```
-
-### Example Output
-```json
-{
-    "status": true
-}
-```
-
-## Edit Row Geometry
-
-### Description
-Edit Row Geometry endpoint allows you to change the geometry for each feature in a table by passing in geojson geometry in SRID 4326.
-In the example below, we are updating the table called `zip_centroids` with the gid of `1` for a new lat lng of `[-88.23456,40.12345]`.
-
-Example: 
-### Example Input 
-```json
-{
-    "table": "zip_centroids",
-    "gid": 1,
-    "geojson": {
-        "type": "Point",
-        "coordinates": [
-            -88.23456,
-            40.12345
-        ]
-    }
-}
-```
-
-### Example Output
-```json
-{
-    "status": true
-}
-```
 
 ## Add Column
 
@@ -108,63 +50,6 @@ Example: In the example below, we are deleting a column called `test` from the t
 {
     "table": "zip_centroids",
     "column_name": "test"
-}
-```
-
-### Example Output
-```json
-{
-    "status": true
-}
-```
-
-## Add Row
-
-### Description
-The add row endpoint allows you to add a new to an existing table within the database. 
-You can pass in one or all columns for this endpoint. If you do not pass in a column the value will be null.
-
-Example: In the example below, we are adding a a new row to the `zip_centroids` table and only adding the postalcode column with the geometry.
-
-### Example Input 
-```json
-{
-    "table": "zip_centroids",
-    "columns": [
-        {
-            "column_name": "postalcode",
-            "value": "55555"
-        }
-    ],
-    "geojson": {
-        "type": "Point",
-        "coordinates": [
-            -88.23456,
-            40.12345
-        ]
-    }
-}
-```
-
-### Example Output
-```json
-{
-    "status": true,
-    "gid": 7821
-}
-```
-## Delete Row
-
-### Description
-The delete row endpoint allows you to delete a row for a table that exists in the database.
-
-Example: In the example below, we are deleting the column with a gid of `1` in the table `zip_centroids`.
-
-### Example Input 
-```json
-{
-    "table": "zip_centroids",
-    "gid": 1
 }
 ```
 
