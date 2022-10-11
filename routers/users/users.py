@@ -35,7 +35,10 @@ router = APIRouter()
 async def create_user(
     user: models.UserIn_Pydantic
 ):
-    """Create a new user."""
+    """
+    Create a new user.
+    More information at https://docs.qwikgeo.com/users/#create-user
+    """
 
     try:
         user_obj = db_models.User(
@@ -51,17 +54,9 @@ async def create_user(
         raise HTTPException(status_code=400, detail="Username already exist.") from exc
 
 @router.get(
-    "/user/{username}",
+    "/user",
     response_model=models.User_Pydantic,
     responses={
-        403: {
-            "description": "Forbidden",
-            "content": {
-                "application/json": {
-                    "example": {"detail": "You do not have access to this user."}
-                }
-            }
-        },
         404: {
             "description": "Not Found",
             "content": {
@@ -81,13 +76,13 @@ async def create_user(
     }
 )
 async def get_user(
-    username:str,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Retrieve information about user."""
+    """
+    Retrieve information about user.
+    More information at https://docs.qwikgeo.com/users/#user
+    """
 
-    if username != user_name:
-        raise HTTPException(status_code=403, detail="You do not have access to this user.")
     try:
         user = await models.User_Pydantic.from_queryset_single(
             db_models.User.get(username=user_name)
@@ -97,17 +92,9 @@ async def get_user(
         raise HTTPException(status_code=404, detail="User not found.") from exc
 
 @router.put(
-    path="/user/{username}",
+    path="/user",
     response_model=models.User_Pydantic,
     responses={
-        403: {
-            "description": "Forbidden",
-            "content": {
-                "application/json": {
-                    "example": {"detail": "You do not have access to this user."}
-                }
-            }
-        },
         404: {
             "description": "Not Found",
             "content": {
@@ -127,14 +114,14 @@ async def get_user(
     }
 )
 async def update_user(
-    username:str,
     user: models.UserIn_Pydantic,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Update information about user."""
+    """
+    Update information about user.
+    More information at https://docs.qwikgeo.com/users/#update-user
+    """
 
-    if username != user_name:
-        raise HTTPException(status_code=403, detail="You do not have access to this user.")
     try:
         await db_models.User.filter(username=user_name).update(**user.dict(exclude_unset=True))
         return await models.User_Pydantic.from_queryset_single(
@@ -144,7 +131,7 @@ async def update_user(
         raise HTTPException(status_code=404, detail="User not found.") from exc
 
 @router.delete(
-    path="/user/{username}",
+    path="/user",
     response_model=models.Status,
     responses={
         200: {
@@ -152,14 +139,6 @@ async def update_user(
             "content": {
                 "application/json": {
                     "example": {"Deleted user."}
-                }
-            }
-        },
-        403: {
-            "description": "Forbidden",
-            "content": {
-                "application/json": {
-                    "example": {"detail": "You do not have access to this user."}
                 }
             }
         },
@@ -182,13 +161,13 @@ async def update_user(
     }
 )
 async def delete_user(
-    username:str,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Delete a user."""
+    """
+    Delete a user.
+    More information at https://docs.qwikgeo.com/users/#delete-user
+    """
 
-    if username != user_name:
-        raise HTTPException(status_code=403, detail="You do not have access to this user.")
     deleted_count = await db_models.User.filter(username=user_name).delete()
     if not deleted_count:
         raise HTTPException(status_code=404, detail="User not found.")
@@ -212,9 +191,10 @@ async def user_search(
     username: str,
     user_name: int=Depends(utilities.get_token_header)
 ):
-    """Return a list of users based off of searching via username."""
-
-    print(username)
+    """
+    Return a list of users based off of searching via username.
+    More information at https://docs.qwikgeo.com/users/#user-search
+    """
 
     users= (
         await db_models.User.filter(username__icontains=username)
