@@ -440,6 +440,12 @@ async def queryables(
                                 "title": "{scheme}.{table}",
                                 "rel": "collection",
                                 "href": "http://api.qwikgeo.com/api/v1/collections/{scheme}.{table}"
+                            },
+                            {
+                                "type": "application/geo+json",
+                                "rel": "next",
+                                "title": "items (next)",
+                                "href": "http://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items?offset=10"
                             }
                         ]
                     }
@@ -477,7 +483,7 @@ async def items(
     table: str,
     request: Request,
     bbox: str=None,
-    limit: int=100,
+    limit: int=10,
     offset: int=0,
     properties: str="*",
     sortby: str="gid",
@@ -578,6 +584,34 @@ async def items(
             }
         ]
 
+        extra_params = ""
+
+        for param in request.query_params:
+            if param != 'offset':
+                extra_params += f"{param}={request.query_params[param]}"
+
+        if (results['numberReturned'] + offset) < results['numberMatched']:
+            href = f"{request.url_for('items')}?offset={offset+limit}"
+            if len(extra_params)> 0:
+                href += extra_params
+            results['links'].append({
+                "type": "application/geo+json",
+                "rel": "next",
+                "title": "items (next)",
+                "href": href
+            })
+
+        if (offset - limit) > -1:
+            href = f"{request.url_for('items')}?offset={offset-limit}"
+            if len(extra_params)> 0:
+                href += extra_params
+            results['links'].append({
+                "type": "application/geo+json",
+                "rel": "prev",
+                "title": "items (prev)",
+                "href": href
+            })
+
         return results
 
 @router.post(
@@ -598,7 +632,7 @@ async def items(
                         },
                         "properties": {},
                         "id": 1
-                    }                       
+                    }
                 }
             }
         },
@@ -675,7 +709,7 @@ async def create_item(
 
         input_columns = ""
         values = ""
-        
+
         for column in info.properties:
             if column not in db_columns:
                 raise HTTPException(
@@ -688,11 +722,11 @@ async def create_item(
                 values += f"""{float(info.properties[column])},"""
             else:
                 values += f"""'{info.properties[column]}',"""
-            
+
             db_column_types[column]['used'] = True
-        
+
         for column in db_column_types:
-            if db_column_types[column]['used'] == False:
+            if db_column_types[column]['used'] is False:
                 raise HTTPException(
                     status_code=400,
                     detail=f"""Column {column} was not used. Add {column} to your properties."""
@@ -890,7 +924,7 @@ async def item(
                         },
                         "properties": {},
                         "id": 1
-                    }                       
+                    }
                 }
             }
         },
@@ -984,7 +1018,7 @@ async def update_item(
             UPDATE user_data."{table}"
             SET 
         """
-        
+
         for column in info.properties:
             if column not in db_columns:
                 raise HTTPException(
@@ -996,11 +1030,11 @@ async def update_item(
                 query += f"{column} = {info.properties[column]},"
             else:
                 query += f"{column} = '{info.properties[column]}',"
-            
+
             db_column_types[column]['used'] = True
-        
+
         for column in db_column_types:
-            if db_column_types[column]['used'] == False:
+            if db_column_types[column]['used'] is False:
                 raise HTTPException(
                     status_code=400,
                     detail=f"""Column {column} was not used. Add {column} to your properties."""
@@ -1048,7 +1082,7 @@ async def update_item(
                         },
                         "properties": {},
                         "id": 1
-                    }                       
+                    }
                 }
             }
         },
@@ -1141,7 +1175,7 @@ async def modify_item(
             UPDATE user_data."{table}"
             SET 
         """
-        
+
         for column in info.properties:
             if column not in db_columns:
                 raise HTTPException(
@@ -1187,7 +1221,7 @@ async def modify_item(
                 "application/json": {
                     "example": {
                         "status": True
-                    }                       
+                    }
                 }
             }
         },
@@ -1721,4 +1755,3 @@ async def delete_tile_cache(
     utilities.delete_user_tile_cache(table_metadata.table_id)
 
     return {"status": "deleted"}
-
