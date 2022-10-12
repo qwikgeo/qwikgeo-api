@@ -161,7 +161,7 @@ async def collections(
                         "keywords": ["string"],
                         "links": [
                             {
-                                "type": "application/json",
+                                "type": "application/geo+json",
                                 "rel": "self",
                                 "title": "Items as GeoJSON",
                                 "href": "http://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items"
@@ -261,7 +261,7 @@ async def collection(
                 "href": f"{url}api/v1/collections/{scheme}.{table}"
             },
             {
-                "type": "application/json",
+                "type": "application/geo+json",
                 "rel": "items",
                 "title": "Items as GeoJSON",
                 "href": f"{url}api/v1/collections/{scheme}.{table}/items"
@@ -430,7 +430,7 @@ async def queryables(
                         "numberReturned": 10,
                         "links": [
                             {
-                                "type": "application/json",
+                                "type": "application/geo+json",
                                 "rel": "self",
                                 "title": "This document as GeoJSON",
                                 "href": "http://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items"
@@ -565,7 +565,7 @@ async def items(
 
         results['links'] = [
             {
-                "type": "application/json",
+                "type": "application/geo+json",
                 "rel": "self",
                 "title": "This document as GeoJSON",
                 "href": request.url._url
@@ -751,13 +751,13 @@ async def create_item(
                         "id": 1,
                         "links": [
                             {
-                                "type": "application/json",
+                                "type": "application/geo+json",
                                 "rel": "self",
                                 "title": "This document as GeoJSON",
                                 "href": "http://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items/1"
                             },
                             {
-                                "type": "application/json",
+                                "type": "application/geo+json",
                                 "title": "items as GeoJSON",
                                 "rel": "items",
                                 "href": "http://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items"
@@ -851,13 +851,13 @@ async def item(
 
         results['features'][0]['links'] = [
             {
-                "type": "application/json",
+                "type": "application/geo+json",
                 "rel": "self",
                 "title": "This document as GeoJSON",
                 "href": request.url._url
             },
             {
-                "type": "application/json",
+                "type": "application/geo+json",
                 "title": "items as GeoJSON",
                 "rel": "items",
                 "href": f"{url}api/v1/collections/{scheme}.{table}/items"
