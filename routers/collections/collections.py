@@ -3,6 +3,7 @@
 import os
 import json
 import shutil
+import datetime
 from typing import Optional
 from functools import reduce
 from fastapi import Request, APIRouter, Depends, status, Response, HTTPException
@@ -568,6 +569,8 @@ async def items(
             srid=srid,
             app=request.app
         )
+
+        results['timeStamp'] = f"{datetime.datetime.utcnow().isoformat()}Z"
 
         results['links'] = [
             {
