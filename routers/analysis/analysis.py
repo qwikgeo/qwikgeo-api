@@ -12,7 +12,21 @@ analysis_processes = {}
 
 @router.get(
     path="/status/{process_id}",
-    # response_model=models.StatusResponseModel
+    responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "status": "SUCCESS",
+                        "new_table_id": "shnxppipxrppsdkozuroilkubktfodibtqorhucjvxlcdrqyhh",
+                        "completion_time": "2022-07-06T19:33:17.950059",
+                        "run_time_in_seconds": 1.78599
+                    }
+                }
+            }
+        },
+    }
 )
 def status(
     process_id: str,
