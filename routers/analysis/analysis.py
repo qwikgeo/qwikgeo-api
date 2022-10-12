@@ -12,7 +12,7 @@ analysis_processes = {}
 
 @router.get(
     path="/status/{process_id}",
-    response_model=models.StatusResponseModel
+    # response_model=models.StatusResponseModel
 )
 def status(
     process_id: str,
@@ -87,6 +87,7 @@ async def buffer(
 
     background_tasks.add_task(
         analysis_queries.buffer,
+        username=user_name,
         table=info.table,
         distance_in_kilometers=info.distance_in_kilometers,
         new_table_id=new_table_id,
@@ -158,6 +159,7 @@ async def dissolve(
 
     background_tasks.add_task(
         analysis_queries.dissolve,
+        username=user_name,
         table=info.table,
         new_table_id=new_table_id,
         process_id=process_id
@@ -228,6 +230,7 @@ async def dissolve_by_value(
 
     background_tasks.add_task(
         analysis_queries.dissolve_by_value,
+        username=user_name,
         table=info.table,
         new_table_id=new_table_id,
         column=info.column,
@@ -299,6 +302,7 @@ async def square_grids(
 
     background_tasks.add_task(
         analysis_queries.square_grids,
+        username=user_name,
         table=info.table,
         new_table_id=new_table_id,
         grid_size_in_kilometers=info.grid_size_in_kilometers,
@@ -370,6 +374,7 @@ async def hexagon_grids(
 
     background_tasks.add_task(
         analysis_queries.hexagon_grids,
+        username=user_name,
         table=info.table,
         new_table_id=new_table_id,
         grid_size_in_kilometers=info.grid_size_in_kilometers,
@@ -441,6 +446,7 @@ async def bounding_box(
 
     background_tasks.add_task(
         analysis_queries.bounding_box,
+        username=user_name,
         table=info.table,
         new_table_id=new_table_id,
         process_id=process_id
@@ -511,6 +517,7 @@ async def k_means_cluster(
 
     background_tasks.add_task(
         analysis_queries.k_means_cluster,
+        username=user_name,
         table=info.table,
         new_table_id=new_table_id,
         number_of_clusters=info.number_of_clusters,
@@ -582,6 +589,7 @@ async def center_of_each_polygon(
 
     background_tasks.add_task(
         analysis_queries.center_of_each_polygon,
+        username=user_name,
         table=info.table,
         new_table_id=new_table_id,
         process_id=process_id
@@ -652,6 +660,7 @@ async def center_of_dataset(
 
     background_tasks.add_task(
         analysis_queries.center_of_dataset,
+        username=user_name,
         table=info.table,
         new_table_id=new_table_id,
         process_id=process_id
@@ -722,6 +731,7 @@ async def find_within_distance(
 
     background_tasks.add_task(
         analysis_queries.find_within_distance,
+        username=user_name,
         table=info.table,
         new_table_id=new_table_id,
         latitude=info.latitude,
@@ -795,6 +805,7 @@ async def convex_hull(
 
     background_tasks.add_task(
         analysis_queries.convex_hull,
+        username=user_name,
         table=info.table,
         new_table_id=new_table_id,
         process_id=process_id
@@ -865,6 +876,7 @@ async def aggregate_points_by_grids(
 
     background_tasks.add_task(
         analysis_queries.aggregate_points_by_grids,
+        username=user_name,
         table=info.table,
         new_table_id=new_table_id,
         distance_in_kilometers=info.distance_in_kilometers,
@@ -942,6 +954,7 @@ async def aggregate_points_by_polygons(
 
     background_tasks.add_task(
         analysis_queries.aggregate_points_by_polygons,
+        username=user_name,
         table=info.table,
         new_table_id=new_table_id,
         polygons=info.polygons,
@@ -1018,6 +1031,7 @@ async def select_inside(
 
     background_tasks.add_task(
         analysis_queries.select_inside,
+        username=user_name,
         table=info.table,
         new_table_id=new_table_id,
         polygons=info.polygons,
@@ -1094,6 +1108,7 @@ async def select_outside(
 
     background_tasks.add_task(
         analysis_queries.select_outside,
+        username=user_name,
         table=info.table,
         new_table_id=new_table_id,
         polygons=info.polygons,
@@ -1170,6 +1185,7 @@ async def clip(
 
     background_tasks.add_task(
         analysis_queries.clip,
+        username=user_name,
         table=info.table,
         new_table_id=new_table_id,
         polygons=info.polygons,

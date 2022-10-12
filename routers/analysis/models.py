@@ -22,8 +22,8 @@ class StatusResponseModel(BaseModel):
     completion_time: str = Field(
         default="2022-07-06T19:33:17.950059"
     )
-    run_time_in_seconds: float = Field(
-        default=1.78599
+    run_time_in_seconds: int = Field(
+        default=2
     )
 
 class BaseResponseModel(BaseModel):

@@ -4,10 +4,17 @@ import datetime
 
 import main
 import utilities
-from routers import analysis
+import db_models
+import routers.analysis.analysis as analysis
 
 
-async def buffer(table: str, distance_in_kilometers: float, new_table_id: str, process_id: str):
+async def buffer(
+    username: str,
+    table: str,
+    distance_in_kilometers: float,
+    new_table_id: str,
+    process_id: str
+):
     """
     Method to buffer any geometric table
     """
@@ -42,6 +49,25 @@ async def buffer(table: str, distance_in_kilometers: float, new_table_id: str, p
 
             await con.fetch(buffer_column_query)
 
+            table_metadata = await db_models.Table_Pydantic.from_queryset_single(
+                db_models.Table.get(table_id=table)
+            )
+
+            item_metadata = await db_models.Item_Pydantic.from_queryset_single(
+                db_models.Item.get(portal_id=table_metadata.portal_id.portal_id)
+            )
+
+            await utilities.create_table(
+                username=username,
+                table_id=new_table_id,
+                title=f"Buffer Analysis of {item_metadata.title}",
+                description=f"A {distance_in_kilometers} kilometer buffer analysis of {item_metadata.title}.",
+                tags=["analysis"],
+                searchable=False,
+                read_access_list=[username],
+                write_access_list=[username]
+            )
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -52,7 +78,12 @@ async def buffer(table: str, distance_in_kilometers: float, new_table_id: str, p
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def dissolve(table: str, new_table_id: str, process_id: str):
+async def dissolve(
+    username: str,
+    table: str,
+    new_table_id: str,
+    process_id: str
+):
     """
     Method to dissolve any geometric table into one geometry.
     """
@@ -72,6 +103,25 @@ async def dissolve(table: str, new_table_id: str, process_id: str):
 
             await con.fetch(sql_query)
 
+            table_metadata = await db_models.Table_Pydantic.from_queryset_single(
+                db_models.Table.get(table_id=table)
+            )
+
+            item_metadata = await db_models.Item_Pydantic.from_queryset_single(
+                db_models.Item.get(portal_id=table_metadata.portal_id.portal_id)
+            )
+
+            await utilities.create_table(
+                username=username,
+                table_id=new_table_id,
+                title=f"Dissolve Analysis of {item_metadata.title}",
+                description=f"A dissolve analysis of {item_metadata.title}.",
+                tags=["analysis"],
+                searchable=False,
+                read_access_list=[username],
+                write_access_list=[username]
+            )
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -82,7 +132,13 @@ async def dissolve(table: str, new_table_id: str, process_id: str):
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def dissolve_by_value(table: str, new_table_id: str, column: str, process_id: str):
+async def dissolve_by_value(
+    username: str,
+    table: str,
+    new_table_id: str,
+    column: str,
+    process_id: str
+):
     """
     Method to dissolve any geometric table into one geometry based off a column.
     """
@@ -103,6 +159,25 @@ async def dissolve_by_value(table: str, new_table_id: str, column: str, process_
 
             await con.fetch(sql_query)
 
+            table_metadata = await db_models.Table_Pydantic.from_queryset_single(
+                db_models.Table.get(table_id=table)
+            )
+
+            item_metadata = await db_models.Item_Pydantic.from_queryset_single(
+                db_models.Item.get(portal_id=table_metadata.portal_id.portal_id)
+            )
+
+            await utilities.create_table(
+                username=username,
+                table_id=new_table_id,
+                title=f"Dissolve By Value Analysis of {item_metadata.title}",
+                description=f"A dissolve by value analysis of {item_metadata.title} using the column {column}.",
+                tags=["analysis"],
+                searchable=False,
+                read_access_list=[username],
+                write_access_list=[username]
+            )
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -113,7 +188,13 @@ async def dissolve_by_value(table: str, new_table_id: str, column: str, process_
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def square_grids(table: str, new_table_id: str, grid_size_in_kilometers: int, process_id: str):
+async def square_grids(
+    username: str,
+    table: str,
+    new_table_id: str,
+    grid_size_in_kilometers: int,
+    process_id: str
+):
     """
     Method to generate square grids based off a given table.
     """
@@ -141,6 +222,25 @@ async def square_grids(table: str, new_table_id: str, grid_size_in_kilometers: i
 
             await con.fetch(size_column_query)
 
+            table_metadata = await db_models.Table_Pydantic.from_queryset_single(
+                db_models.Table.get(table_id=table)
+            )
+
+            item_metadata = await db_models.Item_Pydantic.from_queryset_single(
+                db_models.Item.get(portal_id=table_metadata.portal_id.portal_id)
+            )
+
+            await utilities.create_table(
+                username=username,
+                table_id=new_table_id,
+                title=f"Square Grid Analysis of {item_metadata.title}",
+                description=f"A square grid analysis of {item_metadata.title} with a grid size of {grid_size_in_kilometers} kilometers.",
+                tags=["analysis"],
+                searchable=False,
+                read_access_list=[username],
+                write_access_list=[username]
+            )
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -151,7 +251,13 @@ async def square_grids(table: str, new_table_id: str, grid_size_in_kilometers: i
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def hexagon_grids(table: str, new_table_id: str, grid_size_in_kilometers: int, process_id: str):
+async def hexagon_grids(
+    username: str,
+    table: str,
+    new_table_id: str,
+    grid_size_in_kilometers: int,
+    process_id: str
+):
     """
     Method to generate hexagon grids based off a given table.
     """
@@ -179,6 +285,25 @@ async def hexagon_grids(table: str, new_table_id: str, grid_size_in_kilometers: 
 
             await con.fetch(size_column_query)
 
+            table_metadata = await db_models.Table_Pydantic.from_queryset_single(
+                db_models.Table.get(table_id=table)
+            )
+
+            item_metadata = await db_models.Item_Pydantic.from_queryset_single(
+                db_models.Item.get(portal_id=table_metadata.portal_id.portal_id)
+            )
+
+            await utilities.create_table(
+                username=username,
+                table_id=new_table_id,
+                title=f"Hexagon Grid Analysis of {item_metadata.title}",
+                description=f"A hexagon grid analysis of {item_metadata.title} with a grid size of {grid_size_in_kilometers} kilometers.",
+                tags=["analysis"],
+                searchable=False,
+                read_access_list=[username],
+                write_access_list=[username]
+            )
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -189,7 +314,12 @@ async def hexagon_grids(table: str, new_table_id: str, grid_size_in_kilometers: 
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def bounding_box(table: str, new_table_id: str, process_id: str):
+async def bounding_box(
+    username: str,
+    table: str,
+    new_table_id: str,
+    process_id: str
+):
     """
     Method to generate a bounding box based off a given table.
     """
@@ -209,6 +339,25 @@ async def bounding_box(table: str, new_table_id: str, process_id: str):
 
             await con.fetch(sql_query)
 
+            table_metadata = await db_models.Table_Pydantic.from_queryset_single(
+                db_models.Table.get(table_id=table)
+            )
+
+            item_metadata = await db_models.Item_Pydantic.from_queryset_single(
+                db_models.Item.get(portal_id=table_metadata.portal_id.portal_id)
+            )
+
+            await utilities.create_table(
+                username=username,
+                table_id=new_table_id,
+                title=f"Bounding Box Analysis of {item_metadata.title}",
+                description=f"A bounding box analysis of {item_metadata.title}.",
+                tags=["analysis"],
+                searchable=False,
+                read_access_list=[username],
+                write_access_list=[username]
+            )
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -219,7 +368,13 @@ async def bounding_box(table: str, new_table_id: str, process_id: str):
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def k_means_cluster(table: str, new_table_id: str, number_of_clusters: int, process_id: str):
+async def k_means_cluster(
+    username: str,
+    table: str,
+    new_table_id: str,
+    number_of_clusters: int,
+    process_id: str
+):
     """
     Method to generate clusters based off a k means_clustering.
     """
@@ -246,6 +401,25 @@ async def k_means_cluster(table: str, new_table_id: str, number_of_clusters: int
 
             await con.fetch(sql_query)
 
+            table_metadata = await db_models.Table_Pydantic.from_queryset_single(
+                db_models.Table.get(table_id=table)
+            )
+
+            item_metadata = await db_models.Item_Pydantic.from_queryset_single(
+                db_models.Item.get(portal_id=table_metadata.portal_id.portal_id)
+            )
+
+            await utilities.create_table(
+                username=username,
+                table_id=new_table_id,
+                title=f"K Means Cluster Analysis of {item_metadata.title}",
+                description=f"A k means cluster analysis of {item_metadata.title} with {number_of_clusters} clusters.",
+                tags=["analysis"],
+                searchable=False,
+                read_access_list=[username],
+                write_access_list=[username]
+            )
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -256,7 +430,12 @@ async def k_means_cluster(table: str, new_table_id: str, number_of_clusters: int
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def center_of_each_polygon(table: str, new_table_id: str, process_id: str):
+async def center_of_each_polygon(
+    username: str,
+    table: str,
+    new_table_id: str,
+    process_id: str
+):
     """
     Method to find center of each polygon based off a given table.
     """
@@ -283,6 +462,25 @@ async def center_of_each_polygon(table: str, new_table_id: str, process_id: str)
 
             await con.fetch(sql_query)
 
+            table_metadata = await db_models.Table_Pydantic.from_queryset_single(
+                db_models.Table.get(table_id=table)
+            )
+
+            item_metadata = await db_models.Item_Pydantic.from_queryset_single(
+                db_models.Item.get(portal_id=table_metadata.portal_id.portal_id)
+            )
+
+            await utilities.create_table(
+                username=username,
+                table_id=new_table_id,
+                title=f"Center of Each Polygon Analysis of {item_metadata.title}",
+                description=f"A center of each polygon analysis of {item_metadata.title}.",
+                tags=["analysis"],
+                searchable=False,
+                read_access_list=[username],
+                write_access_list=[username]
+            )
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -293,7 +491,12 @@ async def center_of_each_polygon(table: str, new_table_id: str, process_id: str)
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def center_of_dataset(table: str, new_table_id: str, process_id: str):
+async def center_of_dataset(
+    username: str,
+    table: str,
+    new_table_id: str,
+    process_id: str
+):
     """
     Method to find center of all geometries based off a given table.
     """
@@ -313,6 +516,25 @@ async def center_of_dataset(table: str, new_table_id: str, process_id: str):
 
             await con.fetch(sql_query)
 
+            table_metadata = await db_models.Table_Pydantic.from_queryset_single(
+                db_models.Table.get(table_id=table)
+            )
+
+            item_metadata = await db_models.Item_Pydantic.from_queryset_single(
+                db_models.Item.get(portal_id=table_metadata.portal_id.portal_id)
+            )
+
+            await utilities.create_table(
+                username=username,
+                table_id=new_table_id,
+                title=f"Center of Dataset Analysis of {item_metadata.title}",
+                description=f"A center of dataset analysis of {item_metadata.title}.",
+                tags=["analysis"],
+                searchable=False,
+                read_access_list=[username],
+                write_access_list=[username]
+            )
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -323,8 +545,15 @@ async def center_of_dataset(table: str, new_table_id: str, process_id: str):
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def find_within_distance(table: str, new_table_id: str,
-    latitude: float, longitude: float, distance_in_kilometers: float, process_id: str):
+async def find_within_distance(
+    username: str,
+    table: str,
+    new_table_id: str,
+    latitude: float,
+    longitude: float,
+    distance_in_kilometers: float,
+    process_id: str
+):
     """
     Method to find all geometries within set distance of latitude and longitude.
     """
@@ -345,6 +574,25 @@ async def find_within_distance(table: str, new_table_id: str,
 
             await con.fetch(sql_query)
 
+            table_metadata = await db_models.Table_Pydantic.from_queryset_single(
+                db_models.Table.get(table_id=table)
+            )
+
+            item_metadata = await db_models.Item_Pydantic.from_queryset_single(
+                db_models.Item.get(portal_id=table_metadata.portal_id.portal_id)
+            )
+
+            await utilities.create_table(
+                username=username,
+                table_id=new_table_id,
+                title=f"Find Within Distance Analysis of {item_metadata.title}",
+                description=f"A find within distance analysis of {item_metadata.title} to find all features within {distance_in_kilometers} kilometers of {latitude}, {longitude}.",
+                tags=["analysis"],
+                searchable=False,
+                read_access_list=[username],
+                write_access_list=[username]
+            )
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -355,7 +603,12 @@ async def find_within_distance(table: str, new_table_id: str,
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def convex_hull(table: str, new_table_id: str, process_id: str):
+async def convex_hull(
+    username: str,
+    table: str,
+    new_table_id: str,
+    process_id: str
+):
     """
     Method to find the convex hull of all geometries based off a given table.
     """
@@ -375,6 +628,25 @@ async def convex_hull(table: str, new_table_id: str, process_id: str):
 
             await con.fetch(sql_query)
 
+            table_metadata = await db_models.Table_Pydantic.from_queryset_single(
+                db_models.Table.get(table_id=table)
+            )
+
+            item_metadata = await db_models.Item_Pydantic.from_queryset_single(
+                db_models.Item.get(portal_id=table_metadata.portal_id.portal_id)
+            )
+
+            await utilities.create_table(
+                username=username,
+                table_id=new_table_id,
+                title=f"Convex Hull Analysis of {item_metadata.title}",
+                description=f"A convex hull analysis of {item_metadata.title}.",
+                tags=["analysis"],
+                searchable=False,
+                read_access_list=[username],
+                write_access_list=[username]
+            )
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -385,9 +657,16 @@ async def convex_hull(table: str, new_table_id: str, process_id: str):
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def aggregate_points_by_grids(table: str, new_table_id: str, distance_in_kilometers: float, grid_type: str,process_id: str):
+async def aggregate_points_by_grids(
+    username: str,
+    table: str,
+    new_table_id: str,
+    distance_in_kilometers: float,
+    grid_type: str,
+    process_id: str
+):
     """
-    Method to aggegate points into grids.
+    Method to aggregate points into grids.
     """
 
     start = datetime.datetime.now()
@@ -413,6 +692,25 @@ async def aggregate_points_by_grids(table: str, new_table_id: str, distance_in_k
 
             await con.fetch(sql_query)
 
+            table_metadata = await db_models.Table_Pydantic.from_queryset_single(
+                db_models.Table.get(table_id=table)
+            )
+
+            item_metadata = await db_models.Item_Pydantic.from_queryset_single(
+                db_models.Item.get(portal_id=table_metadata.portal_id.portal_id)
+            )
+
+            await utilities.create_table(
+                username=username,
+                table_id=new_table_id,
+                title=f"Aggregate Points By Grids Analysis of {item_metadata.title}",
+                description=f"A aggregate points by grids analysis of {item_metadata.title} with a grid size of {distance_in_kilometers} kilometers.",
+                tags=["analysis"],
+                searchable=False,
+                read_access_list=[username],
+                write_access_list=[username]
+            )
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -423,7 +721,13 @@ async def aggregate_points_by_grids(table: str, new_table_id: str, distance_in_k
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def aggregate_points_by_polygons(table: str, new_table_id: str, polygons: str, process_id: str):
+async def aggregate_points_by_polygons(
+    username: str,
+    table: str,
+    new_table_id: str,
+    polygons: str,
+    process_id: str
+):
     """
     Method to aggregate points into polygons.
     """
@@ -446,6 +750,25 @@ async def aggregate_points_by_polygons(table: str, new_table_id: str, polygons: 
 
             await con.fetch(sql_query)
 
+            table_metadata = await db_models.Table_Pydantic.from_queryset_single(
+                db_models.Table.get(table_id=table)
+            )
+
+            item_metadata = await db_models.Item_Pydantic.from_queryset_single(
+                db_models.Item.get(portal_id=table_metadata.portal_id.portal_id)
+            )
+
+            await utilities.create_table(
+                username=username,
+                table_id=new_table_id,
+                title=f"Aggregate Points By Polygons Analysis of {item_metadata.title}",
+                description=f"A aggregate points by polygons analysis of {item_metadata.title}.",
+                tags=["analysis"],
+                searchable=False,
+                read_access_list=[username],
+                write_access_list=[username]
+            )
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -456,7 +779,13 @@ async def aggregate_points_by_polygons(table: str, new_table_id: str, polygons: 
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def select_inside(table: str, new_table_id: str, polygons: str, process_id: str):
+async def select_inside(
+    username: str,
+    table: str,
+    new_table_id: str,
+    polygons: str,
+    process_id: str
+):
     """
     Method to find geometries within a given polygon table.
     """
@@ -478,6 +807,33 @@ async def select_inside(table: str, new_table_id: str, polygons: str, process_id
 
             await con.fetch(sql_query)
 
+            table_metadata = await db_models.Table_Pydantic.from_queryset_single(
+                db_models.Table.get(table_id=table)
+            )
+
+            polygon_metadata = await db_models.Table_Pydantic.from_queryset_single(
+                db_models.Table.get(table_id=polygons)
+            )
+
+            item_metadata = await db_models.Item_Pydantic.from_queryset_single(
+                db_models.Item.get(portal_id=table_metadata.portal_id.portal_id)
+            )
+
+            polygon_item_metadata = await db_models.Item_Pydantic.from_queryset_single(
+                db_models.Item.get(portal_id=polygon_metadata.portal_id.portal_id)
+            )
+
+            await utilities.create_table(
+                username=username,
+                table_id=new_table_id,
+                title=f"Select Inside Analysis of {item_metadata.title}",
+                description=f"A select inside analysis of {item_metadata.title} within {polygon_item_metadata.title}.",
+                tags=["analysis"],
+                searchable=False,
+                read_access_list=[username],
+                write_access_list=[username]
+            )
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -488,7 +844,13 @@ async def select_inside(table: str, new_table_id: str, polygons: str, process_id
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def select_outside(table: str, new_table_id: str, polygons: str, process_id: str):
+async def select_outside(
+    username: str,
+    table: str,
+    new_table_id: str,
+    polygons: str,
+    process_id: str
+):
     """
     Method to find geometries outside a given polygon table.
     """
@@ -511,6 +873,33 @@ async def select_outside(table: str, new_table_id: str, polygons: str, process_i
 
             await con.fetch(sql_query)
 
+            table_metadata = await db_models.Table_Pydantic.from_queryset_single(
+                db_models.Table.get(table_id=table)
+            )
+
+            polygon_metadata = await db_models.Table_Pydantic.from_queryset_single(
+                db_models.Table.get(table_id=polygons)
+            )
+
+            item_metadata = await db_models.Item_Pydantic.from_queryset_single(
+                db_models.Item.get(portal_id=table_metadata.portal_id.portal_id)
+            )
+
+            polygon_item_metadata = await db_models.Item_Pydantic.from_queryset_single(
+                db_models.Item.get(portal_id=polygon_metadata.portal_id.portal_id)
+            )
+
+            await utilities.create_table(
+                username=username,
+                table_id=new_table_id,
+                title=f"Select Outside Analysis of {item_metadata.title}",
+                description=f"A select outside analysis of {item_metadata.title} within {polygon_item_metadata.title}.",
+                tags=["analysis"],
+                searchable=False,
+                read_access_list=[username],
+                write_access_list=[username]
+            )
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -521,7 +910,13 @@ async def select_outside(table: str, new_table_id: str, polygons: str, process_i
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
-async def clip(table: str, new_table_id: str, polygons: str, process_id: str):
+async def clip(
+    username: str,
+    table: str,
+    new_table_id: str,
+    polygons: str,
+    process_id: str
+):
     """
     Method to clip geometries given polygon table.
     """
@@ -550,6 +945,33 @@ async def clip(table: str, new_table_id: str, polygons: str, process_id: str):
 
             await con.fetch(sql_query)
 
+            table_metadata = await db_models.Table_Pydantic.from_queryset_single(
+                db_models.Table.get(table_id=table)
+            )
+
+            polygon_metadata = await db_models.Table_Pydantic.from_queryset_single(
+                db_models.Table.get(table_id=polygons)
+            )
+
+            item_metadata = await db_models.Item_Pydantic.from_queryset_single(
+                db_models.Item.get(portal_id=table_metadata.portal_id.portal_id)
+            )
+
+            polygon_item_metadata = await db_models.Item_Pydantic.from_queryset_single(
+                db_models.Item.get(portal_id=polygon_metadata.portal_id.portal_id)
+            )
+
+            await utilities.create_table(
+                username=username,
+                table_id=new_table_id,
+                title=f"Clip Analysis of {item_metadata.title}",
+                description=f"A clip analysis of {item_metadata.title} within {polygon_item_metadata.title}.",
+                tags=["analysis"],
+                searchable=False,
+                read_access_list=[username],
+                write_access_list=[username]
+            )
+
             analysis.analysis_processes[process_id]['status'] = "SUCCESS"
             analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
             analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
@@ -559,4 +981,3 @@ async def clip(table: str, new_table_id: str, polygons: str, process_id: str):
         analysis.analysis_processes[process_id]['error'] = str(error)
         analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
         analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
-    
