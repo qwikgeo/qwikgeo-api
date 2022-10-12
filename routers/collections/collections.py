@@ -594,7 +594,7 @@ async def items(
                 extra_params += f"{param}={request.query_params[param]}"
 
         if (results['numberReturned'] + offset) < results['numberMatched']:
-            href = f"{request.url_for('items')}?offset={offset+limit}"
+            href = f"{str(request.base_url)[:-1]}{request.url.path}?offset={offset+limit}"
             if len(extra_params)> 0:
                 href += extra_params
             results['links'].append({
@@ -605,7 +605,7 @@ async def items(
             })
 
         if (offset - limit) > -1:
-            href = f"{request.url_for('items')}?offset={offset-limit}"
+            href = f"{str(request.base_url)[:-1]}{request.url.path}?offset={offset-limit}"
             if len(extra_params)> 0:
                 href += extra_params
             results['links'].append({
