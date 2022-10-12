@@ -29,13 +29,13 @@ async def buffer(table: str, distance_in_kilometers: float, new_table_id: str, p
             sql_query = f"""
             CREATE TABLE user_data."{new_table_id}" AS
             SELECT {fields}, ST_Transform(ST_Buffer(ST_Transform(geom,3857), {distance_in_kilometers*1000}),4326) as geom
-            FROM {table};
+            FROM user_data."{table}";
             """
 
             await con.fetch(sql_query)
 
             buffer_column_query = f"""
-            ALTER TABLE {new_table_id}
+            ALTER TABLE user_data."{new_table_id}"
             ADD COLUMN buffer_distance_in_kilometers float NOT NULL
             DEFAULT {distance_in_kilometers};
             """
@@ -67,7 +67,7 @@ async def dissolve(table: str, new_table_id: str, process_id: str):
             sql_query = f"""
             CREATE TABLE user_data."{new_table_id}" AS
             SELECT ST_Union(geom) as geom
-            FROM {table};
+            FROM user_data."{table}";
             """
 
             await con.fetch(sql_query)
@@ -97,7 +97,7 @@ async def dissolve_by_value(table: str, new_table_id: str, column: str, process_
             sql_query = f"""
             CREATE TABLE user_data."{new_table_id}" AS
             SELECT DISTINCT("{column}"), ST_Union(geom) as geom
-            FROM {table}
+            FROM user_data."{table}"
             GROUP BY "{column}";
             """
 
@@ -128,13 +128,13 @@ async def square_grids(table: str, new_table_id: str, grid_size_in_kilometers: i
             sql_query = f"""
             CREATE TABLE user_data."{new_table_id}" AS
             SELECT ST_Transform((ST_SquareGrid({grid_size_in_kilometers*1000}, ST_Transform(a.geom, 3857))).geom,4326) as geom
-            FROM {table} a;
+            FROM user_data."{table}" a;
             """
 
             await con.fetch(sql_query)
 
             size_column_query = f"""
-            ALTER TABLE {new_table_id}
+            ALTER TABLE user_data."{new_table_id}"
             ADD COLUMN grid_size_in_kilometers float NOT NULL
             DEFAULT {grid_size_in_kilometers};
             """
@@ -166,13 +166,13 @@ async def hexagon_grids(table: str, new_table_id: str, grid_size_in_kilometers: 
             sql_query = f"""
             CREATE TABLE user_data."{new_table_id}" AS
             SELECT ST_Transform((ST_HexagonGrid({grid_size_in_kilometers*1000}, ST_Transform(a.geom, 3857))).geom,4326) as geom
-            FROM {table} a;
+            FROM user_data."{table}" a;
             """
 
             await con.fetch(sql_query)
 
             size_column_query = f"""
-            ALTER TABLE {new_table_id}
+            ALTER TABLE user_data."{new_table_id}"
             ADD COLUMN grid_size_in_kilometers float NOT NULL
             DEFAULT {grid_size_in_kilometers};
             """
@@ -204,7 +204,7 @@ async def bounding_box(table: str, new_table_id: str, process_id: str):
             sql_query = f"""
             CREATE TABLE user_data."{new_table_id}" AS
             SELECT ST_Envelope(ST_Union(geom)) as geom
-            FROM {table};
+            FROM user_data."{table}";
             """
 
             await con.fetch(sql_query)
@@ -241,7 +241,7 @@ async def k_means_cluster(table: str, new_table_id: str, number_of_clusters: int
             sql_query = f"""
             CREATE TABLE user_data."{new_table_id}" AS
             SELECT ST_ClusterKMeans(geom, {number_of_clusters}) over () as cluster_id, {fields}, geom
-            FROM {table};
+            FROM user_data."{table}";
             """
 
             await con.fetch(sql_query)
@@ -278,7 +278,7 @@ async def center_of_each_polygon(table: str, new_table_id: str, process_id: str)
             sql_query = f"""
             CREATE TABLE user_data."{new_table_id}" AS
             SELECT {fields}, ST_Centroid(geom) geom
-            FROM {table};
+            FROM user_data."{table}";
             """
 
             await con.fetch(sql_query)
@@ -308,7 +308,7 @@ async def center_of_dataset(table: str, new_table_id: str, process_id: str):
             sql_query = f"""
             CREATE TABLE user_data."{new_table_id}" AS
             SELECT ST_Centroid(ST_Union(geom)) geom
-            FROM {table};
+            FROM user_data."{table}";
             """
 
             await con.fetch(sql_query)
@@ -339,7 +339,7 @@ async def find_within_distance(table: str, new_table_id: str,
             sql_query = f"""
             CREATE TABLE user_data."{new_table_id}" AS
             SELECT *
-            FROM {table}
+            FROM user_data."{table}"
             WHERE ST_Intersects(geom, ST_Transform(ST_Buffer(ST_Transform(ST_SetSRID(ST_Point({longitude}, {latitude}),4326),3857), {distance_in_kilometers*1000}),4326));
             """
 
@@ -370,7 +370,7 @@ async def convex_hull(table: str, new_table_id: str, process_id: str):
             sql_query = f"""
             CREATE TABLE user_data."{new_table_id}" AS
             SELECT ST_ConvexHull(ST_Union(geom)) geom
-            FROM {table};
+            FROM user_data."{table}";
             """
 
             await con.fetch(sql_query)
@@ -401,11 +401,11 @@ async def aggregate_points_by_grids(table: str, new_table_id: str, distance_in_k
             CREATE TABLE user_data."{new_table_id}" AS
             WITH grids AS (
                 SELECT ST_Transform((ST_{grid_type}Grid({distance_in_kilometers*1000}, ST_Transform(ST_ConvexHull(ST_Union(a.geom)), 3857))).geom,4326) AS geom
-                FROM {table} as a
+                FROM user_data."{table}" as a
             )
 
             SELECT COUNT(points.geom) AS number_of_points, polygons.geom
-            FROM {table} AS points
+            FROM user_data."{table}" AS points
             LEFT JOIN grids AS polygons
             ON ST_Contains(polygons.geom,points.geom)
             GROUP BY polygons.geom;
@@ -425,7 +425,7 @@ async def aggregate_points_by_grids(table: str, new_table_id: str, distance_in_k
 
 async def aggregate_points_by_polygons(table: str, new_table_id: str, polygons: str, process_id: str):
     """
-    Method to aggegate points into polygons.
+    Method to aggregate points into polygons.
     """
 
     start = datetime.datetime.now()
@@ -438,7 +438,7 @@ async def aggregate_points_by_polygons(table: str, new_table_id: str, polygons: 
             sql_query = f"""
             CREATE TABLE user_data."{new_table_id}" AS
             SELECT polygons.gid, COUNT(points.geom) AS number_of_points, polygons.geom
-            FROM {table} AS points
+            FROM user_data."{table}" AS points
             LEFT JOIN {polygons} AS polygons
             ON ST_Contains(polygons.geom,points.geom)
             GROUP BY polygons.gid;
@@ -471,8 +471,8 @@ async def select_inside(table: str, new_table_id: str, polygons: str, process_id
             sql_query = f"""
             CREATE TABLE user_data."{new_table_id}" AS
             SELECT points.*
-            FROM {table} AS points
-            JOIN {polygons} AS polygons
+            FROM user_data."{table}" AS points
+            JOIN user_data."{polygons}" AS polygons
             ON ST_Intersects(points.geom, polygons.geom);
             """
 
@@ -503,8 +503,8 @@ async def select_outside(table: str, new_table_id: str, polygons: str, process_i
             sql_query = f"""
             CREATE TABLE user_data."{new_table_id}" AS
             SELECT *
-            FROM {table} AS points
-            JOIN {polygons} AS polygons
+            FROM user_data."{table}" AS points
+            JOIN user_data."{polygons}" AS polygons
             ON ST_Intersects(points.geom, polygons.geom)
             WHERE polygons.gid IS NULL;
             """
@@ -544,7 +544,7 @@ async def clip(table: str, new_table_id: str, polygons: str, process_id: str):
             sql_query = f"""
             CREATE TABLE user_data."{new_table_id}" AS
             SELECT {fields}, ST_Intersection(polygons.geom, a.geom) as geom
-            FROM {table} as a, {polygons} as polygons
+            FROM user_data."{table}" as a, user_data."{polygons}" as polygons
             WHERE ST_Intersects(a.geom, polygons.geom);
             """
 
