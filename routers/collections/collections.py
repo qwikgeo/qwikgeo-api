@@ -2,6 +2,7 @@
 
 import os
 import json
+import re
 import shutil
 from typing import Optional
 from functools import reduce
@@ -477,7 +478,7 @@ async def items(
     table: str,
     request: Request,
     bbox: str=None,
-    limit: int=100,
+    limit: int=10,
     offset: int=0,
     properties: str="*",
     sortby: str="gid",
@@ -561,7 +562,7 @@ async def items(
             filter=filter,
             srid=srid,
             app=request.app
-        )
+        )        
 
         results['links'] = [
             {
@@ -577,6 +578,36 @@ async def items(
                 "href": f"{url}api/v1/collections/{scheme}.{table}"
             }
         ]
+
+        extra_params = ""
+
+
+
+        for param in request.query_params:
+            if param != 'offset':
+                extra_params += f"{param}={request.query_params[param]}"
+
+        if (results['numberReturned'] + offset) < results['numberMatched']:
+            href = f"{request.url.path}?offset={offset+limit}"
+            if len(extra_params)> 0:
+                href += extra_params
+            results['links'].append({
+                "type": "application/geo+json",
+                "rel": "next",
+                "title": "items (next)",
+                "href": href
+            })
+        
+        if (offset - limit) > 0:
+            href = f"{request.url.path}?offset={offset-limit}"
+            if len(extra_params)> 0:
+                href += extra_params
+            results['links'].append({
+                "type": "application/geo+json",
+                "rel": "prev",
+                "title": "items (prev)",
+                "href": href
+            })
 
         return results
 
