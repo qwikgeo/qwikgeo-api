@@ -4,9 +4,10 @@ import os
 import shutil
 from typing import List
 from functools import reduce
-from fastapi import APIRouter, Request, Depends
+from fastapi import APIRouter, Request, Depends, HTTPException, status
 from tortoise.expressions import Q
 from tortoise.query_utils import Prefetch
+import asyncpg
 
 import routers.tables.models as models
 import utilities
@@ -497,7 +498,14 @@ async def statistics(
 
             query += await utilities.generate_where_clause(info, con)
 
-            data = await con.fetchrow(query)
+            try:
+                data = await con.fetchrow(query)
+            
+            except asyncpg.exceptions.UndefinedColumnError:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f'One of the columns usedZ does not exist for {table_id}.'
+                )
 
             for col in col_names:
                 final_results[col] = data[col]
@@ -515,7 +523,14 @@ async def statistics(
                     GROUP BY "{aggregate.column}"
                     ORDER BY "{aggregate.group_method}" DESC"""
 
-                    data = await con.fetch(query)
+                    try:
+                        data = await con.fetchrow(query)
+                    
+                    except asyncpg.exceptions.UndefinedColumnError:
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f'One of the columns used does not exist for {table_id}.'
+                        )
 
                     final_results[
                         f"""distinct_{aggregate.column}_{aggregate.group_method}_{aggregate.group_column}"""
@@ -604,9 +619,16 @@ async def bins(
             FROM user_data."{table_id}"
         """
 
-        query += await utilities.generate_where_clause(info, con)
+        query += await utilities.generate_where_clause(info, con)        
 
-        data = await con.fetchrow(query)
+        try:
+            data = await con.fetchrow(query)
+        
+        except asyncpg.exceptions.UndefinedColumnError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f'Column: {info.column} does not exist for {table_id}.'
+            )
 
         group_size = (data['max'] - data['min']) / info.number_of_bins
 
@@ -726,7 +748,14 @@ async def numeric_breaks(
 
         query += await utilities.generate_where_clause(info, con)
 
-        break_points = await con.fetchrow(query)
+        try:
+            break_points = await con.fetchrow(query)
+        
+        except asyncpg.exceptions.UndefinedColumnError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f'Column: {info.column} does not exist for {table_id}.'
+            )
 
         min_query = f"""
             SELECT MIN("{info.column}")
@@ -853,7 +882,14 @@ async def custom_break_values(
 
             query += await utilities.generate_where_clause(info, con, True)
 
-            data = await con.fetchrow(query)
+            try:
+                data = await con.fetchrow(query)
+            
+            except asyncpg.exceptions.UndefinedColumnError:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f'Column: {info.column} does not exist for {table_id}.'
+                )
 
             results.append({
                 "min": minimum,
@@ -936,7 +972,14 @@ async def table_autocomplete(
             LIMIT {limit}
         """
 
-        data = await con.fetch(query)
+        try:
+            data = await con.fetch(query)
+        
+        except asyncpg.exceptions.UndefinedColumnError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f'Column: {column} does not exist for {table_id}.'
+            )
 
         for row in data:
             results.append(row[column])
