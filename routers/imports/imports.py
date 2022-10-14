@@ -41,8 +41,6 @@ def status(
     https://docs.qwikgeo.com/imports/#import-status
     """
 
-    print(utilities.import_processes)
-
     if process_id not in utilities.import_processes:
         return {"status": "UNKNOWN", "error": "This process_id does not exist."}
     return utilities.import_processes[process_id]
