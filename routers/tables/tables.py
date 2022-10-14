@@ -427,6 +427,14 @@ async def delete_table(
                 }
             }
         },
+        400: {
+            "description": "Bad Request",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "One of the columns used does not exist for {table_id}."}
+                }
+            }
+        },
         403: {
             "description": "Forbidden",
             "content": {
@@ -504,7 +512,7 @@ async def statistics(
             except asyncpg.exceptions.UndefinedColumnError:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f'One of the columns usedZ does not exist for {table_id}.'
+                    detail=f'One of the columns used does not exist for {table_id}.'
                 )
 
             for col in col_names:
@@ -563,6 +571,14 @@ async def statistics(
                         ],
                         "status": "SUCCESS"
                     }
+                }
+            }
+        },
+        400: {
+            "description": "Bad Request",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Column: {column} does not exists for {table_id}."}
                 }
             }
         },
@@ -683,6 +699,14 @@ async def bins(
                         ],
                         "status": "SUCCESS"
                     }
+                }
+            }
+        },
+        400: {
+            "description": "Bad Request",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Column: {column} does not exists for {table_id}."}
                 }
             }
         },
@@ -820,6 +844,14 @@ async def numeric_breaks(
                 }
             }
         },
+        400: {
+            "description": "Bad Request",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Column: {column} does not exists for {table_id}."}
+                }
+            }
+        },
         403: {
             "description": "Forbidden",
             "content": {
@@ -910,6 +942,14 @@ async def custom_break_values(
             "content": {
                 "application/json": {
                     "example": ["str","str"]
+                }
+            }
+        },
+        400: {
+            "description": "Bad Request",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Column: {column} does not exists for {table_id}."}
                 }
             }
         },
