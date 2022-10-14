@@ -7,6 +7,7 @@ from tortoise import exceptions
 import db_models
 import routers.users.models as models
 import utilities
+import authentication_handler
 
 router = APIRouter()
 
@@ -76,7 +77,7 @@ async def create_user(
     }
 )
 async def get_user(
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Retrieve information about user.
@@ -115,7 +116,7 @@ async def get_user(
 )
 async def update_user(
     user: models.UserIn_Pydantic,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Update information about user.
@@ -161,7 +162,7 @@ async def update_user(
     }
 )
 async def delete_user(
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Delete a user.
@@ -189,7 +190,7 @@ async def delete_user(
 )
 async def user_search(
     username: str,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Return a list of users based off of searching via username.

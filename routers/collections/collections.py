@@ -17,6 +17,7 @@ import routers.collections.models as models
 import utilities
 import db_models
 import config
+import authentication_handler
 
 router = APIRouter()
 
@@ -81,7 +82,7 @@ router = APIRouter()
 )
 async def collections(
     request: Request,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get a list of collections available to query.
@@ -227,7 +228,7 @@ async def collection(
     scheme: str,
     table: str,
     request: Request,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get information about a collection.
@@ -350,7 +351,7 @@ async def queryables(
     scheme: str,
     table: str,
     request: Request,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get queryable information about a collection.
@@ -490,7 +491,7 @@ async def items(
     sortby: str="gid",
     filter: str=None,
     srid: int=4326,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get geojson from a collection.
@@ -670,7 +671,7 @@ async def create_item(
     table: str,
     info: models.Geojson,
     request: Request,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a new item to a collection.
@@ -843,7 +844,7 @@ async def item(
     request: Request,
     properties: str="*",
     srid: int=4326,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get geojson for one item of a collection.
@@ -963,7 +964,7 @@ async def update_item(
     id: int,
     info: models.Geojson,
     request: Request,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Update an item in a collection.
@@ -1121,7 +1122,7 @@ async def modify_item(
     id: int,
     info: models.Geojson,
     request: Request,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Modify an item in a collection.
@@ -1259,7 +1260,7 @@ async def delete_item(
     table: str,
     id: int,
     request: Request,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Delete an item in a collection.
@@ -1360,7 +1361,7 @@ async def tiles(
     scheme: str,
     table: str,
     request: Request,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get tile information about a collection.
@@ -1471,7 +1472,7 @@ async def tile(
     request: Request,
     fields: Optional[str] = None,
     cql_filter: Optional[str] = None,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get a vector tile for a given table.
@@ -1585,7 +1586,7 @@ async def tiles_metadata(
     table: str,
     tile_matrix_set_id: str,
     request: Request,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get tile metadata for a given table.
@@ -1669,7 +1670,7 @@ async def tiles_metadata(
 async def get_tile_cache_size(
     scheme: str,
     table: str,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get size of cache for table.
@@ -1739,7 +1740,7 @@ async def get_tile_cache_size(
 async def delete_tile_cache(
     scheme: str,
     table: str,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Delete cache for a table.

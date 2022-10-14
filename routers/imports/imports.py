@@ -9,6 +9,7 @@ import aiofiles
 
 import utilities
 import routers.imports.models as models
+import authentication_handler
 
 DEFAULT_CHUNK_SIZE = 1024 * 1024 * 50  # 50 megabytes
 
@@ -34,7 +35,7 @@ router = APIRouter()
 )
 def status(
     process_id: str,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Return status of an import.
@@ -53,7 +54,7 @@ async def import_arcgis_service(
     info: models.ArcgisModel,
     request: Request,
     background_tasks: BackgroundTasks,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a new dataset from an arcgis service.
@@ -112,7 +113,7 @@ async def import_geographic_data_from_geographic_file(
     title: str = Form(...),
     description: str= Form(...),
     files: List[UploadFile] = File(...),
-    user_name: int=Depends(utilities.get_token_header),
+    user_name: int=Depends(authentication_handler.JWTBearer()),
     tags: list=[],
     read_access_list: list=[],
     write_access_list: list=[],
@@ -199,7 +200,7 @@ async def import_geographic_data_from_csv(
     map_columns: List = Form(...),
     table_columns: List = Form(...),
     files: List[UploadFile] = File(...),
-    user_name: int=Depends(utilities.get_token_header),
+    user_name: int=Depends(authentication_handler.JWTBearer()),
     tags: list=[],
     read_access_list: list=[],
     write_access_list: list=[],
@@ -291,7 +292,7 @@ async def import_point_data_from_csv(
     longitude: str = Form(...),
     table_columns: List = Form(...),
     files: List[UploadFile] = File(...),
-    user_name: int=Depends(utilities.get_token_header),
+    user_name: int=Depends(authentication_handler.JWTBearer()),
     title: str = Form(...),
     description: str = Form(...),
     tags: list=[],
@@ -381,7 +382,7 @@ async def import_geographic_data_from_json_file(
     table_column: str = Form(...),
     table_columns: List = Form(...),
     files: List[UploadFile] = File(...),
-    user_name: int=Depends(utilities.get_token_header),
+    user_name: int=Depends(authentication_handler.JWTBearer()),
     title: str = Form(...),
     description: str = Form(...),
     tags: list=[],
@@ -475,7 +476,7 @@ async def import_point_data_from_json_file(
     longitude: str = Form(...),
     table_columns: List = Form(...),
     files: List[UploadFile] = File(...),
-    user_name: int=Depends(utilities.get_token_header),
+    user_name: int=Depends(authentication_handler.JWTBearer()),
     title: str = Form(...),
     description: str = Form(...),
     tags: list=[],
@@ -549,7 +550,7 @@ async def import_geographic_data_from_json_url(
     request: Request,
     background_tasks: BackgroundTasks,
     info: models.GeographicJsonUrl,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a new dataset from a json url with geographic file.
@@ -613,7 +614,7 @@ async def import_point_data_from_json_url(
     request: Request,
     background_tasks: BackgroundTasks,
     info: models.PointJsonUrl,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a new dataset from a json url with point data.
@@ -667,7 +668,7 @@ async def import_geojson_from_url(
     request: Request,
     background_tasks: BackgroundTasks,
     info: models.GeojsonUrl,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a new dataset from a url with geojson data.

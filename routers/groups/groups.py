@@ -8,6 +8,7 @@ from tortoise.query_utils import Prefetch
 import routers.groups.models as models
 import db_models
 import utilities
+import authentication_handler
 
 router = APIRouter()
 
@@ -26,7 +27,7 @@ router = APIRouter()
     }
 )
 async def groups(
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """Return a list of all groups."""
 
@@ -55,7 +56,7 @@ async def groups(
 )
 async def group_search(
     name: str,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """Return a list of groups based off of searching via the name of the group."""
 
@@ -140,7 +141,7 @@ async def create_group(
 )
 async def get_group(
     group_id: str,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """Retrieve a group."""
 
@@ -193,7 +194,7 @@ async def get_group(
 async def update_group(
     group_id: uuid.UUID,
     new_group: models.Group_Pydantic,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """Update a group."""
 
@@ -259,7 +260,7 @@ async def update_group(
 )
 async def delete_group(
     group_id: uuid.UUID,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """Delete a group."""
 
