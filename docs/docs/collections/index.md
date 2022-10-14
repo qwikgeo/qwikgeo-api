@@ -73,7 +73,7 @@ Collection endpoint is available at `https:/api.qwikgeo.com/api/v1/collections/{
     "keywords": [],
     "links": [
         {
-            "type": "application/json",
+            "type": "application/geo+json",
             "rel": "self",
             "title": "Items as GeoJSON",
             "href": "https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items"
@@ -151,10 +151,10 @@ Items endpoint is available at `https:/api.qwikgeo.com/api/v1/collections/{schem
         ...
     ],
     "numberMatched": 57,
-    "numberReturned": 1,
+    "numberReturned": 10,
     "links": [
         {
-            "type": "application/json",
+            "type": "application/geo+json",
             "rel": "self",
             "title": "This document as GeoJSON",
             "href": "https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items"
@@ -164,6 +164,12 @@ Items endpoint is available at `https:/api.qwikgeo.com/api/v1/collections/{schem
             "title": "States",
             "rel": "collection",
             "href": "https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}"
+        },
+        {
+            "type": "application/geo+json",
+            "rel": "next",
+            "title": "items (next)",
+            "href": "https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items?offfset=10"
         }
     ]
 }
@@ -270,13 +276,13 @@ Item endpoint is available at `https:/api.qwikgeo.com/api/v1/collections/{scheme
             "id": 1,
             "links": [
                 {
-                    "type": "application/json",
+                    "type": "application/geo+json",
                     "rel": "self",
                     "title": "This document as GeoJSON",
                     "href": "https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items/{id}"
                 },
                 {
-                    "type": "application/json",
+                    "type": "application/geo+json",
                     "title": "items as GeoJSON",
                     "rel": "items",
                     "href": "https://api.qwikgeo.com/api/v1/collections/{scheme}.{table}/items"
