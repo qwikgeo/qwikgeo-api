@@ -5,6 +5,7 @@ from fastapi import APIRouter, BackgroundTasks, Request, Depends
 import utilities
 import routers.analysis.analysis_queries as analysis_queries
 import routers.analysis.models as models
+import authentication_handler
 
 router = APIRouter()
 
@@ -30,7 +31,7 @@ analysis_processes = {}
 )
 def status(
     process_id: str,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Return status of an analysis.
@@ -75,7 +76,7 @@ async def buffer(
     info: models.BufferModel,
     request: Request,
     background_tasks: BackgroundTasks,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a buffer analysis.
@@ -147,7 +148,7 @@ async def dissolve(
     info: models.BaseAnalysisModel,
     request: Request,
     background_tasks: BackgroundTasks,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a dissolve analysis.
@@ -218,7 +219,7 @@ async def dissolve_by_value(
     info: models.DissolveByValueModel,
     request: Request,
     background_tasks: BackgroundTasks,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a dissolve by value analysis.
@@ -290,7 +291,7 @@ async def square_grids(
     info: models.GridModel,
     request: Request,
     background_tasks: BackgroundTasks,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a square grid analysis.
@@ -362,7 +363,7 @@ async def hexagon_grids(
     info: models.GridModel,
     request: Request,
     background_tasks: BackgroundTasks,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a hexagon grid analysis.
@@ -434,7 +435,7 @@ async def bounding_box(
     info: models.BaseAnalysisModel,
     request: Request,
     background_tasks: BackgroundTasks,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a bounding box analysis.
@@ -505,7 +506,7 @@ async def k_means_cluster(
     info: models.KMeansModel,
     request: Request,
     background_tasks: BackgroundTasks,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a k means cluster analysis.
@@ -577,7 +578,7 @@ async def center_of_each_polygon(
     info: models.BaseAnalysisModel,
     request: Request,
     background_tasks: BackgroundTasks,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a center of each polygon analysis.
@@ -648,7 +649,7 @@ async def center_of_dataset(
     info: models.BaseAnalysisModel,
     request: Request,
     background_tasks: BackgroundTasks,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a center of dataset analysis.
@@ -719,7 +720,7 @@ async def find_within_distance(
     info: models.FindWithinDistanceModel,
     request: Request,
     background_tasks: BackgroundTasks,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a find within distance analysis.
@@ -793,7 +794,7 @@ async def convex_hull(
     info: models.BaseAnalysisModel,
     request: Request,
     background_tasks: BackgroundTasks,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a convex hull analysis.
@@ -864,7 +865,7 @@ async def aggregate_points_by_grids(
     info: models.AggregatePointsByGridsModel,
     request: Request,
     background_tasks: BackgroundTasks,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a aggregate points by grid analysis.
@@ -937,7 +938,7 @@ async def aggregate_points_by_polygons(
     info: models.PolygonsModel,
     request: Request,
     background_tasks: BackgroundTasks,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a aggregate points by polygons analysis.
@@ -1014,7 +1015,7 @@ async def select_inside(
     info: models.PolygonsModel,
     request: Request,
     background_tasks: BackgroundTasks,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a select inside analysis.
@@ -1091,7 +1092,7 @@ async def select_outside(
     info: models.PolygonsModel,
     request: Request,
     background_tasks: BackgroundTasks,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a select outside analysis.
@@ -1168,7 +1169,7 @@ async def clip(
     info: models.PolygonsModel,
     request: Request,
     background_tasks: BackgroundTasks,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a clip analysis.

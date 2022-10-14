@@ -10,6 +10,7 @@ import tortoise
 
 import utilities
 import db_models
+import authentication_handler
 
 router = APIRouter()
 
@@ -28,7 +29,7 @@ router = APIRouter()
     }
 )
 async def items(
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     List all items.
@@ -65,7 +66,7 @@ async def items(
 )
 async def item(
     portal_id: str,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get an item.

@@ -12,6 +12,7 @@ import asyncpg
 import routers.tables.models as models
 import utilities
 import db_models
+import authentication_handler
 
 router = APIRouter()
 
@@ -30,7 +31,7 @@ router = APIRouter()
     }
 )
 async def tables(
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     List all tables.
@@ -90,7 +91,7 @@ async def tables(
 )
 async def table(
     table_id: str,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get a table.
@@ -157,7 +158,7 @@ async def add_column(
     request: Request,
     table_id: str,
     info: models.AddColumn,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a new column for a table.
@@ -227,7 +228,7 @@ async def delete_column(
     request: Request,
     table_id: str,
     column: str,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Delete a column for a table.
@@ -283,7 +284,7 @@ async def delete_column(
 async def create_table(
     request: Request,
     info: models.CreateTable,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a new table.
@@ -368,7 +369,7 @@ async def create_table(
 async def delete_table(
     request: Request,
     table_id: str,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Delete a table.
@@ -477,7 +478,7 @@ async def statistics(
     table_id: str,
     info: models.StatisticsModel,
     request: Request,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Retrieve statistics for a table.
@@ -624,7 +625,7 @@ async def bins(
     table_id: str,
     info: models.BinsModel,
     request: Request,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Retrieve a numerical column's bins for a table.
@@ -752,7 +753,7 @@ async def numeric_breaks(
     table_id: str,
     info: models.NumericBreaksModel,
     request: Request,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Retrieve a numerical column's breaks for a table.
@@ -894,7 +895,7 @@ async def custom_break_values(
     table_id: str,
     info: models.CustomBreaksModel,
     request: Request,
-    user_name: int=Depends(utilities.get_token_header)
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Retrieve custom break values for a column for a table.
@@ -997,7 +998,7 @@ async def table_autocomplete(
     q: str,
     request: Request,
     limit: int=10,
-    user_name: int=Depends(utilities.get_token_header),
+    user_name: int=Depends(authentication_handler.JWTBearer()),
 
 ):
     """
