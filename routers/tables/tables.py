@@ -329,7 +329,7 @@ async def create_table(
         return {"status": True, "table_id": new_table_id}
 
 @router.delete(
-    path="/{table_id}",
+    path="/{table_id}/delete_table",
     responses={
         200: {
             "description": "Successful Response",
@@ -390,6 +390,18 @@ async def delete_table(
         """
 
         await con.fetch(query)
+
+        table_metadata = await db_models.Table_Pydantic.from_queryset_single(
+            db_models.Table.get(table_id=table_id)
+        )
+
+        item_metadata = await db_models.Item_Pydantic.from_queryset_single(
+            db_models.Item.get(portal_id=table_metadata.portal_id.portal_id)
+        )
+
+        await db_models.Item.filter(portal_id=item_metadata.portal_id).delete()
+
+        await db_models.Table.filter(table_id=table_id).delete()
 
         if os.path.exists(f'{os.getcwd()}/cache/user_data_{table_id}'):
             shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table_id}')

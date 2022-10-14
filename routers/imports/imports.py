@@ -3,8 +3,7 @@
 import os
 import json
 from typing import List
-from fastapi import APIRouter, BackgroundTasks, Request, Form
-from fastapi import File, UploadFile, Depends
+from fastapi import File, UploadFile, Depends, HTTPException, APIRouter, BackgroundTasks, Request, Form
 import requests
 import aiofiles
 
@@ -17,7 +16,21 @@ router = APIRouter()
 
 @router.get(
     path="/status/{process_id}",
-    response_model=models.StatusResponseModel
+    responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "status": "SUCCESS",
+                        "new_table_id": "shnxppipxrppsdkozuroilkubktfodibtqorhucjvxlcdrqyhh",
+                        "completion_time": "2022-07-06T19:33:17.950059",
+                        "run_time_in_seconds": 1.78599
+                    }
+                }
+            }
+        },
+    }
 )
 def status(
     process_id: str,
@@ -81,7 +94,17 @@ async def import_arcgis_service(
 
 @router.post(
     path="/geographic_data_from_geographic_file",
-    response_model=models.BaseResponseModel
+    response_model=models.BaseResponseModel,
+    responses = {
+        400: {
+            "description": "Bad Request",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "There was an error uploading the file(s)"}
+                }
+            }
+        }
+    }
 )
 async def import_geographic_data_from_geographic_file(
     request: Request,
@@ -110,21 +133,21 @@ async def import_geographic_data_from_geographic_file(
 
     file_path = ""
 
-    for file in files:
+    for new_file in files:
         try:
-            file_path = f"{os.getcwd()}/media/{new_table_id}_{file.filename}"
+            file_path = f"{os.getcwd()}/media/{new_table_id}_{new_file.filename}"
             async with aiofiles.open(file_path, "wb") as file:
-                while chunk := await file.read(DEFAULT_CHUNK_SIZE):
+                while chunk := await new_file.read(DEFAULT_CHUNK_SIZE):
                     await file.write(chunk)
         except Exception:
             media_directory = os.listdir(f"{os.getcwd()}/media/")
             for file in media_directory:
                 if new_table_id in file:
                     os.remove(f"{os.getcwd()}/media/{file}")
-
-            return {"message": "There was an error uploading the file(s)"}
-        finally:
-            await file.close()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="There was an error uploading the file(s)"
+            )
 
     utilities.import_processes[process_id] = {
         "status": "PENDING"
@@ -144,14 +167,26 @@ async def import_geographic_data_from_geographic_file(
         searchable=searchable
     )
 
-    return {
-        "process_id": process_id,
-        "url": process_url
-    }
+    return models.BaseResponseModel(
+        process_id=process_id,
+        url=process_url
+    )
+
+    
 
 @router.post(
     path="/geographic_data_from_csv",
-    response_model=models.BaseResponseModel
+    response_model=models.BaseResponseModel,
+    responses = {
+        400: {
+            "description": "Bad Request",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "There was an error uploading the file(s)"}
+                }
+            }
+        }
+    }
 )
 async def import_geographic_data_from_csv(
     request: Request,
@@ -190,21 +225,21 @@ async def import_geographic_data_from_csv(
 
     file_path = ""
 
-    for file in files:
+    for new_file in files:
         try:
-            file_path = f"{os.getcwd()}/media/{new_table_id}_{file.filename}"
+            file_path = f"{os.getcwd()}/media/{new_table_id}_{new_file.filename}"
             async with aiofiles.open(file_path, "wb") as file:
-                while chunk := await file.read(DEFAULT_CHUNK_SIZE):
+                while chunk := await new_file.read(DEFAULT_CHUNK_SIZE):
                     await file.write(chunk)
         except Exception:
             media_directory = os.listdir(f"{os.getcwd()}/media/")
             for file in media_directory:
                 if new_table_id in file:
                     os.remove(f"{os.getcwd()}/media/{file}")
-
-            return {"message": "There was an error uploading the file(s)"}
-        finally:
-            await file.close()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="There was an error uploading the file(s)"
+            )
 
     utilities.import_processes[process_id] = {
         "status": "PENDING"
@@ -237,7 +272,17 @@ async def import_geographic_data_from_csv(
 
 @router.post(
     path="/point_data_from_csv",
-    response_model=models.BaseResponseModel
+    response_model=models.BaseResponseModel,
+    responses = {
+        400: {
+            "description": "Bad Request",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "There was an error uploading the file(s)"}
+                }
+            }
+        }
+    }
 )
 async def import_point_data_from_csv(
     request: Request,
@@ -269,19 +314,21 @@ async def import_point_data_from_csv(
 
     file_path = ""
 
-    for file in files:
+    for new_file in files:
         try:
-            file_path = f"{os.getcwd()}/media/{new_table_id}_{file.filename}"
+            file_path = f"{os.getcwd()}/media/{new_table_id}_{new_file.filename}"
             async with aiofiles.open(file_path, "wb") as file:
-                while chunk := await file.read(DEFAULT_CHUNK_SIZE):
+                while chunk := await new_file.read(DEFAULT_CHUNK_SIZE):
                     await file.write(chunk)
         except Exception:
             media_directory = os.listdir(f"{os.getcwd()}/media/")
             for file in media_directory:
                 if new_table_id in file:
                     os.remove(f"{os.getcwd()}/media/{file}")
-
-            return {"message": "There was an error uploading the file(s)"}
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="There was an error uploading the file(s)"
+            )
 
 
     utilities.import_processes[process_id] = {
@@ -313,7 +360,17 @@ async def import_point_data_from_csv(
 
 @router.post(
     path="/geographic_data_from_json_file",
-    response_model=models.BaseResponseModel
+    response_model=models.BaseResponseModel,
+    responses = {
+        400: {
+            "description": "Bad Request",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "There was an error uploading the file(s)"}
+                }
+            }
+        }
+    }
 )
 async def import_geographic_data_from_json_file(
     request: Request,
@@ -352,21 +409,21 @@ async def import_geographic_data_from_json_file(
 
     file_path = ""
 
-    for file in files:
+    for new_file in files:
         try:
-            file_path = f"{os.getcwd()}/media/{new_table_id}_{file.filename}"
+            file_path = f"{os.getcwd()}/media/{new_table_id}_{new_file.filename}"
             async with aiofiles.open(file_path, "wb") as file:
-                while chunk := await file.read(DEFAULT_CHUNK_SIZE):
+                while chunk := await new_file.read(DEFAULT_CHUNK_SIZE):
                     await file.write(chunk)
         except Exception:
             media_directory = os.listdir(f"{os.getcwd()}/media/")
             for file in media_directory:
                 if new_table_id in file:
                     os.remove(f"{os.getcwd()}/media/{file}")
-
-            return {"message": "There was an error uploading the file(s)"}
-        finally:
-            await file.close()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="There was an error uploading the file(s)"
+            )
 
     utilities.import_processes[process_id] = {
         "status": "PENDING"
@@ -399,7 +456,17 @@ async def import_geographic_data_from_json_file(
 
 @router.post(
     path="/point_data_from_json_file",
-    response_model=models.BaseResponseModel
+    response_model=models.BaseResponseModel,
+    responses = {
+        400: {
+            "description": "Bad Request",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "There was an error uploading the file(s)"}
+                }
+            }
+        }
+    }
 )
 async def import_point_data_from_json_file(
     request: Request,
@@ -431,21 +498,21 @@ async def import_point_data_from_json_file(
 
     file_path = ""
 
-    for file in files:
+    for new_file in files:
         try:
-            file_path = f"{os.getcwd()}/media/{new_table_id}_{file.filename}"
+            file_path = f"{os.getcwd()}/media/{new_table_id}_{new_file.filename}"
             async with aiofiles.open(file_path, "wb") as file:
-                while chunk := await file.read(DEFAULT_CHUNK_SIZE):
+                while chunk := await new_file.read(DEFAULT_CHUNK_SIZE):
                     await file.write(chunk)
         except Exception:
             media_directory = os.listdir(f"{os.getcwd()}/media/")
             for file in media_directory:
                 if new_table_id in file:
                     os.remove(f"{os.getcwd()}/media/{file}")
-
-            return {"message": "There was an error uploading the file(s)"}
-        finally:
-            await file.close()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="There was an error uploading the file(s)"
+            )
 
     utilities.import_processes[process_id] = {
         "status": "PENDING"

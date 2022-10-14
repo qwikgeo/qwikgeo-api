@@ -19,6 +19,7 @@ import pandas as pd
 import tortoise
 from tortoise.query_utils import Prefetch
 from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError, DecodeError
+import asyncpg
 
 import db_models
 import config
@@ -353,7 +354,10 @@ async def get_table_geometry_type(
         SELECT ST_GeometryType(geom) as geom_type
         FROM {scheme}.{table}
         """
-        geometry_type = await con.fetchval(geometry_query)
+        try:
+            geometry_type = await con.fetchval(geometry_query)
+        except asyncpg.exceptions.UndefinedTableError:
+            return "unkown"
 
         geom_type = 'point'
 
@@ -670,7 +674,7 @@ async def get_arcgis_data(
                                 json.dump(data, json_file)
 
                             load_geographic_data_to_server(
-                                table_id=f"user_data.{table_id}",
+                                table_id=table_id,
                                 file_path=f'{table_id}.geojson'
                             )
 
@@ -713,7 +717,7 @@ async def get_arcgis_data(
                             json.dump(feature_collection, json_file)
 
                         load_geographic_data_to_server(
-                            table_id=f"user_data.{table_id}",
+                            table_id=table_id,
                             file_path=f'{table_id}.geojson'
                         )
 
@@ -729,7 +733,7 @@ async def get_arcgis_data(
                 )
 
                 load_geographic_data_to_server(
-                    table_id=f"user_data.{table_id}",
+                    table_id=table_id,
                     file_path=f'{table_id}.geojson'
                 )
 
@@ -1070,7 +1074,7 @@ def load_geographic_data_to_server(
     username = config.DB_USERNAME
     password = config.DB_PASSWORD
     database = config.DB_DATABASE
-    subprocess.call(f'ogr2ogr -f "PostgreSQL" "PG:host={host} user={username} dbname={database} password={password} port={config.DB_PORT}" "{file_path}" -lco GEOMETRY_NAME=geom -lco FID=gid -lco PRECISION=no -nln {table_id} -overwrite', shell=True)
+    subprocess.call(f'ogr2ogr -f "PostgreSQL" "PG:host={host} user={username} dbname={database} password={password} port={config.DB_PORT}" "{file_path}" -lco GEOMETRY_NAME=geom -lco FID=gid -lco PRECISION=no -nln user_data.{table_id} -overwrite', shell=True)
 
 async def get_table_columns(
     table: str,
@@ -1208,7 +1212,10 @@ async def get_table_bounds(
 
         table_extent = []
 
-        extent = await con.fetchval(query)
+        try:
+            extent = await con.fetchval(query)
+        except asyncpg.exceptions.UndefinedTableError:
+            return []
 
         extent = extent.replace('BOX(','').replace(')','')
 
