@@ -126,6 +126,24 @@ async def collections(
                             "rel": "self",
                             "title": "This document as JSON",
                             "href": f"{url}api/v1/collections/user_data.{table.table_id}"
+                        },
+                        {
+                            "type": "application/geo+json",
+                            "rel": "items",
+                            "title": "Items as GeoJSON",
+                            "href": f"{url}api/v1/collections/user_data.{table}/items"
+                        },
+                        {
+                            "type": "application/json",
+                            "rel": "queryables",
+                            "title": "Queryables for this collection as JSON",
+                            "href": f"{url}api/v1/collections/user_data.{table}/queryables"
+                        },
+                        {
+                            "type": "application/json",
+                            "rel": "tiles",
+                            "title": "Tiles as JSON",
+                            "href": f"{url}api/v1/collections/user_data.{table}/tiles"
                         }
                     ],
                     "geometry": await utilities.get_table_geometry_type(
