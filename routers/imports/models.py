@@ -2,23 +2,6 @@
 
 from pydantic import BaseModel, Field
 
-class StatusResponseModel(BaseModel):
-    """Model for imports response"""
-
-    status: str = Field(
-        default="SUCCESS"
-    )
-    new_table_id: str = Field(
-        default="shnxppipxrppsdkozuroilkubktfodibtqorhucjvxlcdrqyhh",
-        title="50 character new table_id in postgresql."
-    )
-    completion_time: str = Field(
-        default="2022-07-06T19:33:17.950059"
-    )
-    run_time_in_seconds: float = Field(
-        default=1.78599
-    )
-
 class BaseResponseModel(BaseModel):
     """Model for base response"""
 

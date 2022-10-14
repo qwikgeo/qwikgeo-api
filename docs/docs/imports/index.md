@@ -2,16 +2,16 @@
 
 | Method | URL | Description |
 | ------ | --- | ----------- |
-| `GET` | `/api/v1/imports/status/{process_id}` | [Import Status](#Import-Status)  |
-| `POST` | `/api/v1/imports/arcgis_service` | [ArcGIS Service](#ArcGIS-Service)  |
-| `POST` | `/api/v1/imports/geographic_data_from_geographic_file` | [Geographic Data From Geographic File](#Geographic-Data-From-Geographic-File)  |
-| `POST` | `/api/v1/imports/geographic_data_from_csv` | [Geographic Data From CSV](#Geographic-Data-From-CSV)  |
-| `POST` | `/api/v1/imports/point_data_from_csv` | [Point Data From CSV](#Point-Data-From-CSV)  |
-| `POST` | `/api/v1/imports/geographic_data_from_json_file` | [Geographic Data From Json File](#Geographic-Data-From-Json-File)  |
-| `POST` | `/api/v1/imports/point_data_from_json_file` | [Point Data From Json File ](#Point-Data-From-Json-File)  |
-| `POST` | `/api/v1/imports/geographic_data_from_json_url` | [Geographic Data From Json URL](#Geographic-Data-From-Json-Url)  |
-| `POST` | `/api/v1/imports/point_data_from_json_url` | [Point Data From Json URL](#Point-Data-From-Json-Url)  |
-| `POST` | `/api/v1/imports/geojson_from_url` | [Geojson From URL](#Geojson-From-Url)  |
+| `GET` | `/api/v1/imports/status/{process_id}` | [Import Status](#import-status)  |
+| `POST` | `/api/v1/imports/arcgis_service` | [ArcGIS Service](#arcgis-service)  |
+| `POST` | `/api/v1/imports/geographic_data_from_geographic_file` | [Geographic Data From Geographic File](#geographic-data-from-geographic-file)  |
+| `POST` | `/api/v1/imports/geographic_data_from_csv` | [Geographic Data From CSV](#geographic-data-from-csv)  |
+| `POST` | `/api/v1/imports/point_data_from_csv` | [Point Data From CSV](#point-data-from-csv)  |
+| `POST` | `/api/v1/imports/geographic_data_from_json_file` | [Geographic Data From Json File](#geographic-data-from-json-file)  |
+| `POST` | `/api/v1/imports/point_data_from_json_file` | [Point Data From Json File ](#point-data-from-json-file)  |
+| `POST` | `/api/v1/imports/geographic_data_from_json_url` | [Geographic Data From Json URL](#geographic-data-from-json-url)  |
+| `POST` | `/api/v1/imports/point_data_from_json_url` | [Point Data From Json URL](#point-data-from-json-url)  |
+| `POST` | `/api/v1/imports/geojson_from_url` | [Geojson From URL](#geojson-from-url)  |
 
 
 ## Endpoint Description's
@@ -62,8 +62,9 @@ Example: Download a point dataset of Tennesse State Parks.
 ### Example Input
 ```json
 {
+    "title": "title",
+    "description": "description",
     "url": "https://services5.arcgis.com/bPacKTm9cauMXVfn/ArcGIS/rest/services/TN_State_Parks_Points/FeatureServer/0",
-    "database": "data"
 }
 ```
 
@@ -85,7 +86,8 @@ Example: Import geojson from [file](/data/states.geojson).
 ### Example Input
 ```json
 {
-    "database": "data",
+    "title": "title",
+    "description": "description",
     "files": "FILES IN MULTI PART FORM"
 }
 ```
@@ -109,8 +111,9 @@ and joining to the `states` map based off of the `state_abbr` column.
 ### Example Input
 ```json
 {
-  "database": "data",
-  "map": "states",
+  "title": "title",
+  "description": "description",
+  "map_name": "states",
   "map_column": "state_abbr",
   "map_columns": ["state_abbr"],
   "table_column": "state_abbr",
@@ -137,7 +140,8 @@ Example: A csv [file](/data/us-states-capitals.csv) with latitude and longitude 
 ### Example Input
 ```json
 {
-  "database": "data",
+  "title": "title",
+  "description": "description",
   "longitude": "longitude",
   "latitude": "latitude",
   "table_columns": ["name","description","latitude","longitude"],
@@ -163,8 +167,9 @@ Example: Import state date from a json [file](/data/states.json).
 ### Example Input
 ```json
 {
-  "database": "data",
-  "map": "states",
+  "title": "title",
+  "description": "description",
+  "map_name": "states",
   "map_column": "state_abbr",
   "map_columns": ["state_abbr"],
   "table_column": "code",
@@ -191,7 +196,8 @@ Example: A json [file](/data/cities.json) that contains cities for the entire wo
 ### Example Input
 ```json
 {
-  "database": "data",
+  "title": "title",
+  "description": "description",
   "longitude": "longitude",
   "latitude": "latitude",
   "table_columns": ["id","name","latitude","longitude","state_id","state_code","state_name","country_id","country_code","country_name","wikiDataId"],
@@ -217,7 +223,8 @@ Example: Import state information from a gitlab url
 ### Example Input
 ```json
 {
-    "database": "data",
+    "title": "title",
+    "description": "description",
     "map_column": "state_abbr",
     "table_column": "code",
     "table_columns": [
@@ -226,7 +233,7 @@ Example: Import state information from a gitlab url
         "code",
         "nickname"
     ],
-    "map": "states",
+    "map_name": "states",
     "map_columns": [
         "state_abbr"
     ],
@@ -252,8 +259,9 @@ Example: Import state centroids from a gitlab url
 ### Example Input
 ```json
 {
+  "title": "title",
+  "description": "description",
   "url": "https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/master/states.json",
-  "database": "data",
   "longitude": "longitude",
   "latitude": "latitude",
   "table_columns": ["id","name","latitude","longitude","state_code","country_id","country_code","country_name","type"],
@@ -279,7 +287,8 @@ Example: Input large earthquakes for the past month
 ### Example Input
 ```json
 {
-    "database": "data",
+    "title": "title",
+    "description": "description",
     "url": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson"
 }
 ```
