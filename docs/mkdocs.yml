@@ -12,13 +12,18 @@ extra_css:
 
 theme:
   name: material
+  logo: assets/images/favicon.ico
 
 markdown_extensions:
     - toc:
         permalink: 
     - attr_list
     - def_list
+    - pymdownx.highlight:
+        anchor_linenums: true
+    - pymdownx.inlinehilite
     - pymdownx.snippets
+    - pymdownx.superfences
 
 dev_addr: '127.0.0.1:5000'
 
