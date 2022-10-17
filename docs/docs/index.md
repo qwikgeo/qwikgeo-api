@@ -12,7 +12,7 @@ Using the [create user](/users/#create-user) endpoint, create an account.
 ### 2. Get an access token
 Use the [token](/authentication/#token) endpoint, to create a JWT token.
 
-### 3. Starting using the multitude of different api's QwikGeo has to offer.
+### 3. Start using the multitude of different api's QwikGeo has to offer.
 
  - Upload a dataset via the [imports api](/imports).
  - Perform a geospatial analysis via the [analysis api](/analysis).
