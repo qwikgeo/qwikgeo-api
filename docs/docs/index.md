@@ -16,4 +16,4 @@ Use the [token](/authentication/#token) endpoint, to create a JWT token.
 
  - Upload a dataset via the [imports api](/imports).
  - Perform a geospatial analysis via the [analysis api](/analysis).
- - Visualize a dataset as geojson or vector tiles with the [collections api](/collectons).
+ - Visualize a dataset as geojson or vector tiles with the [collections api](/collections).
