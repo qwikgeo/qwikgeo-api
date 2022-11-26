@@ -1522,7 +1522,7 @@ async def tile(
     request: Request,
     fields: Optional[str] = None,
     cql_filter: Optional[str] = None,
-    # user_name: int=Depends(authentication_handler.JWTBearer())
+    user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get a vector tile for a given table.
