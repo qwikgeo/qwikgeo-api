@@ -12,6 +12,8 @@ from pygeofilter.backends.sql import to_sql_where
 from pygeofilter.parsers.ecql import parse
 from tortoise.expressions import Q
 from tortoise.query_utils import Prefetch
+from fastapi_cache.decorator import cache
+import lark
 
 import routers.collections.models as models
 import utilities
@@ -80,6 +82,7 @@ router = APIRouter()
         }
     }
 )
+@cache(expire=60, key_builder=config.key_builder)
 async def collections(
     request: Request,
     user_name: int=Depends(authentication_handler.JWTBearer())
@@ -507,8 +510,10 @@ async def items(
     offset: int=0,
     properties: str="*",
     sortby: str="gid",
+    sortdesc: int=1,
     filter: str=None,
     srid: int=4326,
+    return_geometry: bool=True,
     user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
@@ -523,7 +528,7 @@ async def items(
         user_name=user_name
     )
 
-    blacklist_query_parameters = ["bbox","limit","offset","properties","sortby","filter"]
+    blacklist_query_parameters = ["bbox","limit","offset","properties","sortby","sortdesc","filter","srid"]
 
     new_query_parameters = []
 
@@ -546,12 +551,25 @@ async def items(
 
         db_fields = await con.fetch(sql_field_query)
 
+        fields = []
+
+        for field in db_fields:
+            fields.append(field['column_name'])
+
         if properties == '*':
             properties = ""
             for field in db_fields:
                 column = field['column_name']
                 properties += f'"{column}",'
             properties = properties[:-1]
+        else:
+            if len(properties) > 0:
+                for property in properties.split(","):
+                    if property not in fields:
+                        raise HTTPException(
+                            status_code=400,
+                            detail=f"""Column: {property} is not a column for {scheme}.{table}."""
+                        )
 
         if new_query_parameters:
 
@@ -567,9 +585,21 @@ async def items(
 
             for field in db_fields:
                 field_mapping[field['column_name']] = field['column_name']
+            try:
+                ast = parse(filter)
+            except lark.exceptions.UnexpectedToken as error:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid operator used in filter."
+                )
+            try:
+                filter = to_sql_where(ast, field_mapping)
+            except KeyError:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"""Invalid column in filter parameter for {scheme}.{table}."""
+                )
 
-            ast = parse(filter)
-            filter = to_sql_where(ast, field_mapping)
 
         if filter is not None and column_where_parameters != "":
             filter += f" AND {column_where_parameters}"
@@ -582,10 +612,12 @@ async def items(
             limit=limit,
             offset=offset,
             properties=properties,
-            sort_by=sortby,
+            sortby=sortby,
+            sortdesc=sortdesc,
             bbox=bbox,
             filter=filter,
             srid=srid,
+            return_geometry=return_geometry,
             app=request.app
         )
 
@@ -610,7 +642,7 @@ async def items(
 
         for param in request.query_params:
             if param != 'offset':
-                extra_params += f"{param}={request.query_params[param]}"
+                extra_params += f"&{param}={request.query_params[param]}"
 
         if (results['numberReturned'] + offset) < results['numberMatched']:
             href = f"{str(request.base_url)[:-1]}{request.url.path}?offset={offset+limit}"
