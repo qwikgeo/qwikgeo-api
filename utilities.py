@@ -271,15 +271,15 @@ async def get_tile(
                 SELECT ST_TileEnvelope({z}, {x}, {y}) as geom
             )
             SELECT
-                st_asmvtgeom(
-                    ST_Transform(t.geom, 3857)
+                ST_AsMVTGeom(
+                    ST_Transform("table".geom, 3857)
                     ,bounds.geom
                 ) AS mvtgeom {field_list}
-            FROM {scheme}.{table} as t, bounds
+            FROM {scheme}.{table} as "table", bounds
             WHERE ST_Intersects(
-                ST_Transform(t.geom, 4326),
+                ST_Transform("table".geom, 4326),
                 ST_Transform(bounds.geom, 4326)
-            ) 	
+            )
 
         """
         if cql_filter:
@@ -1120,8 +1120,10 @@ async def get_table_geojson(
     limit: int=200000,
     offset: int=0,
     properties: str="*",
-    sort_by: str="gid",
-    srid: int=4326
+    sortby: str="gid",
+    sortdesc: int=1,
+    srid: int=4326,
+    return_geometry: bool=True
 ) -> object:
     """
     Method used to retrieve the table geojson.
@@ -1131,19 +1133,26 @@ async def get_table_geojson(
     pool = app.state.database
 
     async with pool.acquire() as con:
-        query = """
-        SELECT
-        json_build_object(
-            'type', 'FeatureCollection',
-            'features', json_agg(ST_AsGeoJSON(t.*)::json)
-        )
-        FROM (
-        """
+        if return_geometry:
+            query = """
+            SELECT
+            json_build_object(
+                'type', 'FeatureCollection',
+                'features', json_agg(ST_AsGeoJSON(t.*)::json)
+            )
+            FROM (
+            """
 
-        if properties != '*':
-            query += f"SELECT {properties},ST_Transform(geom,{srid})"
+            if properties != '*' and properties != "":
+                query += f"SELECT {properties},ST_Transform(geom,{srid})"
+            else:
+                query += f"SELECT ST_Transform(geom,{srid}), gid"
+        
         else:
-            query += f"SELECT ST_Transform(geom,{srid})"
+            if properties != '*' and properties != "":
+                query = f"SELECT {properties}, gid"
+            else:
+                query = f"SELECT gid"
 
         query += f" FROM {scheme}.{table} "
 
@@ -1164,25 +1173,64 @@ async def get_table_geojson(
             query += f" ST_INTERSECTS(geom,ST_MakeEnvelope({coords[0]}, {coords[1]}, {coords[2]}, {coords[3]}, 4326)) "
             count_query += f" ST_INTERSECTS(geom,ST_MakeEnvelope({coords[0]}, {coords[1]}, {coords[2]}, {coords[3]}, 4326)) "
 
-        if sort_by != "gid":
-            order = sort_by.split(':')
+        if sortby != "gid":
             sort = "asc"
-            if len(order) == 2 and order[1] == "D":
+            if sortdesc != 1:
                 sort = "desc"
-            query += f" ORDER BY {order[0]} {sort}"
+            query += f" ORDER BY {sortby} {sort}"
 
         query += f" OFFSET {offset} LIMIT {limit}"
 
-        query += ") AS t;"
+        if return_geometry:
 
-        geojson = await con.fetchrow(query)
+            query += ") AS t;"
+
+        try:
+            if return_geometry:
+                geojson = await con.fetchrow(query)
+            else:
+                featuresJson = await con.fetch(query)
+        except asyncpg.exceptions.InvalidTextRepresentationError as error:
+            raise HTTPException(
+                status_code=400,
+                detail=str(error)
+            )
+        except asyncpg.exceptions.UndefinedFunctionError as error:
+            raise HTTPException(
+                status_code=400,
+                detail=str(error)
+            )
         count = await con.fetchrow(count_query)
 
-        formatted_geojson = json.loads(geojson['json_build_object'])
+        if return_geometry:
 
-        if formatted_geojson['features'] is not None:
-            for feature in formatted_geojson['features']:
-                feature['id'] = feature['properties']['gid']
+            formatted_geojson = json.loads(geojson['json_build_object'])
+
+            if formatted_geojson['features'] is not None:
+                for feature in formatted_geojson['features']:
+                    feature['id'] = feature['properties']['gid']
+                    if properties == "":
+                        feature['properties'].pop("gid")
+        else:
+
+            formatted_geojson = {
+                "type": "FeatureCollection",
+                "features": []
+            }
+
+            for feature in featuresJson:
+                geojsonFeature = {
+                    "type": "Feature",
+                    "geometry": None,
+                    "properties": {},
+                    "id": feature['gid']
+                }
+                featureProperties = dict(feature)
+                for property in featureProperties:
+                    geojsonFeature['properties'][property] = featureProperties[property]
+                if properties == "":
+                    geojsonFeature['properties'].pop("gid")
+                formatted_geojson['features'].append(geojsonFeature)
 
         formatted_geojson['numberMatched'] = count['count']
         formatted_geojson['numberReturned'] = 0

@@ -4,6 +4,9 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from tortoise.contrib.fastapi import register_tortoise
 from prometheus_fastapi_instrumentator import Instrumentator
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
+
 
 import db
 import config
@@ -103,7 +106,7 @@ app.include_router(
 @app.on_event("startup")
 async def startup_event():
     """Application startup: register the database connection and create table list."""
-
+    FastAPICache.init(InMemoryBackend(), prefix="fastapi-cache")
     await db.connect_to_db(app)
 
 @app.on_event("shutdown")
