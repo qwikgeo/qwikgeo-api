@@ -4,7 +4,7 @@ import os
 import json
 import shutil
 import datetime
-from typing import Optional
+from typing import Optional, List
 from functools import reduce
 from fastapi import Request, APIRouter, Depends, status, Response, HTTPException
 from starlette.responses import FileResponse
@@ -1809,3 +1809,633 @@ async def delete_tile_cache(
     utilities.delete_user_tile_cache(table_metadata.table_id)
 
     return {"status": "deleted"}
+
+@router.post(
+    path="/{scheme}.{table}/statistics",
+    responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "results": {
+                            "count_gid": 19,
+                            "avg_deed_ac": 64.28666666666666,
+                            "distinct_first_name_count_first_name": [
+                                {
+                                    "first_name": "",
+                                    "count": 3
+                                },
+                                {
+                                    "first_name": "COLE",
+                                    "count": 3
+                                },
+                                {
+                                    "first_name": "% BAS",
+                                    "count": 2
+                                }
+                            ]
+                        },
+                        "status": "SUCCESS"
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Bad Request",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "One of the columns used does not exist for {scheme}.{table}."}
+                }
+            }
+        },
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def statistics(
+    table: str,
+    info: models.StatisticsModel,
+    request: Request,
+    user_name: int=Depends(authentication_handler.JWTBearer())
+):
+    """
+    Retrieve statistics for a table.
+    More information at https://docs.qwikgeo.com/tables/#statistics
+    """
+
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name
+    )
+
+    pool = request.app.state.database
+
+    async with pool.acquire() as con:
+
+        final_results= {}
+        cols = []
+        col_names = []
+        distinct = False
+        general_stats = False
+
+        for aggregate in info.aggregate_columns:
+            if aggregate.type == 'distinct':
+                distinct = True
+            else:
+                general_stats = True
+                cols.append(f"""
+                {aggregate.type }("{aggregate.column}") as {aggregate.type}_{aggregate.column}
+                """)
+                col_names.append(f"{aggregate.type}_{aggregate.column}")
+
+        if general_stats:
+            formatted_columns = ','.join(cols)
+            query = f"""
+                SELECT {formatted_columns}
+                FROM user_data."{table}"
+            """
+
+            query += await utilities.generate_where_clause(info, con)
+
+            try:
+                data = await con.fetchrow(query)
+            
+            except asyncpg.exceptions.UndefinedColumnError:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f'One of the columns used does not exist for {table}.'
+                )
+
+            for col in col_names:
+                final_results[col] = data[col]
+
+        if distinct:
+            for aggregate in info.aggregate_columns:
+                if aggregate.type == 'distinct':
+                    query = f"""
+                    SELECT DISTINCT("{aggregate.column}"), {aggregate.group_method}("{aggregate.group_column}") 
+                    FROM user_data."{table}" """
+
+                    query += await utilities.generate_where_clause(info, con)
+
+                    query += f"""
+                    GROUP BY "{aggregate.column}"
+                    ORDER BY "{aggregate.group_method}" DESC"""
+
+                    try:
+                        data = await con.fetchrow(query)
+                    
+                    except asyncpg.exceptions.UndefinedColumnError:
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f'One of the columns used does not exist for {table}.'
+                        )
+
+                    final_results[
+                        f"""distinct_{aggregate.column}_{aggregate.group_method}_{aggregate.group_column}"""
+                    ] = data
+
+        return {
+            "results": final_results,
+            "status": "SUCCESS"
+        }
+
+@router.post(
+    path="/{scheme}.{table}/bins",
+    responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "results": [
+                            {
+                                "min": 0.0,
+                                "max": 145.158,
+                                "count": 15993
+                            },
+                            {
+                                "min": 145.158,
+                                "max": 290.316,
+                                "count": 1088
+                            },
+                        ],
+                        "status": "SUCCESS"
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Bad Request",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Column: {column} does not exists for {scheme}.{table}."}
+                }
+            }
+        },
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def bins(
+    table: str,
+    info: models.BinsModel,
+    request: Request,
+    user_name: int=Depends(authentication_handler.JWTBearer())
+):
+    """
+    Retrieve a numerical column's bins for a table.
+    More information at https://docs.qwikgeo.com/tables/#bins
+    """
+
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name
+    )
+
+    pool = request.app.state.database
+
+    async with pool.acquire() as con:
+        results = [
+
+        ]
+        query = f"""
+            SELECT MIN("{info.column}"),MAX("{info.column}")
+            FROM user_data."{table}"
+        """
+
+        query += await utilities.generate_where_clause(info, con)        
+
+        try:
+            data = await con.fetchrow(query)
+        
+        except asyncpg.exceptions.UndefinedColumnError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f'Column: {info.column} does not exist for {table}.'
+            )
+
+        group_size = (data['max'] - data['min']) / info.number_of_bins
+
+        for group in range(info.number_of_bins):
+            if group == 0:
+                minimum = data['min']
+                maximum = group_size
+            else:
+                minimum = group*group_size
+                maximum = (group+1)*group_size
+            query = f"""
+                SELECT COUNT(*)
+                FROM user_data."{table}"
+                WHERE "{info.column}" > {minimum}
+                AND "{info.column}" <= {maximum}
+            """
+
+            query += await utilities.generate_where_clause(info, con, True)
+
+            data = await con.fetchrow(query)
+
+            results.append({
+                "min": minimum,
+                "max": maximum,
+                "count": data['count']
+            })
+
+        return {
+            "results": results,
+            "status": "SUCCESS"
+        }
+
+@router.post(
+    path="/{scheme}.{table}/numeric_breaks",
+    responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "results": [
+                            {
+                                "min": 0.0,
+                                "max": 145.158,
+                                "count": 15993
+                            },
+                            {
+                                "min": 145.158,
+                                "max": 290.316,
+                                "count": 1088
+                            },
+                        ],
+                        "status": "SUCCESS"
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Bad Request",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Column: {column} does not exists for {scheme}.{table}."}
+                }
+            }
+        },
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def numeric_breaks(
+    table: str,
+    info: models.NumericBreaksModel,
+    request: Request,
+    user_name: int=Depends(authentication_handler.JWTBearer())
+):
+    """
+    Retrieve a numerical column's breaks for a table.
+    More information at https://docs.qwikgeo.com/tables/#numeric-breaks
+    """
+
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name
+    )
+
+    pool = request.app.state.database
+
+    async with pool.acquire() as con:
+        results = [
+
+        ]
+
+        if info.break_type == "quantile":
+            query = f"""
+                SELECT {info.break_type}_bins(array_agg(CAST("{info.column}" AS integer)), {info.number_of_breaks}) 
+                FROM user_data."{table}"
+            """
+        else:
+            query = f"""
+                SELECT {info.break_type}_bins(array_agg("{info.column}"), {info.number_of_breaks}) 
+                FROM user_data."{table}"
+            """
+
+        query += await utilities.generate_where_clause(info, con)
+
+        try:
+            break_points = await con.fetchrow(query)
+        
+        except asyncpg.exceptions.UndefinedColumnError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f'Column: {info.column} does not exist for {table}.'
+            )
+
+        min_query = f"""
+            SELECT MIN("{info.column}")
+            FROM user_data."{table}"
+        """
+
+        min_query += await utilities.generate_where_clause(info, con)
+
+        min_number = await con.fetchrow(min_query)
+
+        for index, max_number in enumerate(break_points[f"{info.break_type}_bins"]):
+            if index == 0:
+                minimum = min_number['min']
+                maximum = max_number
+            else:
+                minimum = break_points[f"{info.break_type}_bins"][index-1]
+                maximum = max_number
+            query = f"""
+                SELECT COUNT(*)
+                FROM user_data."{table}"
+                WHERE "{info.column}" > {minimum}
+                AND "{info.column}" <= {maximum}
+            """
+
+            query += await utilities.generate_where_clause(info, con, True)
+
+            data = await con.fetchrow(query)
+
+            results.append({
+                "min": minimum,
+                "max": maximum,
+                "count": data['count']
+            })
+
+        return {
+            "results": results,
+            "status": "SUCCESS"
+        }
+
+@router.post(
+    path="/{scheme}.{table}/custom_break_values",
+    responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "results": [
+                            {
+                                "min": 0.0,
+                                "max": 145.158,
+                                "count": 15993
+                            },
+                            {
+                                "min": 145.158,
+                                "max": 290.316,
+                                "count": 1088
+                            },
+                        ],
+                        "status": "SUCCESS"
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Bad Request",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Column: {column} does not exists for {scheme}.{table}."}
+                }
+            }
+        },
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def custom_break_values(
+    table: str,
+    info: models.CustomBreaksModel,
+    request: Request,
+    user_name: int=Depends(authentication_handler.JWTBearer())
+):
+    """
+    Retrieve custom break values for a column for a table.
+    More information at https://docs.qwikgeo.com/tables/#numeric-breaks
+    """
+
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name
+    )
+
+    pool = request.app.state.database
+
+    async with pool.acquire() as con:
+        results = [
+
+        ]
+
+        for break_range in info.breaks:
+            minimum = break_range.min
+            maximum = break_range.max
+
+            query = f"""
+                SELECT COUNT(*)
+                FROM user_data."{table}"
+                WHERE "{info.column}" > {minimum}
+                AND "{info.column}" <= {maximum}
+            """
+
+            query += await utilities.generate_where_clause(info, con, True)
+
+            try:
+                data = await con.fetchrow(query)
+            
+            except asyncpg.exceptions.UndefinedColumnError:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f'Column: {info.column} does not exist for {table}.'
+                )
+
+            results.append({
+                "min": minimum,
+                "max": maximum,
+                "count": data['count']
+            })
+
+        return {
+            "results": results,
+            "status": "SUCCESS"
+        }
+
+@router.get(
+    path="/{scheme}.{table}/autocomplete/",
+    responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": ["str","str"]
+                }
+            }
+        },
+        400: {
+            "description": "Bad Request",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Column: {column} does not exists for {scheme}.{table}."}
+                }
+            }
+        },
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def autocomplete(
+    table: str,
+    column: str,
+    q: str,
+    request: Request,
+    limit: int=10,
+    user_name: int=Depends(authentication_handler.JWTBearer()),
+
+):
+    """
+    Retrieve distinct values for a column in a table.
+    More information at https://docs.qwikgeo.com/tables/#table-autocomplete
+    """
+
+    await utilities.validate_table_access(
+        table=table,
+        user_name=user_name
+    )
+
+    pool = request.app.state.database
+
+    async with pool.acquire() as con:
+
+        results = []
+
+        query = f"""
+            SELECT distinct("{column}")
+            FROM user_data.{table}
+            WHERE "{column}" ILIKE '%{q}%'
+            ORDER BY "{column}"
+            LIMIT {limit}
+        """
+
+        try:
+            data = await con.fetch(query)
+        
+        except asyncpg.exceptions.UndefinedColumnError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f'Column: {column} does not exist for {table}.'
+            )
+
+        for row in data:
+            results.append(row[column])
+
+        return results
