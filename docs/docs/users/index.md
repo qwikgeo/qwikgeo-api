@@ -2,11 +2,11 @@
 
 | Method | URL                                                                              | Description                           |
 | ------ | -------------------------------------------------------------------------------- | --------------------------------------|
-| `POST`  | `https://api.qwikgeo.com/api/v1/users/user`                                     | [Create User](#create-user)           |
-| `GET`  | `https://api.qwikgeo.com/api/v1/users/user`                                      | [User](#user)                         |
-| `PUT`  | `https://api.qwikgeo.com/api/v1/users/user`                                      | [Update User](#update-user)           |
-| `DELETE`  | `https://api.qwikgeo.com/api/v1/users/user`                                   | [Delete User](#delete-user)           |
-| `GET`  | `https://api.qwikgeo.com/api/v1/users/search`                                    | [User Search](#user-search)           |
+| `POST`  | `https://api.qwikgeo.com/api/v1/users/`                                     | [Create User](#create-user)           |
+| `GET`  | `https://api.qwikgeo.com/api/v1/users/me`                                      | [User](#user)                         |
+| `PUT`  | `https://api.qwikgeo.com/api/v1/users/me`                                      | [Update User](#update-user)           |
+| `DELETE`  | `https://api.qwikgeo.com/api/v1/users/me`                                   | [Delete User](#delete-user)           |
+| `GET`  | `https://api.qwikgeo.com/api/v1/users/`                                    | [User Search](#user-search)           |
 
 ## Endpoint Description's
 
@@ -15,7 +15,7 @@
 ### Description
 The create user endpoint allows you to create a new user to use QwikGeo.
 
-Create user endpoint is available at `https://api.qwikgeo.com/api/v1/users/user`
+Create user endpoint is available at `https://api.qwikgeo.com/api/v1/users/`
 
 ### Example Input 
 ```json
@@ -47,7 +47,7 @@ Create user endpoint is available at `https://api.qwikgeo.com/api/v1/users/user`
 ### Description
 The user endpoint allows you to view your user information.
 
-User endpoint is available at `https://api.qwikgeo.com/api/v1/users/user`
+User endpoint is available at `https://api.qwikgeo.com/api/v1/users/me`
 
 ### Example Output
 ```json
@@ -68,7 +68,7 @@ User endpoint is available at `https://api.qwikgeo.com/api/v1/users/user`
 ### Description
 The update user endpoint allows you to update information about your account.
 
-Update user endpoint is available at `https://api.qwikgeo.com/api/v1/users/user`
+Update user endpoint is available at `https://api.qwikgeo.com/api/v1/users/me`
 
 ### Example Input 
 ```json
@@ -99,7 +99,7 @@ Update user endpoint is available at `https://api.qwikgeo.com/api/v1/users/user`
 ### Description
 The delete user endpoint allows you to delete your account.
 
-Delete user endpoint is available at `https://api.qwikgeo.com/api/v1/users/user`
+Delete user endpoint is available at `https://api.qwikgeo.com/api/v1/users/me`
 
 ### Example Output
 ```json
@@ -113,7 +113,7 @@ Delete user endpoint is available at `https://api.qwikgeo.com/api/v1/users/user`
 ### Description
 The update user endpoint allows you to update information about your account.
 
-Update user endpoint is available at `https://api.qwikgeo.com/api/v1/users/user_search`
+Update user endpoint is available at `https://api.qwikgeo.com/api/v1/users/`
 
 ### Example
 
@@ -121,7 +121,7 @@ Search for users who username contain `john`.
 
 ### Example Input 
 ```shell
-curl `https://api.qwikgeo.com/api/v1/users/user_search?username=john`
+curl `https://api.qwikgeo.com/api/v1/users/?username=john`
 ```
 
 ### Example Output

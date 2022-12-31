@@ -29,6 +29,7 @@ class Group(models.Model):
     group_id = fields.UUIDField(unique=True, indexable=True, pk=True)
     name = fields.CharField(500, unique=True)
     users = fields.ReverseRelation["GroupUser"]
+    admins = fields.ReverseRelation["GroupAdmin"]
 
 class GroupUser(models.Model):
     """Model for group_user in database"""
@@ -38,6 +39,16 @@ class GroupUser(models.Model):
         "models.Group", related_name="group_users", to_field="group_id"
     )
     username = fields.CharField(500)
+
+class GroupAdmin(models.Model):
+    """Model for group_user in database"""
+
+    id = fields.IntField(pk=True)
+    group_id: fields.ForeignKeyRelation[Group] = fields.ForeignKeyField(
+        "models.Group", related_name="group_admins", to_field="group_id"
+    )
+    username = fields.CharField(500)
+
 
 class Item(models.Model):
     """Model for item in database"""
@@ -87,7 +98,50 @@ class Table(models.Model):
     created_time = fields.DatetimeField(auto_now_add=True)
     modified_time = fields.DatetimeField(auto_now=True)
 
+class Map(models.Model):
+    """Model for map in database"""
+
+    username: fields.ForeignKeyField(
+        "models.User", related_name="maps", to_field="username"
+    )
+    portal_id: fields.ForeignKeyRelation[Item] = fields.ForeignKeyField(
+        "models.Item", related_name="map", to_field="portal_id"
+    )
+    map_id = fields.UUIDField(unique=True, indexable=True, pk=True)
+    created_time = fields.DatetimeField(auto_now_add=True)
+    modified_time = fields.DatetimeField(auto_now=True)
+    pitch = fields.IntField(default=0)
+    bearing = fields.IntField(default=0)
+    basemap = fields.CharField(max_length=50)
+    bounding_box = fields.JSONField()
+    layers: fields.ReverseRelation["Layer"]
+
+class Layer(models.Model):
+    """Model for layer in database"""
+
+    gid = fields.IntField(pk=True)
+    id = fields.CharField(max_length=1000)
+    title = fields.CharField(max_length=500)
+    description = fields.CharField(max_length=500)
+    map_type = fields.CharField(max_length=50)
+    mapbox_name = fields.CharField(max_length=50)
+    geometry_type = fields.CharField(max_length=50)
+    style = fields.JSONField()
+    paint = fields.JSONField()
+    layout = fields.JSONField()
+    fill_paint = fields.JSONField()
+    border_paint = fields.JSONField()
+    bounding_box = fields.JSONField()
+
+    map: fields.ForeignKeyRelation[Map] = fields.ForeignKeyField(
+        "models.Map", related_name="layers", to_field="map_id"
+    )
+
+
 Tortoise.init_models(["db_models"], "models")
 
+Group_Pydantic = pydantic_model_creator(Group, name="Group")
 Table_Pydantic = pydantic_model_creator(Table, name="Table")
+Map_Pydantic = pydantic_model_creator(Map, name="Map")
 Item_Pydantic = pydantic_model_creator(Item, name="Item")
+ItemReadAccessListPydantic = pydantic_model_creator(ItemReadAccessList, name="ItemReadAccessList")

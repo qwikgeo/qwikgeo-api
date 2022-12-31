@@ -1,18 +1,18 @@
 """QwikGeo API - Users"""
 
+from typing import List
 from passlib.hash import bcrypt
 from fastapi import APIRouter, HTTPException, Depends
 from tortoise import exceptions
 
 import db_models
 import routers.users.models as models
-import utilities
 import authentication_handler
 
 router = APIRouter()
 
 @router.post(
-    path="/user",
+    path="/",
     response_model=models.User_Pydantic,
     responses={
         400: {
@@ -55,7 +55,7 @@ async def create_user(
         raise HTTPException(status_code=400, detail="Username already exist.") from exc
 
 @router.get(
-    "/user",
+    "/me",
     response_model=models.User_Pydantic,
     responses={
         404: {
@@ -93,7 +93,7 @@ async def get_user(
         raise HTTPException(status_code=404, detail="User not found.") from exc
 
 @router.put(
-    path="/user",
+    path="/me",
     response_model=models.User_Pydantic,
     responses={
         404: {
@@ -132,7 +132,7 @@ async def update_user(
         raise HTTPException(status_code=404, detail="User not found.") from exc
 
 @router.delete(
-    path="/user",
+    path="/me",
     response_model=models.Status,
     responses={
         200: {
@@ -175,8 +175,8 @@ async def delete_user(
     return models.Status(message="Deleted user.")
 
 @router.get(
-    path="/search",
-    response_model=models.Users,
+    path="/",
+    response_model=List[models.User],
     responses={
         500: {
             "description": "Internal Server Error",
@@ -188,7 +188,7 @@ async def delete_user(
         }
     }
 )
-async def user_search(
+async def get_users(
     username: str,
     user_name: int=Depends(authentication_handler.JWTBearer())
 ):
@@ -201,4 +201,4 @@ async def user_search(
         await db_models.User.filter(username__icontains=username)
     )
 
-    return {"users": users}
+    return users

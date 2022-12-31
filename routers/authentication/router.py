@@ -1,8 +1,7 @@
 """QwikGeo API - Authentication"""
 
 from datetime import datetime, timedelta
-from passlib.hash import bcrypt
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException
 from tortoise import exceptions
 import jwt
 from google.oauth2 import id_token

@@ -5,7 +5,7 @@ import datetime
 import main
 import utilities
 import db_models
-import routers.analysis.analysis as analysis
+from routers.analysis import router as analysis_router
 
 
 async def buffer(
@@ -68,15 +68,15 @@ async def buffer(
                 write_access_list=[username]
             )
 
-            analysis.analysis_processes[process_id]['status'] = "SUCCESS"
-            analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
-            analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-            analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+            analysis_router.analysis_processes[process_id]['status'] = "SUCCESS"
+            analysis_router.analysis_processes[process_id]['new_table_id'] = new_table_id
+            analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+            analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
     except Exception as error:
-        analysis.analysis_processes[process_id]['status'] = "FAILURE"
-        analysis.analysis_processes[process_id]['error'] = str(error)
-        analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-        analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+        analysis_router.analysis_processes[process_id]['status'] = "FAILURE"
+        analysis_router.analysis_processes[process_id]['error'] = str(error)
+        analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+        analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
 async def dissolve(
     username: str,
@@ -122,15 +122,15 @@ async def dissolve(
                 write_access_list=[username]
             )
 
-            analysis.analysis_processes[process_id]['status'] = "SUCCESS"
-            analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
-            analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-            analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+            analysis_router.analysis_processes[process_id]['status'] = "SUCCESS"
+            analysis_router.analysis_processes[process_id]['new_table_id'] = new_table_id
+            analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+            analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
     except Exception as error:
-        analysis.analysis_processes[process_id]['status'] = "FAILURE"
-        analysis.analysis_processes[process_id]['error'] = str(error)
-        analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-        analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+        analysis_router.analysis_processes[process_id]['status'] = "FAILURE"
+        analysis_router.analysis_processes[process_id]['error'] = str(error)
+        analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+        analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
 async def dissolve_by_value(
     username: str,
@@ -178,15 +178,15 @@ async def dissolve_by_value(
                 write_access_list=[username]
             )
 
-            analysis.analysis_processes[process_id]['status'] = "SUCCESS"
-            analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
-            analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-            analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+            analysis_router.analysis_processes[process_id]['status'] = "SUCCESS"
+            analysis_router.analysis_processes[process_id]['new_table_id'] = new_table_id
+            analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+            analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
     except Exception as error:
-        analysis.analysis_processes[process_id]['status'] = "FAILURE"
-        analysis.analysis_processes[process_id]['error'] = str(error)
-        analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-        analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+        analysis_router.analysis_processes[process_id]['status'] = "FAILURE"
+        analysis_router.analysis_processes[process_id]['error'] = str(error)
+        analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+        analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
 async def square_grids(
     username: str,
@@ -241,15 +241,15 @@ async def square_grids(
                 write_access_list=[username]
             )
 
-            analysis.analysis_processes[process_id]['status'] = "SUCCESS"
-            analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
-            analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-            analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+            analysis_router.analysis_processes[process_id]['status'] = "SUCCESS"
+            analysis_router.analysis_processes[process_id]['new_table_id'] = new_table_id
+            analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+            analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
     except Exception as error:
-        analysis.analysis_processes[process_id]['status'] = "FAILURE"
-        analysis.analysis_processes[process_id]['error'] = str(error)
-        analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-        analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+        analysis_router.analysis_processes[process_id]['status'] = "FAILURE"
+        analysis_router.analysis_processes[process_id]['error'] = str(error)
+        analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+        analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
 async def hexagon_grids(
     username: str,
@@ -304,15 +304,15 @@ async def hexagon_grids(
                 write_access_list=[username]
             )
 
-            analysis.analysis_processes[process_id]['status'] = "SUCCESS"
-            analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
-            analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-            analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+            analysis_router.analysis_processes[process_id]['status'] = "SUCCESS"
+            analysis_router.analysis_processes[process_id]['new_table_id'] = new_table_id
+            analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+            analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
     except Exception as error:
-        analysis.analysis_processes[process_id]['status'] = "FAILURE"
-        analysis.analysis_processes[process_id]['error'] = str(error)
-        analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-        analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+        analysis_router.analysis_processes[process_id]['status'] = "FAILURE"
+        analysis_router.analysis_processes[process_id]['error'] = str(error)
+        analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+        analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
 async def bounding_box(
     username: str,
@@ -358,15 +358,15 @@ async def bounding_box(
                 write_access_list=[username]
             )
 
-            analysis.analysis_processes[process_id]['status'] = "SUCCESS"
-            analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
-            analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-            analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+            analysis_router.analysis_processes[process_id]['status'] = "SUCCESS"
+            analysis_router.analysis_processes[process_id]['new_table_id'] = new_table_id
+            analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+            analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
     except Exception as error:
-        analysis.analysis_processes[process_id]['status'] = "FAILURE"
-        analysis.analysis_processes[process_id]['error'] = str(error)
-        analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-        analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+        analysis_router.analysis_processes[process_id]['status'] = "FAILURE"
+        analysis_router.analysis_processes[process_id]['error'] = str(error)
+        analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+        analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
 async def k_means_cluster(
     username: str,
@@ -420,15 +420,15 @@ async def k_means_cluster(
                 write_access_list=[username]
             )
 
-            analysis.analysis_processes[process_id]['status'] = "SUCCESS"
-            analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
-            analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-            analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+            analysis_router.analysis_processes[process_id]['status'] = "SUCCESS"
+            analysis_router.analysis_processes[process_id]['new_table_id'] = new_table_id
+            analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+            analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
     except Exception as error:
-        analysis.analysis_processes[process_id]['status'] = "FAILURE"
-        analysis.analysis_processes[process_id]['error'] = str(error)
-        analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-        analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+        analysis_router.analysis_processes[process_id]['status'] = "FAILURE"
+        analysis_router.analysis_processes[process_id]['error'] = str(error)
+        analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+        analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
 async def center_of_each_polygon(
     username: str,
@@ -481,15 +481,15 @@ async def center_of_each_polygon(
                 write_access_list=[username]
             )
 
-            analysis.analysis_processes[process_id]['status'] = "SUCCESS"
-            analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
-            analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-            analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+            analysis_router.analysis_processes[process_id]['status'] = "SUCCESS"
+            analysis_router.analysis_processes[process_id]['new_table_id'] = new_table_id
+            analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+            analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
     except Exception as error:
-        analysis.analysis_processes[process_id]['status'] = "FAILURE"
-        analysis.analysis_processes[process_id]['error'] = str(error)
-        analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-        analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+        analysis_router.analysis_processes[process_id]['status'] = "FAILURE"
+        analysis_router.analysis_processes[process_id]['error'] = str(error)
+        analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+        analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
 async def center_of_dataset(
     username: str,
@@ -535,15 +535,15 @@ async def center_of_dataset(
                 write_access_list=[username]
             )
 
-            analysis.analysis_processes[process_id]['status'] = "SUCCESS"
-            analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
-            analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-            analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+            analysis_router.analysis_processes[process_id]['status'] = "SUCCESS"
+            analysis_router.analysis_processes[process_id]['new_table_id'] = new_table_id
+            analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+            analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
     except Exception as error:
-        analysis.analysis_processes[process_id]['status'] = "FAILURE"
-        analysis.analysis_processes[process_id]['error'] = str(error)
-        analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-        analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+        analysis_router.analysis_processes[process_id]['status'] = "FAILURE"
+        analysis_router.analysis_processes[process_id]['error'] = str(error)
+        analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+        analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
 async def find_within_distance(
     username: str,
@@ -593,15 +593,15 @@ async def find_within_distance(
                 write_access_list=[username]
             )
 
-            analysis.analysis_processes[process_id]['status'] = "SUCCESS"
-            analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
-            analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-            analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+            analysis_router.analysis_processes[process_id]['status'] = "SUCCESS"
+            analysis_router.analysis_processes[process_id]['new_table_id'] = new_table_id
+            analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+            analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
     except Exception as error:
-        analysis.analysis_processes[process_id]['status'] = "FAILURE"
-        analysis.analysis_processes[process_id]['error'] = str(error)
-        analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-        analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+        analysis_router.analysis_processes[process_id]['status'] = "FAILURE"
+        analysis_router.analysis_processes[process_id]['error'] = str(error)
+        analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+        analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
 async def convex_hull(
     username: str,
@@ -647,15 +647,15 @@ async def convex_hull(
                 write_access_list=[username]
             )
 
-            analysis.analysis_processes[process_id]['status'] = "SUCCESS"
-            analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
-            analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-            analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+            analysis_router.analysis_processes[process_id]['status'] = "SUCCESS"
+            analysis_router.analysis_processes[process_id]['new_table_id'] = new_table_id
+            analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+            analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
     except Exception as error:
-        analysis.analysis_processes[process_id]['status'] = "FAILURE"
-        analysis.analysis_processes[process_id]['error'] = str(error)
-        analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-        analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+        analysis_router.analysis_processes[process_id]['status'] = "FAILURE"
+        analysis_router.analysis_processes[process_id]['error'] = str(error)
+        analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+        analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
 async def aggregate_points_by_grids(
     username: str,
@@ -711,15 +711,15 @@ async def aggregate_points_by_grids(
                 write_access_list=[username]
             )
 
-            analysis.analysis_processes[process_id]['status'] = "SUCCESS"
-            analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
-            analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-            analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+            analysis_router.analysis_processes[process_id]['status'] = "SUCCESS"
+            analysis_router.analysis_processes[process_id]['new_table_id'] = new_table_id
+            analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+            analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
     except Exception as error:
-        analysis.analysis_processes[process_id]['status'] = "FAILURE"
-        analysis.analysis_processes[process_id]['error'] = str(error)
-        analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-        analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+        analysis_router.analysis_processes[process_id]['status'] = "FAILURE"
+        analysis_router.analysis_processes[process_id]['error'] = str(error)
+        analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+        analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
 async def aggregate_points_by_polygons(
     username: str,
@@ -769,15 +769,15 @@ async def aggregate_points_by_polygons(
                 write_access_list=[username]
             )
 
-            analysis.analysis_processes[process_id]['status'] = "SUCCESS"
-            analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
-            analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-            analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+            analysis_router.analysis_processes[process_id]['status'] = "SUCCESS"
+            analysis_router.analysis_processes[process_id]['new_table_id'] = new_table_id
+            analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+            analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
     except Exception as error:
-        analysis.analysis_processes[process_id]['status'] = "FAILURE"
-        analysis.analysis_processes[process_id]['error'] = str(error)
-        analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-        analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+        analysis_router.analysis_processes[process_id]['status'] = "FAILURE"
+        analysis_router.analysis_processes[process_id]['error'] = str(error)
+        analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+        analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
 async def select_inside(
     username: str,
@@ -834,15 +834,15 @@ async def select_inside(
                 write_access_list=[username]
             )
 
-            analysis.analysis_processes[process_id]['status'] = "SUCCESS"
-            analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
-            analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-            analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+            analysis_router.analysis_processes[process_id]['status'] = "SUCCESS"
+            analysis_router.analysis_processes[process_id]['new_table_id'] = new_table_id
+            analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+            analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
     except Exception as error:
-        analysis.analysis_processes[process_id]['status'] = "FAILURE"
-        analysis.analysis_processes[process_id]['error'] = str(error)
-        analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-        analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+        analysis_router.analysis_processes[process_id]['status'] = "FAILURE"
+        analysis_router.analysis_processes[process_id]['error'] = str(error)
+        analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+        analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
 async def select_outside(
     username: str,
@@ -900,15 +900,15 @@ async def select_outside(
                 write_access_list=[username]
             )
 
-            analysis.analysis_processes[process_id]['status'] = "SUCCESS"
-            analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
-            analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-            analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+            analysis_router.analysis_processes[process_id]['status'] = "SUCCESS"
+            analysis_router.analysis_processes[process_id]['new_table_id'] = new_table_id
+            analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+            analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
     except Exception as error:
-        analysis.analysis_processes[process_id]['status'] = "FAILURE"
-        analysis.analysis_processes[process_id]['error'] = str(error)
-        analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-        analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+        analysis_router.analysis_processes[process_id]['status'] = "FAILURE"
+        analysis_router.analysis_processes[process_id]['error'] = str(error)
+        analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+        analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
 
 async def clip(
     username: str,
@@ -972,12 +972,12 @@ async def clip(
                 write_access_list=[username]
             )
 
-            analysis.analysis_processes[process_id]['status'] = "SUCCESS"
-            analysis.analysis_processes[process_id]['new_table_id'] = new_table_id
-            analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-            analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+            analysis_router.analysis_processes[process_id]['status'] = "SUCCESS"
+            analysis_router.analysis_processes[process_id]['new_table_id'] = new_table_id
+            analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+            analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
     except Exception as error:
-        analysis.analysis_processes[process_id]['status'] = "FAILURE"
-        analysis.analysis_processes[process_id]['error'] = str(error)
-        analysis.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
-        analysis.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
+        analysis_router.analysis_processes[process_id]['status'] = "FAILURE"
+        analysis_router.analysis_processes[process_id]['error'] = str(error)
+        analysis_router.analysis_processes[process_id]['completion_time'] = datetime.datetime.now()
+        analysis_router.analysis_processes[process_id]['run_time_in_seconds'] = datetime.datetime.now()-start
