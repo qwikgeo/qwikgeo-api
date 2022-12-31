@@ -861,6 +861,7 @@ async def item(
     id: str,
     request: Request,
     properties: str="*",
+    return_geometry: bool=True,
     srid: int=4326,
     user_name: int=Depends(authentication_handler.JWTBearer())
 ):
@@ -902,6 +903,7 @@ async def item(
             table=table,
             filter=f"gid = '{id}'",
             properties=properties,
+            return_geometry=return_geometry,
             srid=srid,
             app=request.app
         )
