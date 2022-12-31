@@ -2,23 +2,23 @@
 
 | Method | URL | Description |
 | ------ | --- | ----------- |
-| `GET` | `/api/v1/analysis/status/{process_id}` | [Analysis Status](#Analysis-Status)  |
-| `POST` | `/api/v1/analysis/buffer` | [Buffer](#Buffer)  |
-| `POST` | `/api/v1/analysis/dissolve` | [Dissolve](#Dissolve)  |
-| `POST` | `/api/v1/analysis/dissolve_by_value` | [Dissolve By Value](#Dissolve-By-Value)  |
-| `POST` | `/api/v1/analysis/square_grids` | [Square Grids](#Square-Grids)  |
-| `POST` | `/api/v1/analysis/hexagon_grids` | [Hexagon Grids](#Hexagon-Grids)  |
-| `POST` | `/api/v1/analysis/bounding_box` | [Bounding Box](#Bounding-Box])  |
-| `POST` | `/api/v1/analysis/k_means_cluster` | [K Means Cluster](#K-Means-Cluster)  |
-| `POST` | `/api/v1/analysis/center_of_each_polygon` | [Center Of Each Polygon](#Center-Of-Each-Polygon)  |
-| `POST` | `/api/v1/analysis/center_of_dataset` | [Center Of Dataset](#Center-Of-Dataset)  |
-| `POST` | `/api/v1/analysis/find_within_distance` | [Find Within Distance](#Find-Within-Distance)  |
-| `POST` | `/api/v1/analysis/convex_hull` | [Convex Hull](#Convex-Hull)  |
-| `POST` | `/api/v1/analysis/aggregate_points_by_grids` | [Aggregate Points By Grid](#Aggregate-Points-By-Grid)  |
-| `POST` | `/api/v1/analysis/aggregate_points_by_polygons` | [Aggregate Points By Polygons](#Aggregate-Points-By-Polygons)  |
-| `POST` | `/api/v1/analysis/select_inside` | [Select Inside](#Select-Inside)  |
-| `POST` | `/api/v1/analysis/select_outside` | [Select Outside](#Select-Outside)  |
-| `POST` | `/api/v1/analysis/clip` | [Clip](#Clip)  |
+| `GET` | `/api/v1/analysis/status/{process_id}` | [Analysis Status](#analysis-status)  |
+| `POST` | `/api/v1/analysis/buffer` | [Buffer](#buffer)  |
+| `POST` | `/api/v1/analysis/dissolve` | [Dissolve](#dissolve)  |
+| `POST` | `/api/v1/analysis/dissolve_by_value` | [Dissolve By Value](#dissolve-by-value)  |
+| `POST` | `/api/v1/analysis/square_grids` | [Square Grids](#square-grids)  |
+| `POST` | `/api/v1/analysis/hexagon_grids` | [Hexagon Grids](#hexagon-grids)  |
+| `POST` | `/api/v1/analysis/bounding_box` | [Bounding Box](#bounding-box])  |
+| `POST` | `/api/v1/analysis/k_means_cluster` | [K Means Cluster](#k-means-cluster)  |
+| `POST` | `/api/v1/analysis/center_of_each_polygon` | [Center Of Each Polygon](#center-of-each-polygon)  |
+| `POST` | `/api/v1/analysis/center_of_dataset` | [Center Of Dataset](#center-of-dataset)  |
+| `POST` | `/api/v1/analysis/find_within_distance` | [Find Within Distance](#find-within-distance)  |
+| `POST` | `/api/v1/analysis/convex_hull` | [Convex Hull](#convex-hull)  |
+| `POST` | `/api/v1/analysis/aggregate_points_by_grids` | [Aggregate Points By Grid](#aggregate-points-by-grid)  |
+| `POST` | `/api/v1/analysis/aggregate_points_by_polygons` | [Aggregate Points By Polygons](#aggregate-points-by-polygons)  |
+| `POST` | `/api/v1/analysis/select_inside` | [Select Inside](#select-inside)  |
+| `POST` | `/api/v1/analysis/select_outside` | [Select Outside](#select-outside)  |
+| `POST` | `/api/v1/analysis/clip` | [Clip](#clip)  |
 
 ## Endpoint Description's
 
@@ -147,7 +147,7 @@ Example: Generate 100 kilometers square grids based off of a table containing US
 {
     "table": "states",
     "database": "data",
-    "grid_size_in_kilometers": "100"
+    "grid_size_in_kilometers": 100
 }
 ```
 
