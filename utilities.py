@@ -9,6 +9,7 @@ import uuid
 import datetime
 import subprocess
 import shutil
+from functools import reduce
 import jwt
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, FastAPI, HTTPException, status
@@ -18,6 +19,7 @@ import aiohttp
 import pandas as pd
 import tortoise
 from tortoise.query_utils import Prefetch
+from tortoise.expressions import Q
 from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError, DecodeError
 import asyncpg
 
@@ -54,24 +56,54 @@ async def get_all_tables_from_db(
 
         return db_tables
 
-async def validate_table_access(
-    table: str,
+def get_database_model_name(model_name):
+    if model_name == "Table":
+        return db_models.Table
+    elif model_name == "Item":
+        return db_models.Item
+    elif model_name == "Map":
+        return db_models.Map
+    elif model_name == "Group":
+        return db_models.Group
+
+def get_database_serializer_name(model_name):
+    if model_name == "Table":
+        return db_models.Table_Pydantic
+    elif model_name == "Item":
+        return db_models.Item_Pydantic
+    elif model_name == "Map":
+        return db_models.Map_Pydantic
+    elif model_name == "Group":
+        return db_models.Group_Pydantic
+
+async def validate_item_access(
+    query_filter,
+    model_name: str,
     user_name: str,
-    write_access: bool=False
+    write_access: bool=False,
 ) -> bool:
     """
-    Method to validate if user has access to table in portal.
+    Method to validate if user has access to item in portal.
 
     """
 
-    try:
-        table = await db_models.Table_Pydantic.from_queryset_single(
-            db_models.Table.get(table_id=table)
-        )
+    database_model_name = get_database_model_name(model_name)
+    database_model_serializer = get_database_serializer_name(model_name)
 
-        item = await db_models.Item_Pydantic.from_queryset_single(
-            db_models.Item.get(portal_id=table.portal_id.portal_id)
-        )
+    try:
+        if model_name == 'Item':
+            item = await db_models.Item_Pydantic.from_queryset_single(
+                db_models.Item.get(query_filter)
+            )
+
+        else:
+            table = await database_model_serializer.from_queryset_single(
+                database_model_name.get(query_filter)
+            )
+
+            item = await db_models.Item_Pydantic.from_queryset_single(
+                db_models.Item.get(portal_id=table.portal_id.portal_id)
+            )
 
         user_groups = await get_user_groups(user_name)
 
@@ -80,11 +112,11 @@ async def validate_table_access(
         write_access_list = []
         read_access_list = []
 
-        for access in item.item_write_access_list:
-            write_access_list.append(access.name)
+        for access_item in item.item_write_access_list:
+            write_access_list.append(access_item.name)
 
-        for access in item.item_read_access_list:
-            read_access_list.append(access.name)
+        for access_item in item.item_read_access_list:
+            read_access_list.append(access_item.name)
 
         if write_access:
             if any(map(lambda v: v in user_groups, write_access_list)):
@@ -95,56 +127,195 @@ async def validate_table_access(
         if access is False:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail='No access to table.'
+                detail='No access to item.'
             )
-    except tortoise.exceptions.DoesNotExist as exc:
+    except (
+        tortoise.exceptions.ValidationError,
+        tortoise.exceptions.OperationalError,
+        tortoise.exceptions.DoesNotExist
+    ) as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail='Table does not exist.'
+            detail='Item does not exist.'
         ) from exc
 
-async def create_table(
-    username: str,
-    table_id: str,
-    title: str,
-    tags: list,
-    description: str,
-    searchable: bool,
-    read_access_list: list,
-    write_access_list: list
+async def get_multiple_items_in_database(
+    user_name: str,
+    model_name: str,
+    query_filter="",
+    limit: int=10,
+    offset: int=0
 ) -> object:
     """
-    Method to create a table within the database of the portal.
+    Method to get multiple items within the database of the portal.
 
     """
 
-    if read_access_list == []:
-        read_access_list = [username]
-    if write_access_list == []:
-        write_access_list = [username]
-    item = await db_models.Item.create(
-        username_id=username,
-        title=title,
-        tags=tags,
-        description=description,
+    database_model_name = get_database_model_name(model_name)
+    database_model_serializer = get_database_serializer_name(model_name)
+
+    user_groups = await get_user_groups(user_name)
+
+    portal_items = await db_models.ItemReadAccessListPydantic.from_queryset(db_models.ItemReadAccessList.filter(
+        reduce(lambda x, y: x | y, [Q(name=group) for group in user_groups])
+    ))
+
+    default_filter = None
+
+    if model_name != "Group":
+
+        portal_ids = []
+
+        for portal_item in portal_items:
+            portal_ids.append(portal_item.portal_id.portal_id)
+        
+        default_filter = Q(portal_id_id__in=portal_ids)
+
+        if model_name == "Item":
+            default_filter = Q(portal_id__in=portal_ids)
+
+    if query_filter != "":
+        if default_filter == None:
+            items = await database_model_serializer.from_queryset(
+                database_model_name.filter(query_filter).limit(limit).offset(offset)
+            )
+        else:
+            items = await database_model_serializer.from_queryset(
+                database_model_name.filter(default_filter, query_filter).limit(limit).offset(offset)
+            )
+    else:
+        if default_filter == None:
+            items = await database_model_serializer.from_queryset(
+                database_model_name.filter().limit(limit).offset(offset)
+            )
+        else:
+            items = await database_model_serializer.from_queryset(
+                database_model_name.filter(default_filter).limit(limit).offset(offset)
+            )
+
+    return items
+
+async def get_item_in_database(
+    user_name: str,
+    model_name: str,
+    query_filter,
+    write_access: bool=False
+) -> object:
+    """
+    Method to get multiple items within the database of the portal.
+
+    """
+
+    await validate_item_access(
+        query_filter=query_filter,
+        model_name=model_name,
+        user_name=user_name,
+        write_access=write_access
+    )
+
+    database_model_name = get_database_model_name(model_name)
+    database_model_serializer = get_database_serializer_name(model_name)
+
+    portal_item = await database_model_serializer.from_queryset_single(
+        database_model_name.get(query_filter)
+    )
+
+    if model_name != 'Item':
+        item = await db_models.Item_Pydantic.from_queryset_single(
+            db_models.Item.get(portal_id=portal_item.portal_id.portal_id)
+        )
+
+        await db_models.Item.filter(
+            portal_id=portal_item.portal_id.portal_id
+        ).update(views=item.views+1)
+    else:
+        await db_models.Item.filter(
+            query_filter
+        ).update(views=portal_item.views+1)
+    
+    return portal_item
+
+async def create_single_item_in_database(
+    item,
+    model_name: str
+) -> object:
+    """
+    Method to create an item within the database of the portal.
+
+    """
+
+    database_model_name = get_database_model_name(model_name)
+
+    db_item = await db_models.Item.create(
+        username_id=item['user_name'],
+        title=item['title'],
+        tags=item['tags'],
+        description=item['description'],
         views="1",
-        searchable=searchable,
-        item_type="table"
+        searchable=item['searchable'],
+        item_type=model_name.lower()
     )
 
-    for name in read_access_list:
-        await db_models.ItemReadAccessList.create(name=name, portal_id_id=item.portal_id)
+    for name in item['read_access_list']:
+        await db_models.ItemReadAccessList.create(name=name, portal_id_id=db_item.portal_id)
 
-    for name in write_access_list:
-        await db_models.ItemWriteAccessList.create(name=name, portal_id_id=item.portal_id)
+    for name in item['write_access_list']:
+        await db_models.ItemWriteAccessList.create(name=name, portal_id_id=db_item.portal_id)
 
-    await db_models.Table.create(
-        username_id=username,
-        portal_id_id=item.portal_id,
-        table_id=table_id
+    item['portal_id_id'] = db_item.portal_id
+
+    await database_model_name.create(**item)
+
+    return db_item
+
+async def update_single_item_in_database(
+    item,
+    query_filter,
+    model_name: str
+) -> object:
+    """
+    Method to update an item within the database of the portal.
+
+    """
+    
+    database_model_name = get_database_model_name(model_name)
+    database_model_serializer = get_database_serializer_name(model_name)
+
+    await database_model_name.filter(query_filter).update(**item.dict(exclude_unset=True))
+
+    return await database_model_serializer.from_queryset_single(database_model_name.get(query_filter))
+
+async def delete_single_item_in_database(
+    user_name: str,
+    query_filter,
+    model_name: str
+) -> object:
+    """
+    Method to delete an item within the database of the portal.
+
+    """
+
+    await validate_item_access(
+        query_filter=query_filter,
+        model_name=model_name,
+        user_name=user_name,
+        write_access=True
+    )
+    
+    database_model_name = get_database_model_name(model_name)
+    database_model_serializer = get_database_serializer_name(model_name)
+
+    table_metadata = await database_model_serializer.from_queryset_single(
+        database_model_name.get(query_filter)
     )
 
-    return item
+    item_metadata = await db_models.Item_Pydantic.from_queryset_single(
+        db_models.Item.get(portal_id=table_metadata.portal_id.portal_id)
+    )
+
+    await db_models.Item.filter(portal_id=item_metadata.portal_id).delete()
+
+    await database_model_name.filter(query_filter).delete()
 
 async def get_token_header(
     token: str=Depends(oauth2_scheme)
@@ -215,7 +386,6 @@ async def authenticate_user(
     return user
 
 async def get_tile(
-    scheme: str,
     table: str,
     tile_matrix_set_id: str,
     z: int,
@@ -230,7 +400,7 @@ async def get_tile(
 
     """
 
-    cache_file = f'{os.getcwd()}/cache/{scheme}_{table}/{tile_matrix_set_id}/{z}/{x}/{y}'
+    cache_file = f'{os.getcwd()}/cache/user_data_{table}/{tile_matrix_set_id}/{z}/{x}/{y}'
 
     if os.path.exists(cache_file):
         return '', True
@@ -264,7 +434,7 @@ async def get_tile(
             field_list = f',"{fields}"'
 
         sql_vector_query = f"""
-        SELECT ST_AsMVT(tile, '{scheme}.{table}', 4096)
+        SELECT ST_AsMVT(tile, 'user_data.{table}', 4096)
         FROM (
             WITH
             bounds AS (
@@ -275,7 +445,7 @@ async def get_tile(
                     ST_Transform("table".geom, 3857)
                     ,bounds.geom
                 ) AS mvtgeom {field_list}
-            FROM {scheme}.{table} as "table", bounds
+            FROM user_data.{table} as "table", bounds
             WHERE ST_Intersects(
                 ST_Transform("table".geom, 4326),
                 ST_Transform(bounds.geom, 4326)
@@ -293,7 +463,7 @@ async def get_tile(
 
         if fields is None and cql_filter is None and config.CACHE_AGE_IN_SECONDS > 0:
 
-            cache_file_dir = f'{os.getcwd()}/cache/{scheme}_{table}/{tile_matrix_set_id}/{z}/{x}'
+            cache_file_dir = f'{os.getcwd()}/cache/user_data_{table}/{tile_matrix_set_id}/{z}/{x}'
 
             if not os.path.exists(cache_file_dir):
                 try:
@@ -357,7 +527,11 @@ async def get_table_geometry_type(
         try:
             geometry_type = await con.fetchval(geometry_query)
         except asyncpg.exceptions.UndefinedTableError:
-            return "unkown"
+            return "unknown"
+        
+        if geometry_type is None:
+            return "unknown"
+
 
         geom_type = 'point'
 
@@ -1264,6 +1438,9 @@ async def get_table_bounds(
             extent = await con.fetchval(query)
         except asyncpg.exceptions.UndefinedTableError:
             return []
+        
+        if extent is None:
+            return []
 
         extent = extent.replace('BOX(','').replace(')','')
 
@@ -1283,3 +1460,14 @@ def delete_user_tile_cache(
 
     if os.path.exists(f'{os.getcwd()}/cache/user_data_{table}'):
         shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table}')
+
+def check_if_username_in_access_list(
+    user_name: str,
+    access_list: list,
+    type: str
+):
+    if user_name not in access_list:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f'{user_name} is not in {type}_access_list, add {user_name} to {type}_access_list.'
+        )

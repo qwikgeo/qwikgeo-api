@@ -3,11 +3,8 @@
 import os
 import shutil
 from typing import List
-from functools import reduce
-from fastapi import APIRouter, Request, Depends, HTTPException, status
+from fastapi import APIRouter, Request, Depends
 from tortoise.expressions import Q
-from tortoise.query_utils import Prefetch
-import asyncpg
 
 import routers.tables.models as models
 import utilities
@@ -38,26 +35,12 @@ async def tables(
     More information at https://docs.qwikgeo.com/tables/#tables
     """
 
-    user_groups = await utilities.get_user_groups(user_name)
-
-    portal_items = await db_models.Item_Pydantic.from_queryset(
-        db_models.Item.filter(item_type='table').prefetch_related(
-            Prefetch("item_read_access_list", queryset=db_models.ItemReadAccessList.filter(
-                reduce(lambda x, y: x | y, [Q(name=group) for group in user_groups]))
-            )
-        )
+    items = await utilities.get_multiple_items_in_database(
+        user_name=user_name,
+        model_name="Table"
     )
 
-    portal_ids = []
-
-    for portal_item in portal_items:
-        portal_ids.append(portal_item.portal_id)
-
-    portal_tables = await db_models.Table_Pydantic.from_queryset(
-        db_models.Table.filter(portal_id_id__in=portal_ids)
-    )
-
-    return portal_tables
+    return items
 
 @router.get(
     path="/{table_id}",
@@ -98,24 +81,19 @@ async def table(
     More information at https://docs.qwikgeo.com/tables/#table
     """
 
-    await utilities.validate_table_access(
-        table=table_id,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=table_id),
         user_name=user_name
     )
 
-    portal_table = await db_models.Table_Pydantic.from_queryset_single(
-        db_models.Table.get(table_id=table_id)
+    item = await utilities.get_item_in_database(
+        user_name=user_name,
+        model_name="Table",
+        query_filter=Q(table_id=table_id)
     )
 
-    portal_item = await db_models.Item_Pydantic.from_queryset_single(
-        db_models.Item.get(portal_id=portal_table.portal_id.portal_id)
-    )
-
-    await db_models.Item.filter(
-        portal_id=portal_table.portal_id.portal_id
-    ).update(views=portal_item.views+1)
-
-    return portal_table
+    return item
 
 @router.post(
     path="/{table_id}/add_column",
@@ -165,8 +143,9 @@ async def add_column(
     More information at https://docs.qwikgeo.com/tables/#add-column
     """
 
-    await utilities.validate_table_access(
-        table=table_id,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=table_id),
         user_name=user_name,
         write_access=True
     )
@@ -235,8 +214,9 @@ async def delete_column(
     More information at https://docs.qwikgeo.com/tables/#delete-column
     """
 
-    await utilities.validate_table_access(
-        table=table_id,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=table_id),
         user_name=user_name,
         write_access=True
     )
@@ -298,7 +278,7 @@ async def create_table(
     async with pool.acquire() as con:
 
         query = f"""
-            CREATE TABLE "user_data.{new_table_id}"(
+            CREATE TABLE user_data."{new_table_id}"(
             gid SERIAL PRIMARY KEY
         """
 
@@ -315,16 +295,24 @@ async def create_table(
 
         await con.fetch(geom_query)
 
-        await utilities.create_table(
-            username=user_name,
-            table_id=new_table_id,
-            title=info.title,
-            tags=info.tags,
-            description=info.description,
-            searchable=info.searchable,
-            read_access_list=info.read_access_list,
-            write_access_list=info.write_access_list
+        utilities.check_if_username_in_access_list(user_name, info.read_access_list, "read")
 
+        utilities.check_if_username_in_access_list(user_name, info.write_access_list, "write")
+
+        item = {
+            "user_name": user_name,
+            "table_id": new_table_id,
+            "title": info.title,
+            "tags": info.tags,
+            "description": info.description,
+            "searchable": info.searchable,
+            "read_access_list": info.read_access_list,
+            "write_access_list": info.write_access_list
+        }
+
+        await utilities.create_single_item_in_database(
+            item=item,
+            model_name="Table"
         )
 
         return {"status": True, "table_id": new_table_id}
@@ -376,10 +364,10 @@ async def delete_table(
     More information at https://docs.qwikgeo.com/tables/#delete-table
     """
 
-    await utilities.validate_table_access(
-        table=table_id,
+    await utilities.delete_single_item_in_database(
         user_name=user_name,
-        write_access=True
+        model_name="Table",
+        query_filter=Q(table_id=table_id)
     )
 
     pool = request.app.state.database
@@ -392,20 +380,7 @@ async def delete_table(
 
         await con.fetch(query)
 
-        table_metadata = await db_models.Table_Pydantic.from_queryset_single(
-            db_models.Table.get(table_id=table_id)
-        )
-
-        item_metadata = await db_models.Item_Pydantic.from_queryset_single(
-            db_models.Item.get(portal_id=table_metadata.portal_id.portal_id)
-        )
-
-        await db_models.Item.filter(portal_id=item_metadata.portal_id).delete()
-
-        await db_models.Table.filter(table_id=table_id).delete()
-
         if os.path.exists(f'{os.getcwd()}/cache/user_data_{table_id}'):
             shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table_id}')
 
         return {"status": True}
-

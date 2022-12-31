@@ -1,6 +1,7 @@
 """QwikGeo API - Analysis"""
 
 from fastapi import APIRouter, BackgroundTasks, Request, Depends
+from tortoise.expressions import Q
 
 import utilities
 import routers.analysis.analysis_queries as analysis_queries
@@ -83,8 +84,9 @@ async def buffer(
     More information at https://docs.qwikgeo.com/analysis/#buffer
     """
 
-    await utilities.validate_table_access(
-        table=info.table,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=info.table),
         user_name=user_name
     )
 
@@ -155,8 +157,9 @@ async def dissolve(
     More information at https://docs.qwikgeo.com/analysis/#dissolve
     """
 
-    await utilities.validate_table_access(
-        table=info.table,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=info.table),
         user_name=user_name
     )
 
@@ -226,8 +229,9 @@ async def dissolve_by_value(
     More information at https://docs.qwikgeo.com/analysis/#dissolve-by-value
     """
 
-    await utilities.validate_table_access(
-        table=info.table,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=info.table),
         user_name=user_name
     )
 
@@ -298,8 +302,9 @@ async def square_grids(
     More information at https://docs.qwikgeo.com/analysis/#square-grids
     """
 
-    await utilities.validate_table_access(
-        table=info.table,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=info.table),
         user_name=user_name
     )
 
@@ -370,8 +375,9 @@ async def hexagon_grids(
     More information at https://docs.qwikgeo.com/analysis/#hexagon-grids
     """
 
-    await utilities.validate_table_access(
-        table=info.table,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=info.table),
         user_name=user_name
     )
 
@@ -442,8 +448,9 @@ async def bounding_box(
     More information at https://docs.qwikgeo.com/analysis/#bounding-box
     """
 
-    await utilities.validate_table_access(
-        table=info.table,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=info.table),
         user_name=user_name
     )
 
@@ -513,8 +520,9 @@ async def k_means_cluster(
     More information at https://docs.qwikgeo.com/analysis/#k-means-cluster
     """
 
-    await utilities.validate_table_access(
-        table=info.table,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=info.table),
         user_name=user_name
     )
 
@@ -585,8 +593,9 @@ async def center_of_each_polygon(
     More information at https://docs.qwikgeo.com/analysis/#center-of-each-polygon
     """
 
-    await utilities.validate_table_access(
-        table=info.table,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=info.table),
         user_name=user_name
     )
 
@@ -656,8 +665,9 @@ async def center_of_dataset(
     More information at https://docs.qwikgeo.com/analysis/#center-of-dataset
     """
 
-    await utilities.validate_table_access(
-        table=info.table,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=info.table),
         user_name=user_name
     )
 
@@ -727,8 +737,9 @@ async def find_within_distance(
     More information at https://docs.qwikgeo.com/analysis/#find-within-distance
     """
 
-    await utilities.validate_table_access(
-        table=info.table,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=info.table),
         user_name=user_name
     )
 
@@ -801,8 +812,9 @@ async def convex_hull(
     More information at https://docs.qwikgeo.com/analysis/#convex-hull
     """
 
-    await utilities.validate_table_access(
-        table=info.table,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=info.table),
         user_name=user_name
     )
 
@@ -872,8 +884,9 @@ async def aggregate_points_by_grids(
     More information at https://docs.qwikgeo.com/analysis/#aggregate-points-by-grid
     """
 
-    await utilities.validate_table_access(
-        table=info.table,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=info.table),
         user_name=user_name
     )
 
@@ -945,13 +958,15 @@ async def aggregate_points_by_polygons(
     More information at https://docs.qwikgeo.com/analysis/#aggregate-points-by-polygons
     """
 
-    await utilities.validate_table_access(
-        table=info.table,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=info.table),
         user_name=user_name
     )
 
-    await utilities.validate_table_access(
-        table=info.polygons,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=info.polygons),
         user_name=user_name
     )
 
@@ -1022,13 +1037,15 @@ async def select_inside(
     More information at https://docs.qwikgeo.com/analysis/#select-inside
     """
 
-    await utilities.validate_table_access(
-        table=info.table,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=info.table),
         user_name=user_name
     )
 
-    await utilities.validate_table_access(
-        table=info.polygons,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=info.polygons),
         user_name=user_name
     )
 
@@ -1099,13 +1116,15 @@ async def select_outside(
     More information at https://docs.qwikgeo.com/analysis/#select-outside
     """
 
-    await utilities.validate_table_access(
-        table=info.table,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=info.table),
         user_name=user_name
     )
 
-    await utilities.validate_table_access(
-        table=info.polygons,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=info.polygons),
         user_name=user_name
     )
 
@@ -1176,13 +1195,15 @@ async def clip(
     More information at https://docs.qwikgeo.com/analysis/#clip
     """
 
-    await utilities.validate_table_access(
-        table=info.table,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=info.table),
         user_name=user_name
     )
 
-    await utilities.validate_table_access(
-        table=info.polygons,
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=info.polygons),
         user_name=user_name
     )
 

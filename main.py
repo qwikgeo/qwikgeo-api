@@ -4,20 +4,18 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from tortoise.contrib.fastapi import register_tortoise
 from prometheus_fastapi_instrumentator import Instrumentator
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.inmemory import InMemoryBackend
-
 
 import db
 import config
-from routers.authentication import authentication
-from routers.groups import groups
-from routers.users import users
-from routers.items import items
-from routers.tables import tables
-from routers.imports import imports
-from routers.analysis import analysis
-from routers.collections import collections
+from routers.authentication import router as authentication_router
+from routers.groups import router as groups_router
+from routers.users import router as users_router
+from routers.items import router as items_router
+from routers.tables import router as tables_router
+from routers.imports import router as imports_router
+from routers.analysis import router as analysis_router
+from routers.collections import router as collections_router
+from routers.maps import router as maps_router
 
 DESCRIPTION = """A python api to create a geoportal."""
 
@@ -56,57 +54,62 @@ app.add_middleware(
 )
 
 app.include_router(
-    authentication.router,
+    authentication_router.router,
     prefix="/api/v1/authentication",
     tags=["Authentication"],
 )
 
 app.include_router(
-    groups.router,
+    groups_router.router,
     prefix="/api/v1/groups",
     tags=["Groups"],
 )
 
 app.include_router(
-    users.router,
+    users_router.router,
     prefix="/api/v1/users",
     tags=["Users"],
 )
 
 app.include_router(
-    items.router,
+    items_router.router,
     prefix="/api/v1/items",
     tags=["Items"],
 )
 
 app.include_router(
-    tables.router,
+    tables_router.router,
     prefix="/api/v1/tables",
     tags=["Tables"],
 )
 
 app.include_router(
-    imports.router,
+    imports_router.router,
     prefix="/api/v1/imports",
     tags=["Imports"],
 )
 
 app.include_router(
-    analysis.router,
+    analysis_router.router,
     prefix="/api/v1/analysis",
     tags=["Analysis"],
 )
 
 app.include_router(
-    collections.router,
+    collections_router.router,
     prefix="/api/v1/collections",
     tags=["Collections"],
+)
+
+app.include_router(
+    maps_router.router,
+    prefix="/api/v1/maps",
+    tags=["Maps"],
 )
 
 @app.on_event("startup")
 async def startup_event():
     """Application startup: register the database connection and create table list."""
-    FastAPICache.init(InMemoryBackend(), prefix="fastapi-cache")
     await db.connect_to_db(app)
 
 @app.on_event("shutdown")
