@@ -36,7 +36,8 @@ class GroupUser(models.Model):
 
     id = fields.IntField(pk=True)
     group_id: fields.ForeignKeyRelation[Group] = fields.ForeignKeyField(
-        "models.Group", related_name="group_users", to_field="group_id"
+        "models.Group", related_name="group_users", to_field="group_id",
+        on_delete='CASCADE'
     )
     username = fields.CharField(500)
 
@@ -45,7 +46,8 @@ class GroupAdmin(models.Model):
 
     id = fields.IntField(pk=True)
     group_id: fields.ForeignKeyRelation[Group] = fields.ForeignKeyField(
-        "models.Group", related_name="group_admins", to_field="group_id"
+        "models.Group", related_name="group_admins", to_field="group_id",
+        on_delete='CASCADE'
     )
     username = fields.CharField(500)
 
@@ -54,7 +56,8 @@ class Item(models.Model):
     """Model for item in database"""
 
     username: fields.ForeignKeyField(
-        "models.User", related_name="items", to_field="username"
+        "models.User", related_name="items", to_field="username",
+        on_delete='CASCADE'
     )
     portal_id = fields.UUIDField(unique=True, indexable=True, pk=True)
     title = fields.CharField(max_length=500, indexable=True)
@@ -73,7 +76,8 @@ class ItemReadAccessList(models.Model):
     """Model for item_read_access_list in database"""
 
     portal_id: fields.ForeignKeyRelation[Item] = fields.ForeignKeyField(
-        "models.Item", related_name="item_read_access_list", to_field="portal_id"
+        "models.Item", related_name="item_read_access_list", to_field="portal_id",
+        on_delete='CASCADE'
     )
     name = fields.CharField(500)
 
@@ -81,7 +85,8 @@ class ItemWriteAccessList(models.Model):
     """Model for item_read_access_list in database"""
 
     portal_id: fields.ForeignKeyRelation[Item] = fields.ForeignKeyField(
-        "models.Item", related_name="item_write_access_list", to_field="portal_id"
+        "models.Item", related_name="item_write_access_list", to_field="portal_id",
+        on_delete='CASCADE'
     )
     name = fields.CharField(500)
 
@@ -89,10 +94,12 @@ class Table(models.Model):
     """Model for table in database"""
 
     username: fields.ForeignKeyField(
-        "models.User", related_name="tables", to_field="username"
+        "models.User", related_name="tables", to_field="username",
+        on_delete='CASCADE'
     )
     portal_id: fields.ForeignKeyRelation[Item] = fields.ForeignKeyField(
-        "models.Item", related_name="table", to_field="portal_id"
+        "models.Item", related_name="table", to_field="portal_id",
+        on_delete='CASCADE'
     )
     table_id = fields.CharField(50)
     created_time = fields.DatetimeField(auto_now_add=True)
@@ -102,10 +109,12 @@ class Map(models.Model):
     """Model for map in database"""
 
     username: fields.ForeignKeyField(
-        "models.User", related_name="maps", to_field="username"
+        "models.User", related_name="maps", to_field="username",
+        on_delete='CASCADE'
     )
     portal_id: fields.ForeignKeyRelation[Item] = fields.ForeignKeyField(
-        "models.Item", related_name="map", to_field="portal_id"
+        "models.Item", related_name="map", to_field="portal_id",
+        on_delete='CASCADE'
     )
     map_id = fields.UUIDField(unique=True, indexable=True, pk=True)
     created_time = fields.DatetimeField(auto_now_add=True)
@@ -134,7 +143,8 @@ class Layer(models.Model):
     bounding_box = fields.JSONField()
 
     map: fields.ForeignKeyRelation[Map] = fields.ForeignKeyField(
-        "models.Map", related_name="layers", to_field="map_id"
+        "models.Map", related_name="layers", to_field="map_id",
+        on_delete='CASCADE'
     )
 
 
