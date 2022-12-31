@@ -238,7 +238,7 @@ async def delete_column(
         return {"status": True}
 
 @router.post(
-    path="/create_table",
+    path="/",
     responses={
         200: {
             "description": "Successful Response",
@@ -318,7 +318,7 @@ async def create_table(
         return {"status": True, "table_id": new_table_id}
 
 @router.delete(
-    path="/{table_id}/delete_table",
+    path="/{table_id}",
     responses={
         200: {
             "description": "Successful Response",
