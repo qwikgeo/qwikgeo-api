@@ -44,14 +44,6 @@ curl https://api.qwikgeo.com/api/v1/items
                 "id": 1,
                 "name": "mkeller3"
             }
-        ],
-        "table": [
-            {
-                "id": 1,
-                "table_id": "vccvnkvhrmzsqqbbcacvjrlspfpdhbcthvjszbnfledgklxnps",
-                "created_time": "2022-10-07T14:04:56.263222+00:00",
-                "modified_time": "2022-10-07T14:04:56.263248+00:00"
-            }
         ]
     }
 ]
@@ -91,14 +83,6 @@ curl https://api.qwikgeo.com/api/v1/items/{portal_id}
         {
             "id": 1,
             "name": "mkeller3"
-        }
-    ],
-    "table": [
-        {
-            "id": 1,
-            "table_id": "vccvnkvhrmzsqqbbcacvjrlspfpdhbcthvjszbnfledgklxnps",
-            "created_time": "2022-10-07T14:04:56.263222+00:00",
-            "modified_time": "2022-10-07T14:04:56.263248+00:00"
         }
     ]
 }
