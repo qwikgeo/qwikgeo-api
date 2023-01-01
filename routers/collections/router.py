@@ -30,7 +30,7 @@ router = APIRouter()
                     "example": {
                         "collections": [
                             {
-                                "id": "{table}",
+                                "id": "{table_id}",
                                 "title": "string",
                                 "description": "string",
                                 "keywords": ["string"],
@@ -39,7 +39,7 @@ router = APIRouter()
                                         "type": "application/json",
                                         "rel": "self",
                                         "title": "This document as JSON",
-                                        "href": "http://api.qwikgeo.com/api/v1/collections/{table}"
+                                        "href": "http://api.qwikgeo.com/api/v1/collections/{table_id}"
                                     }
                                 ],
                                 "geometry": "point",
@@ -133,14 +133,12 @@ async def collections(
                         }
                     ],
                     "geometry": await utilities.get_table_geometry_type(
-                        scheme="user_data",
-                        table=table.table_id,
+                        table_id=table.table_id,
                         app=request.app
                     ),
                     "extent": {
                         "spatial": {
                             "bbox": await utilities.get_table_bounds(
-                                scheme="user_data",
                                 table=table.table_id,
                                 app=request.app
                             ),
@@ -154,14 +152,14 @@ async def collections(
     return {"collections": db_tables}
 
 @router.get(
-    path="/{table}",
+    path="/{table_id}",
     responses={
         200: {
             "description": "Successful Response",
             "content": {
                 "application/json": {
                     "example": {
-                        "id": "{table}",
+                        "id": "{table_id}",
                         "title": "string",
                         "description": "string",
                         "keywords": ["string"],
@@ -170,19 +168,19 @@ async def collections(
                                 "type": "application/geo+json",
                                 "rel": "self",
                                 "title": "Items as GeoJSON",
-                                "href": "http://api.qwikgeo.com/api/v1/collections/{table}/items"
+                                "href": "http://api.qwikgeo.com/api/v1/collections/{table_id}/items"
                             },
                             {
                                 "type": "application/json",
                                 "rel": "queryables",
                                 "title": "Queryables for this collection as JSON",
-                                "href": "http://api.qwikgeo.com/api/v1/collections/{table}/queryables"
+                                "href": "http://api.qwikgeo.com/api/v1/collections/{table_id}/queryables"
                             },
                             {
                                 "type": "application/json",
                                 "rel": "tiles",
                                 "title": "Tiles as JSON",
-                                "href": "http://api.qwikgeo.com/api/v1/collections/{table}/tiles"
+                                "href": "http://api.qwikgeo.com/api/v1/collections/{table_id}/tiles"
                             }
                         ],
                         "geometry": "point",
@@ -229,7 +227,7 @@ async def collections(
     }
 )
 async def collection(
-    table: str,
+    table_id: str,
     request: Request,
     user_name: int=Depends(authentication_handler.JWTBearer())
 ):
@@ -243,13 +241,13 @@ async def collection(
     item_metadata = await utilities.get_item_in_database(
         user_name=user_name,
         model_name="Table",
-        query_filter=Q(table_id=table)
+        query_filter=Q(table_id=table_id)
     )
 
     url = str(request.base_url)
 
     return {
-        "id": f"{table}",
+        "id": f"{table_id}",
         "title" : item_metadata.portal_id.title,
         "description" : item_metadata.portal_id.description,
         "keywords": item_metadata.portal_id.tags,
@@ -258,37 +256,35 @@ async def collection(
                 "type": "application/json",
                 "rel": "self",
                 "title": "This document as JSON",
-                "href": f"{url}api/v1/collections/{table}"
+                "href": f"{url}api/v1/collections/{table_id}"
             },
             {
                 "type": "application/geo+json",
                 "rel": "items",
                 "title": "Items as GeoJSON",
-                "href": f"{url}api/v1/collections/{table}/items"
+                "href": f"{url}api/v1/collections/{table_id}/items"
             },
             {
                 "type": "application/json",
                 "rel": "queryables",
                 "title": "Queryables for this collection as JSON",
-                "href": f"{url}api/v1/collections/{table}/queryables"
+                "href": f"{url}api/v1/collections/{table_id}/queryables"
             },
             {
                 "type": "application/json",
                 "rel": "tiles",
                 "title": "Tiles as JSON",
-                "href": f"{url}api/v1/collections/{table}/tiles"
+                "href": f"{url}api/v1/collections/{table_id}/tiles"
             }
         ],
         "geometry": await utilities.get_table_geometry_type(
-            scheme="user_data",
-            table=item_metadata.table_id,
+            table_id=item_metadata.table_id,
             app=request.app
         ),
         "extent": {
             "spatial": {
                 "bbox": await utilities.get_table_bounds(
-                    scheme="user_data",
-                    table=table,
+                    table_id=table_id,
                     app=request.app
                 ),
                 "crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
@@ -298,14 +294,14 @@ async def collection(
     }
 
 @router.get(
-    path="/{table}/queryables",
+    path="/{table_id}/queryables",
     responses={
         200: {
             "description": "Successful Response",
             "content": {
                 "application/json": {
                     "example": {
-                        "$id": "http://api.qwikgeo.com/api/v1/collections/{table}/queryables",
+                        "$id": "http://api.qwikgeo.com/api/v1/collections/{table_id}/queryables",
                         "title": "string",
                         "type": "object",
                         "$schema": "http://json-schema.org/draft/2019-09/schema",
@@ -346,7 +342,7 @@ async def collection(
     }
 )
 async def queryables(
-    table: str,
+    table_id: str,
     request: Request,
     user_name: int=Depends(authentication_handler.JWTBearer())
 ):
@@ -358,13 +354,13 @@ async def queryables(
     item_metadata = await utilities.get_item_in_database(
         user_name=user_name,
         model_name="Table",
-        query_filter=Q(table_id=table)
+        query_filter=Q(table_id=table_id)
     )
 
     url = str(request.base_url)
 
     queryable = {
-        "$id": f"{url}api/v1/collections/{table}/queryables",
+        "$id": f"{url}api/v1/collections/{table_id}/queryables",
         "title": item_metadata.portal_id.title,
         "type": "object",
         "$schema": "http://json-schema.org/draft/2019-09/schema",
@@ -378,7 +374,7 @@ async def queryables(
         sql_field_query = f"""
             SELECT column_name, data_type
             FROM information_schema.columns
-            WHERE table_name = '{table}'
+            WHERE table_name = '{table_id}'
             AND column_name != 'geom';
         """
 
@@ -396,7 +392,7 @@ async def queryables(
         return queryable
 
 @router.get(
-    path="/{table}/items",
+    path="/{table_id}/items",
     responses={
         200: {
             "description": "Successful Response",
@@ -425,19 +421,19 @@ async def queryables(
                                 "type": "application/geo+json",
                                 "rel": "self",
                                 "title": "This document as GeoJSON",
-                                "href": "http://api.qwikgeo.com/api/v1/collections/{table}/items"
+                                "href": "http://api.qwikgeo.com/api/v1/collections/{table_id}/items"
                             },
                             {
                                 "type": "application/json",
-                                "title": "{table}",
+                                "title": "{table_id}",
                                 "rel": "collection",
-                                "href": "http://api.qwikgeo.com/api/v1/collections/{table}"
+                                "href": "http://api.qwikgeo.com/api/v1/collections/{table_id}"
                             },
                             {
                                 "type": "application/geo+json",
                                 "rel": "next",
                                 "title": "items (next)",
-                                "href": "http://api.qwikgeo.com/api/v1/collections/{table}/items?offset=10"
+                                "href": "http://api.qwikgeo.com/api/v1/collections/{table_id}/items?offset=10"
                             }
                         ]
                     }
@@ -471,7 +467,7 @@ async def queryables(
     }
 )
 async def items(
-    table: str,
+    table_id: str,
     request: Request,
     bbox: str=None,
     limit: int=10,
@@ -493,7 +489,7 @@ async def items(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=table),
+        query_filter=Q(table_id=table_id),
         user_name=user_name
     )
 
@@ -514,7 +510,7 @@ async def items(
         sql_field_query = f"""
             SELECT column_name
             FROM information_schema.columns
-            WHERE table_name = '{table}'
+            WHERE table_name = '{table_id}'
             AND column_name != 'geom';
         """
 
@@ -537,7 +533,7 @@ async def items(
                     if property not in fields:
                         raise HTTPException(
                             status_code=400,
-                            detail=f"""Column: {property} is not a column for {table}."""
+                            detail=f"""Column: {property} is not a column for {table_id}."""
                         )
 
         if new_query_parameters:
@@ -566,7 +562,7 @@ async def items(
             except KeyError as exc:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"""Invalid column in filter parameter for {table}."""
+                    detail=f"""Invalid column in filter parameter for {table_id}."""
                 ) from exc
 
 
@@ -576,8 +572,7 @@ async def items(
             filter = column_where_parameters
 
         results = await utilities.get_table_geojson(
-            scheme="user_data",
-            table=table,
+            table_id=table_id,
             limit=limit,
             offset=offset,
             properties=properties,
@@ -601,9 +596,9 @@ async def items(
             },
             {
                 "type": "application/json",
-                "title": f"{table}",
+                "title": f"{table_id}",
                 "rel": "collection",
-                "href": f"{url}api/v1/collections/{table}"
+                "href": f"{url}api/v1/collections/{table_id}"
             }
         ]
 
@@ -638,7 +633,7 @@ async def items(
         return results
 
 @router.post(
-    path="/{table}/items",
+    path="/{table_id}/items",
     responses={
         200: {
             "description": "Successful Response",
@@ -686,7 +681,7 @@ async def items(
     }
 )
 async def create_item(
-    table: str,
+    table_id: str,
     info: models.Geojson,
     request: Request,
     user_name: int=Depends(authentication_handler.JWTBearer())
@@ -698,7 +693,7 @@ async def create_item(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=table),
+        query_filter=Q(table_id=table_id),
         user_name=user_name,
         write_access=True
     )
@@ -710,7 +705,7 @@ async def create_item(
         sql_field_query = f"""
         SELECT column_name, data_type
         FROM information_schema.columns
-        WHERE table_name = '{table}'
+        WHERE table_name = '{table_id}'
         AND column_name != 'geom'
         AND column_name != 'gid';
         """
@@ -737,7 +732,7 @@ async def create_item(
             if column not in db_columns:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"""Column: {column} is not a column for {table}.
+                    detail=f"""Column: {column} is not a column for {table_id}.
                     Please use one of the following columns. {string_columns}"""
                 )
             input_columns += f""""{column}","""
@@ -759,7 +754,7 @@ async def create_item(
         values = values[:-1]
 
         query = f"""
-            INSERT INTO user_data."{table}" ({input_columns})
+            INSERT INTO user_data."{table_id}" ({input_columns})
             VALUES ({values})
             RETURNING gid;
         """
@@ -772,15 +767,15 @@ async def create_item(
         }
 
         geom_query = f"""
-            UPDATE user_data."{table}"
+            UPDATE user_data."{table_id}"
             SET geom = ST_GeomFromGeoJSON('{json.dumps(geojson)}')
             WHERE gid = {result[0]['gid']};
         """
 
         await con.fetch(geom_query)
 
-        if os.path.exists(f'{os.getcwd()}/cache/user_data{table}'):
-            shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table}')
+        if os.path.exists(f'{os.getcwd()}/cache/user_data{table_id}'):
+            shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table_id}')
 
         info.properties['gid'] = result[0]['gid']
 
@@ -789,7 +784,7 @@ async def create_item(
         return info
 
 @router.get(
-    path="/{table}/items/{id}",
+    path="/{table_id}/items/{id}",
     responses={
         200: {
             "description": "Successful Response",
@@ -811,19 +806,19 @@ async def create_item(
                                 "type": "application/geo+json",
                                 "rel": "self",
                                 "title": "This document as GeoJSON",
-                                "href": "http://api.qwikgeo.com/api/v1/collections/{table}/items/1"
+                                "href": "http://api.qwikgeo.com/api/v1/collections/{table_id}/items/1"
                             },
                             {
                                 "type": "application/geo+json",
                                 "title": "items as GeoJSON",
                                 "rel": "items",
-                                "href": "http://api.qwikgeo.com/api/v1/collections/{table}/items"
+                                "href": "http://api.qwikgeo.com/api/v1/collections/{table_id}/items"
                             },
                             {
                                 "type": "application/json",
-                                "title": "{table}",
+                                "title": "{table_id}",
                                 "rel": "collection",
-                                "href": "http://api.qwikgeo.com/api/v1/collections/{table}"
+                                "href": "http://api.qwikgeo.com/api/v1/collections/{table_id}"
                             }
                         ]
                     }
@@ -857,7 +852,7 @@ async def create_item(
     }
 )
 async def item(
-    table: str,
+    table_id: str,
     id: str,
     request: Request,
     properties: str="*",
@@ -874,7 +869,7 @@ async def item(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=table),
+        query_filter=Q(table_id=table_id),
         user_name=user_name
     )
 
@@ -885,7 +880,7 @@ async def item(
         sql_field_query = f"""
             SELECT column_name
             FROM information_schema.columns
-            WHERE table_name = '{table}'
+            WHERE table_name = '{table_id}'
             AND column_name != 'geom';
         """
 
@@ -899,8 +894,7 @@ async def item(
             properties = properties[:-1]
 
         results = await utilities.get_table_geojson(
-            scheme="user_data",
-            table=table,
+            table_id=table_id,
             filter=f"gid = '{id}'",
             properties=properties,
             return_geometry=return_geometry,
@@ -919,20 +913,20 @@ async def item(
                 "type": "application/geo+json",
                 "title": "items as GeoJSON",
                 "rel": "items",
-                "href": f"{url}api/v1/collections/{table}/items"
+                "href": f"{url}api/v1/collections/{table_id}/items"
             },
             {
                 "type": "application/json",
-                "title": f"{table}",
+                "title": f"{table_id}",
                 "rel": "collection",
-                "href": f"{url}api/v1/collections/{table}"
+                "href": f"{url}api/v1/collections/{table_id}"
             }
         ]
 
         return results['features'][0]
 
 @router.put(
-    path="/{table}/items/{id}",
+    path="/{table_id}/items/{id}",
     responses={
         200: {
             "description": "Successful Response",
@@ -980,7 +974,7 @@ async def item(
     }
 )
 async def update_item(
-    table: str,
+    table_id: str,
     id: int,
     info: models.Geojson,
     request: Request,
@@ -993,7 +987,7 @@ async def update_item(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=table),
+        query_filter=Q(table_id=table_id),
         user_name=user_name,
         write_access=True
     )
@@ -1005,7 +999,7 @@ async def update_item(
         sql_field_query = f"""
         SELECT column_name, data_type
         FROM information_schema.columns
-        WHERE table_name = '{table}'
+        WHERE table_name = '{table_id}'
         AND column_name != 'geom'
         AND column_name != 'gid';
         """
@@ -1027,7 +1021,7 @@ async def update_item(
 
         exist_query = f"""
         SELECT count(*)
-        FROM user_data."{table}"
+        FROM user_data."{table_id}"
         WHERE gid = {id}
         """
 
@@ -1040,7 +1034,7 @@ async def update_item(
                 )
 
         query = f"""
-            UPDATE user_data."{table}"
+            UPDATE user_data."{table_id}"
             SET 
         """
 
@@ -1048,7 +1042,7 @@ async def update_item(
             if column not in db_columns:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"""Column: {column} is not a column for {table}.
+                    detail=f"""Column: {column} is not a column for {table_id}.
                     Please use one of the following columns. {string_columns}"""
                 )
             if db_column_types[column]['type'] in config.NUMERIC_FIELDS:
@@ -1077,20 +1071,20 @@ async def update_item(
         }
 
         geom_query = f"""
-            UPDATE user_data."{table}"
+            UPDATE user_data."{table_id}"
             SET geom = ST_GeomFromGeoJSON('{json.dumps(geojson)}')
             WHERE gid = {id};
         """
 
         await con.fetch(geom_query)
 
-        if os.path.exists(f'{os.getcwd()}/cache/user_data_{table}'):
-            shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table}')
+        if os.path.exists(f'{os.getcwd()}/cache/user_data_{table_id}'):
+            shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table_id}')
 
         return info
 
 @router.patch(
-    path="/{table}/items/{id}",
+    path="/{table_id}/items/{id}",
     responses={
         200: {
             "description": "Successful Response",
@@ -1138,7 +1132,7 @@ async def update_item(
     }
 )
 async def modify_item(
-    table: str,
+    table_id: str,
     id: int,
     info: models.Geojson,
     request: Request,
@@ -1151,7 +1145,7 @@ async def modify_item(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=table),
+        query_filter=Q(table_id=table_id),
         user_name=user_name,
         write_access=True
     )
@@ -1163,7 +1157,7 @@ async def modify_item(
         sql_field_query = f"""
         SELECT column_name, data_type
         FROM information_schema.columns
-        WHERE table_name = '{table}'
+        WHERE table_name = '{table_id}'
         AND column_name != 'geom'
         AND column_name != 'gid';
         """
@@ -1184,7 +1178,7 @@ async def modify_item(
 
         exist_query = f"""
         SELECT count(*)
-        FROM user_data."{table}"
+        FROM user_data."{table_id}"
         WHERE gid = {id}
         """
 
@@ -1197,7 +1191,7 @@ async def modify_item(
                 )
 
         query = f"""
-            UPDATE user_data."{table}"
+            UPDATE user_data."{table_id}"
             SET 
         """
 
@@ -1205,7 +1199,7 @@ async def modify_item(
             if column not in db_columns:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"""Column: {column} is not a column for {table}.
+                    detail=f"""Column: {column} is not a column for {table_id}.
                     Please use one of the following columns. {string_columns}"""
                 )
             if db_column_types[column]['type'] in config.NUMERIC_FIELDS:
@@ -1225,20 +1219,20 @@ async def modify_item(
         }
 
         geom_query = f"""
-            UPDATE user_data."{table}"
+            UPDATE user_data."{table_id}"
             SET geom = ST_GeomFromGeoJSON('{json.dumps(geojson)}')
             WHERE gid = {id};
         """
 
         await con.fetch(geom_query)
 
-        if os.path.exists(f'{os.getcwd()}/cache/user_data_{table}'):
-            shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table}')
+        if os.path.exists(f'{os.getcwd()}/cache/user_data_{table_id}'):
+            shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table_id}')
 
         return info
 
 @router.delete(
-    path="/{table}/items/{id}",
+    path="/{table_id}/items/{id}",
     responses={
         200: {
             "description": "Successful Response",
@@ -1277,7 +1271,7 @@ async def modify_item(
     }
 )
 async def delete_item(
-    table: str,
+    table_id: str,
     id: int,
     request: Request,
     user_name: int=Depends(authentication_handler.JWTBearer())
@@ -1289,7 +1283,7 @@ async def delete_item(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=table),
+        query_filter=Q(table_id=table_id),
         user_name=user_name,
         write_access=True
     )
@@ -1298,26 +1292,26 @@ async def delete_item(
 
     async with pool.acquire() as con:
         query = f"""
-            DELETE FROM user_data."{table}"
+            DELETE FROM user_data."{table_id}"
             WHERE gid = {id};
         """
 
         await con.fetch(query)
 
-        if os.path.exists(f'{os.getcwd()}/cache/user_data_{table}'):
-            shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table}')
+        if os.path.exists(f'{os.getcwd()}/cache/user_data_{table_id}'):
+            shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table_id}')
 
         return {"status": True}
 
 @router.get(
-    path="/{table}/tiles",
+    path="/{table_id}/tiles",
     responses={
         200: {
             "description": "Successful Response",
             "content": {
                 "application/json": {
                     "example": {
-                        "id": "{table}",
+                        "id": "{table_id}",
                         "title": "string",
                         "description": "string",
                         "links": [
@@ -1325,20 +1319,20 @@ async def delete_item(
                                 "type": "application/json",
                                 "rel": "self",
                                 "title": "This document as JSON",
-                                "href": "http://api.qwikgeo.com/api/v1/collections/{table}/tiles"
+                                "href": "http://api.qwikgeo.com/api/v1/collections/{table_id}/tiles"
                             },
                             {
                                 "type": "application/vnd.mapbox-vector-tile",
                                 "rel": "item",
                                 "title": "This collection as Mapbox vector tiles",
-                                "href": "http://api.qwikgeo.com/api/v1/collections/{table}/tiles/{tile_matrix_set_id}/{tile_matrix}/{tile_row}/{tile_col}",
+                                "href": "http://api.qwikgeo.com/api/v1/collections/{table_id}/tiles/{tile_matrix_set_id}/{tile_matrix}/{tile_row}/{tile_col}",
                                 "templated": True
                             },
                             {
                                 "type": "application/json",
                                 "rel": "describedby",
                                 "title": "Metadata for this collection in the TileJSON format",
-                                "href": "http://api.qwikgeo.com/api/v1/collections/{table}/tiles/{tile_matrix_set_id}/metadata",
+                                "href": "http://api.qwikgeo.com/api/v1/collections/{table_id}/tiles/{tile_matrix_set_id}/metadata",
                                 "templated": True
                             }
                         ],
@@ -1379,7 +1373,7 @@ async def delete_item(
     }
 )
 async def tiles(
-    table: str,
+    table_id: str,
     request: Request,
     user_name: int=Depends(authentication_handler.JWTBearer())
 ):
@@ -1391,7 +1385,7 @@ async def tiles(
     item_metadata = await utilities.get_item_in_database(
         user_name=user_name,
         model_name="Table",
-        query_filter=Q(table_id=table)
+        query_filter=Q(table_id=table_id)
     )
 
     url = str(request.base_url)
@@ -1399,7 +1393,7 @@ async def tiles(
     mvt_path = "{tile_matrix_set_id}/{tile_matrix}/{tile_row}/{tile_col}"
 
     tile_info = {
-        "id": f"{table}",
+        "id": f"{table_id}",
         "title": item_metadata.portal_id.title,
         "description": item_metadata.portal_id.description,
         "links": [
@@ -1407,20 +1401,20 @@ async def tiles(
                 "type": "application/json",
                 "rel": "self",
                 "title": "This document as JSON",
-                "href": f"{url}api/v1/collections/{table}/tiles",
+                "href": f"{url}api/v1/collections/{table_id}/tiles",
             },
             {
                 "type": "application/vnd.mapbox-vector-tile",
                 "rel": "item",
                 "title": "This collection as Mapbox vector tiles",
-                "href": f"{url}api/v1/collections/{table}/tiles/{mvt_path}",
+                "href": f"{url}api/v1/collections/{table_id}/tiles/{mvt_path}",
                 "templated": True
             },
             {
                 "type": "application/json",
                 "rel": "describedby",
                 "title": "Metadata for this collection in the TileJSON format",
-                "href": f"{url}api/v1/collections/{table}/tiles/{{tile_matrix_set_id}}/metadata",
+                "href": f"{url}api/v1/collections/{table_id}/tiles/{{tile_matrix_set_id}}/metadata",
                 "templated": True
             }
         ],
@@ -1435,7 +1429,7 @@ async def tiles(
     return tile_info
 
 @router.get(
-    path="/{table}/tiles/{tile_matrix_set_id}/{tile_matrix}/{tile_row}/{tile_col}",
+    path="/{table_id}/tiles/{tile_matrix_set_id}/{tile_matrix}/{tile_row}/{tile_col}",
     responses={
         200: {
             "description": "Successful Response",
@@ -1476,7 +1470,7 @@ async def tiles(
     }
 )
 async def tile(
-    table: str,
+    table_id: str,
     tile_matrix_set_id: str,
     tile_matrix: int,
     tile_row: int,
@@ -1493,12 +1487,12 @@ async def tile(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=table),
+        query_filter=Q(table_id=table_id),
         user_name=user_name
     )
 
     pbf, tile_cache = await utilities.get_tile(
-        table=table,
+        table_id=table_id,
         tile_matrix_set_id=tile_matrix_set_id,
         z=tile_matrix,
         x=tile_row,
@@ -1517,7 +1511,7 @@ async def tile(
 
     if tile_cache:
         return FileResponse(
-            path=f'{os.getcwd()}/cache/user_data_{table}/{tile_matrix_set_id}/{tile_matrix}/{tile_row}/{tile_col}',
+            path=f'{os.getcwd()}/cache/user_data_{table_id}/{tile_matrix_set_id}/{tile_matrix}/{tile_row}/{tile_col}',
             media_type="application/vnd.mapbox-vector-tile",
             status_code=response_code,
             headers = {
@@ -1540,7 +1534,7 @@ async def tile(
     )
 
 @router.get(
-    path="/{table}/tiles/{tile_matrix_set_id}/metadata",
+    path="/{table_id}/tiles/{tile_matrix_set_id}/metadata",
     responses={
         200: {
             "description": "Successful Response",
@@ -1548,15 +1542,15 @@ async def tile(
                 "application/json": {
                     "example": {
                         "tilejson": "3.0.0",
-                        "name": "{table}",
-                        "tiles": "http://api.qwikgeo.com/api/v1/collections/{table}/tiles/WorldCRS84Quad/{tile_matrix}/{tile_row}/{tile_col}?f=mvt",
+                        "name": "{table_id}",
+                        "tiles": "http://api.qwikgeo.com/api/v1/collections/{table_id}/tiles/WorldCRS84Quad/{tile_matrix}/{tile_row}/{tile_col}?f=mvt",
                         "minzoom": "0",
                         "maxzoom": "22",
                         "attribution": "string",
                         "description": "string",
                         "vector_layers": [
                             {
-                                "id": "{table}",
+                                "id": "{table_id}",
                                 "description": "string",
                                 "minzoom": 0,
                                 "maxzoom": 22,
@@ -1594,7 +1588,7 @@ async def tile(
     }
 )
 async def tiles_metadata(
-    table: str,
+    table_id: str,
     tile_matrix_set_id: str,
     request: Request,
     user_name: int=Depends(authentication_handler.JWTBearer())
@@ -1607,7 +1601,7 @@ async def tiles_metadata(
     item_metadata = await utilities.get_item_in_database(
         user_name=user_name,
         model_name="Table",
-        query_filter=Q(table_id=table)
+        query_filter=Q(table_id=table_id)
     )
 
     url = str(request.base_url)
@@ -1616,8 +1610,8 @@ async def tiles_metadata(
 
     metadata = {
         "tilejson": "3.0.0",
-        "name": f"{table}",
-        "tiles": f"{url}api/v1/collections/{table}/tiles/{mvt_path}",
+        "name": f"{table_id}",
+        "tiles": f"{url}api/v1/collections/{table_id}/tiles/{mvt_path}",
         "minzoom": "0",
         "maxzoom": "22",
         # "bounds": "-124.953634,-16.536406,109.929807,66.969298",
@@ -1626,7 +1620,7 @@ async def tiles_metadata(
         "description": item_metadata.portal_id.description,
         "vector_layers": [
             {
-                "id": f"{table}",
+                "id": f"{table_id}",
                 "description": item_metadata.portal_id.description,
                 "minzoom": 0,
                 "maxzoom": 22,
@@ -1642,7 +1636,7 @@ async def tiles_metadata(
         sql_field_query = f"""
             SELECT column_name, data_type
             FROM information_schema.columns
-            WHERE table_name = '{table}'
+            WHERE table_name = '{table_id}'
             AND column_name != 'geom';
         """
 
@@ -1657,7 +1651,7 @@ async def tiles_metadata(
         return metadata
 
 @router.get(
-    path="/{table}/tiles/cache_size",
+    path="/{table_id}/tiles/cache_size",
     responses={
         200: {
             "description": "Successful Response",
@@ -1672,7 +1666,7 @@ async def tiles_metadata(
     }
 )
 async def get_tile_cache_size(
-    table: str,
+    table_id: str,
     user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
@@ -1682,13 +1676,13 @@ async def get_tile_cache_size(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=table),
+        query_filter=Q(table_id=table_id),
         user_name=user_name
     )
 
     size = 0
 
-    cache_path = f'{os.getcwd()}/cache/user_data_{table}'
+    cache_path = f'{os.getcwd()}/cache/user_data_{table_id}'
 
     if os.path.exists(cache_path):
         for path, dirs, files in os.walk(cache_path):
@@ -1699,7 +1693,7 @@ async def get_tile_cache_size(
     return {"size_in_gigabytes": size*.000000001}
 
 @router.delete(
-    path="/{table}/tiles/cache",
+    path="/{table_id}/tiles/cache",
     responses={
         200: {
             "description": "Successful Response",
@@ -1738,7 +1732,7 @@ async def get_tile_cache_size(
     }
 )
 async def delete_tile_cache(
-    table: str,
+    table_id: str,
     user_name: int=Depends(authentication_handler.JWTBearer())
 ):
     """
@@ -1748,16 +1742,16 @@ async def delete_tile_cache(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=table),
+        query_filter=Q(table_id=table_id),
         user_name=user_name
     )
 
-    utilities.delete_user_tile_cache(table)
+    utilities.delete_user_tile_cache(table_id)
 
     return {"status": "deleted"}
 
 @router.post(
-    path="/{table}/statistics",
+    path="/{table_id}/statistics",
     responses={
         200: {
             "description": "Successful Response",
@@ -1791,7 +1785,7 @@ async def delete_tile_cache(
             "description": "Bad Request",
             "content": {
                 "application/json": {
-                    "example": {"detail": "One of the columns used does not exist for {table}."}
+                    "example": {"detail": "One of the columns used does not exist for {table_id}."}
                 }
             }
         },
@@ -1822,7 +1816,7 @@ async def delete_tile_cache(
     }
 )
 async def statistics(
-    table: str,
+    table_id: str,
     info: models.StatisticsModel,
     request: Request,
     user_name: int=Depends(authentication_handler.JWTBearer())
@@ -1834,7 +1828,7 @@ async def statistics(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=table),
+        query_filter=Q(table_id=table_id),
         user_name=user_name
     )
     pool = request.app.state.database
@@ -1861,7 +1855,7 @@ async def statistics(
             formatted_columns = ','.join(cols)
             query = f"""
                 SELECT {formatted_columns}
-                FROM user_data."{table}"
+                FROM user_data."{table_id}"
             """
 
             query += await utilities.generate_where_clause(info, con)
@@ -1872,7 +1866,7 @@ async def statistics(
             except asyncpg.exceptions.UndefinedColumnError:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f'One of the columns used does not exist for {table}.'
+                    detail=f'One of the columns used does not exist for {table_id}.'
                 )
 
             for col in col_names:
@@ -1883,7 +1877,7 @@ async def statistics(
                 if aggregate.type == 'distinct':
                     query = f"""
                     SELECT DISTINCT("{aggregate.column}"), {aggregate.group_method}("{aggregate.group_column}") 
-                    FROM user_data."{table}" """
+                    FROM user_data."{table_id}" """
 
                     query += await utilities.generate_where_clause(info, con)
 
@@ -1897,7 +1891,7 @@ async def statistics(
                     except asyncpg.exceptions.UndefinedColumnError:
                         raise HTTPException(
                             status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=f'One of the columns used does not exist for {table}.'
+                            detail=f'One of the columns used does not exist for {table_id}.'
                         )
 
                     final_results[
@@ -1910,7 +1904,7 @@ async def statistics(
         }
 
 @router.post(
-    path="/{table}/bins",
+    path="/{table_id}/bins",
     responses={
         200: {
             "description": "Successful Response",
@@ -1938,7 +1932,7 @@ async def statistics(
             "description": "Bad Request",
             "content": {
                 "application/json": {
-                    "example": {"detail": "Column: {column} does not exists for {table}."}
+                    "example": {"detail": "Column: {column} does not exists for {table_id}."}
                 }
             }
         },
@@ -1969,7 +1963,7 @@ async def statistics(
     }
 )
 async def bins(
-    table: str,
+    table_id: str,
     info: models.BinsModel,
     request: Request,
     user_name: int=Depends(authentication_handler.JWTBearer())
@@ -1981,7 +1975,7 @@ async def bins(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=table),
+        query_filter=Q(table_id=table_id),
         user_name=user_name
     )
 
@@ -1993,7 +1987,7 @@ async def bins(
         ]
         query = f"""
             SELECT MIN("{info.column}"),MAX("{info.column}")
-            FROM user_data."{table}"
+            FROM user_data."{table_id}"
         """
 
         query += await utilities.generate_where_clause(info, con)        
@@ -2004,7 +1998,7 @@ async def bins(
         except asyncpg.exceptions.UndefinedColumnError as exc:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f'Column: {info.column} does not exist for {table}.'
+                detail=f'Column: {info.column} does not exist for {table_id}.'
             ) from exc
 
         group_size = (data['max'] - data['min']) / info.number_of_bins
@@ -2018,7 +2012,7 @@ async def bins(
                 maximum = (group+1)*group_size
             query = f"""
                 SELECT COUNT(*)
-                FROM user_data."{table}"
+                FROM user_data."{table_id}"
                 WHERE "{info.column}" > {minimum}
                 AND "{info.column}" <= {maximum}
             """
@@ -2039,7 +2033,7 @@ async def bins(
         }
 
 @router.post(
-    path="/{table}/numeric_breaks",
+    path="/{table_id}/numeric_breaks",
     responses={
         200: {
             "description": "Successful Response",
@@ -2067,7 +2061,7 @@ async def bins(
             "description": "Bad Request",
             "content": {
                 "application/json": {
-                    "example": {"detail": "Column: {column} does not exists for {table}."}
+                    "example": {"detail": "Column: {column} does not exists for {table_id}."}
                 }
             }
         },
@@ -2098,7 +2092,7 @@ async def bins(
     }
 )
 async def numeric_breaks(
-    table: str,
+    table_id: str,
     info: models.NumericBreaksModel,
     request: Request,
     user_name: int=Depends(authentication_handler.JWTBearer())
@@ -2110,7 +2104,7 @@ async def numeric_breaks(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=table),
+        query_filter=Q(table_id=table_id),
         user_name=user_name
     )
 
@@ -2124,12 +2118,12 @@ async def numeric_breaks(
         if info.break_type == "quantile":
             query = f"""
                 SELECT {info.break_type}_bins(array_agg(CAST("{info.column}" AS integer)), {info.number_of_breaks}) 
-                FROM user_data."{table}"
+                FROM user_data."{table_id}"
             """
         else:
             query = f"""
                 SELECT {info.break_type}_bins(array_agg("{info.column}"), {info.number_of_breaks}) 
-                FROM user_data."{table}"
+                FROM user_data."{table_id}"
             """
 
         query += await utilities.generate_where_clause(info, con)
@@ -2140,12 +2134,12 @@ async def numeric_breaks(
         except asyncpg.exceptions.UndefinedColumnError as exc:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f'Column: {info.column} does not exist for {table}.'
+                detail=f'Column: {info.column} does not exist for {table_id}.'
             ) from exc
 
         min_query = f"""
             SELECT MIN("{info.column}")
-            FROM user_data."{table}"
+            FROM user_data."{table_id}"
         """
 
         min_query += await utilities.generate_where_clause(info, con)
@@ -2161,7 +2155,7 @@ async def numeric_breaks(
                 maximum = max_number
             query = f"""
                 SELECT COUNT(*)
-                FROM user_data."{table}"
+                FROM user_data."{table_id}"
                 WHERE "{info.column}" > {minimum}
                 AND "{info.column}" <= {maximum}
             """
@@ -2182,7 +2176,7 @@ async def numeric_breaks(
         }
 
 @router.post(
-    path="/{table}/custom_break_values",
+    path="/{table_id}/custom_break_values",
     responses={
         200: {
             "description": "Successful Response",
@@ -2210,7 +2204,7 @@ async def numeric_breaks(
             "description": "Bad Request",
             "content": {
                 "application/json": {
-                    "example": {"detail": "Column: {column} does not exists for {table}."}
+                    "example": {"detail": "Column: {column} does not exists for {table_id}."}
                 }
             }
         },
@@ -2241,7 +2235,7 @@ async def numeric_breaks(
     }
 )
 async def custom_break_values(
-    table: str,
+    table_id: str,
     info: models.CustomBreaksModel,
     request: Request,
     user_name: int=Depends(authentication_handler.JWTBearer())
@@ -2253,7 +2247,7 @@ async def custom_break_values(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=table),
+        query_filter=Q(table_id=table_id),
         user_name=user_name
     )
 
@@ -2270,7 +2264,7 @@ async def custom_break_values(
 
             query = f"""
                 SELECT COUNT(*)
-                FROM user_data."{table}"
+                FROM user_data."{table_id}"
                 WHERE "{info.column}" > {minimum}
                 AND "{info.column}" <= {maximum}
             """
@@ -2283,7 +2277,7 @@ async def custom_break_values(
             except asyncpg.exceptions.UndefinedColumnError as exc:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f'Column: {info.column} does not exist for {table}.'
+                    detail=f'Column: {info.column} does not exist for {table_id}.'
                 ) from exc
 
             results.append({
@@ -2298,7 +2292,7 @@ async def custom_break_values(
         }
 
 @router.get(
-    path="/{table}/autocomplete/",
+    path="/{table_id}/autocomplete/",
     responses={
         200: {
             "description": "Successful Response",
@@ -2312,7 +2306,7 @@ async def custom_break_values(
             "description": "Bad Request",
             "content": {
                 "application/json": {
-                    "example": {"detail": "Column: {column} does not exists for {table}."}
+                    "example": {"detail": "Column: {column} does not exists for {table_id}."}
                 }
             }
         },
@@ -2343,7 +2337,7 @@ async def custom_break_values(
     }
 )
 async def autocomplete(
-    table: str,
+    table_id: str,
     column: str,
     q: str,
     request: Request,
@@ -2358,7 +2352,7 @@ async def autocomplete(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=table),
+        query_filter=Q(table_id=table_id),
         user_name=user_name
     )
 
@@ -2370,7 +2364,7 @@ async def autocomplete(
 
         query = f"""
             SELECT distinct("{column}")
-            FROM user_data.{table}
+            FROM user_data.{table_id}
             WHERE "{column}" ILIKE '%{q}%'
             ORDER BY "{column}"
             LIMIT {limit}
@@ -2382,7 +2376,7 @@ async def autocomplete(
         except asyncpg.exceptions.UndefinedColumnError:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f'Column: {column} does not exist for {table}.'
+                detail=f'Column: {column} does not exist for {table_id}.'
             )
 
         for row in data:

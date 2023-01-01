@@ -70,7 +70,7 @@ Example: Buffer zip centroids by one kilometer.
 ### Example Input
 ```json
 {
-    "table": "zip_centroids",
+    "table_id": "zip_centroids",
     "database": "data",
     "distance_in_kilometers": 1
 }
@@ -96,7 +96,7 @@ Example: Dissolve all the US States into one single geometry.
 ### Example Input
 ```json
 {
-    "table": "states",
+    "table_id": "states",
     "database": "data"
 }
 ```
@@ -120,7 +120,7 @@ Example: Dissolve US States based off a column in the table called `sub_region`.
 ### Example Input
 ```json
 {
-    "table": "states",
+    "table_id": "states",
     "database": "data",
     "column": "sub_region"
 }
@@ -145,7 +145,7 @@ Example: Generate 100 kilometers square grids based off of a table containing US
 ### Example Input
 ```json
 {
-    "table": "states",
+    "table_id": "states",
     "database": "data",
     "grid_size_in_kilometers": 100
 }
@@ -170,7 +170,7 @@ Example: Generate 100 kilometers hexagon grids based off of a table containing U
 ### Example Input
 ```json
 {
-    "table": "states",
+    "table_id": "states",
     "database": "data",
     "grid_size_in_kilometers": 100
 }
@@ -195,7 +195,7 @@ Example: Find the bounding box of a table that contains all of the US States.
 ### Example Input
 ```json
 {
-    "table": "states",
+    "table_id": "states",
     "database": "data",
 }
 ```
@@ -219,7 +219,7 @@ Use [K Means Clustering](https://en.wikipedia.org/wiki/K-means_clustering) to gr
 ### Example Input
 ```json
 {
-    "table": "zip_centroids",
+    "table_id": "zip_centroids",
     "database": "data",
     "number_of_clusters": 5
 }
@@ -244,7 +244,7 @@ Example: Find the center of each US State.
 ### Example Input
 ```json
 {
-    "table": "states",
+    "table_id": "states",
     "database": "data"
 }
 ```
@@ -268,7 +268,7 @@ Example: Find the geomeric center of a table that contains all of the US States.
 ### Example Input
 ```json
 {
-    "table": "states",
+    "table_id": "states",
     "database": "data"
 }
 ```
@@ -292,7 +292,7 @@ Example: Find all states within `500` kilometers of latitude `40.45` and latitud
 ### Example Input
 ```json
 {
-    "table": "states",
+    "table_id": "states",
     "database": "data",
     "latitude": 40.45,
     "longitude": -88.95,
@@ -319,7 +319,7 @@ Example: Find the smallest convex hull around all the US States.
 ### Example Input
 ```json
 {
-    "table": "states",
+    "table_id": "states",
     "database": "data"
 }
 ```
@@ -343,7 +343,7 @@ Example: Determine how many zip centroids are each 1000 kilometer hexagon grid.
 ### Example Input
 ```json
 {
-    "table": "zip_centroids",
+    "table_id": "zip_centroids",
     "database": "data",
     "distance_in_kilometers": 1000,
     "grid_type": "hexagon"
@@ -369,7 +369,7 @@ Example: Determine how many zip centroids are within each US State.
 ### Example Input
 ```json
 {
-    "table": "zip_centroids",
+    "table_id": "zip_centroids",
     "database": "data",
     "polygons": "states"
 }
@@ -394,7 +394,7 @@ Example: Find all zip centroids within the US States table.
 ### Example Input
 ```json
 {
-    "table": "zip_centroids",
+    "table_id": "zip_centroids",
     "database": "data",
     "polygons": "states"
 }
@@ -419,7 +419,7 @@ Example: Find all the zip centroids outside of the table with US States.
 ### Example Input
 ```json
 {
-    "table": "zip_centroids",
+    "table_id": "zip_centroids",
     "database": "data",
     "polygons": "states"
 }
@@ -444,7 +444,7 @@ Example: Clip the US States table to a large polygon.
 ### Example Input
 ```json
 {
-    "table": "states",
+    "table_id": "states",
     "database": "data",
     "polygons": "big_polygon"
 }
