@@ -3,8 +3,8 @@
 from fastapi import FastAPI
 import asyncpg
 
-import config
-import bins_sql
+from qwikgeo_api import config
+from qwikgeo_api import bins_sql
 
 async def connect_to_db(app: FastAPI) -> None:
     """

@@ -2,10 +2,10 @@
 
 import datetime
 
-import main
-import utilities
-import db_models
-from routers.analysis import router as analysis_router
+from qwikgeo_api import main
+from qwikgeo_api import utilities
+from qwikgeo_api import db_models
+from qwikgeo_api.routers.analysis import router as analysis_router
 
 
 async def buffer(

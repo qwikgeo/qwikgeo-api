@@ -2,7 +2,7 @@ from fastapi import Request, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 
-import config
+from qwikgeo_api import config
 
 class JWTBearer(HTTPBearer):
     def __init__(self, auto_error: bool = False):

@@ -7,10 +7,10 @@ import jwt
 from google.oauth2 import id_token
 from google.auth.transport import requests
 
-import db_models
-import routers.authentication.models as models
-import utilities
-import config
+from qwikgeo_api import db_models
+import qwikgeo_api.routers.authentication.models as models
+from qwikgeo_api import utilities
+from qwikgeo_api import config
 
 router = APIRouter()
 

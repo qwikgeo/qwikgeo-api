@@ -13,10 +13,10 @@ from tortoise.expressions import Q
 import lark
 import asyncpg
 
-import routers.collections.models as models
-import utilities
-import config
-import authentication_handler
+import qwikgeo_api.routers.collections.models as models
+from qwikgeo_api import utilities
+from qwikgeo_api import config
+from qwikgeo_api import authentication_handler
 
 router = APIRouter()
 

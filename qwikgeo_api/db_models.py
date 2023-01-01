@@ -138,7 +138,7 @@ class Layer(models.Model):
     )
 
 
-Tortoise.init_models(["db_models"], "models")
+Tortoise.init_models(["qwikgeo_api.db_models"], "models")
 
 Group_Pydantic = pydantic_model_creator(Group, name="Group")
 Table_Pydantic = pydantic_model_creator(Table, name="Table")

@@ -3,7 +3,7 @@
 from tortoise.contrib.pydantic import pydantic_model_creator
 from pydantic import BaseModel
 
-import db_models
+from qwikgeo_api import db_models
 
 class Login(BaseModel):
     """Model for creating a new user"""

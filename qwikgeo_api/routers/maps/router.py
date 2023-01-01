@@ -1,15 +1,12 @@
 """QwikGeo API - Maps"""
 
-import os
-import shutil
-from typing import List
-from fastapi import APIRouter, Request, Depends
+from fastapi import APIRouter, Depends
 from tortoise.expressions import Q
 
 # import routers.tables.models as models
-import utilities
-import db_models
-import authentication_handler
+from qwikgeo_api import utilities
+from qwikgeo_api import db_models
+from qwikgeo_api import authentication_handler
 
 router = APIRouter()
 

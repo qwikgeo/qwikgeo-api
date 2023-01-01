@@ -5,17 +5,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from tortoise.contrib.fastapi import register_tortoise
 from prometheus_fastapi_instrumentator import Instrumentator
 
-import db
-import config
-from routers.authentication import router as authentication_router
-from routers.groups import router as groups_router
-from routers.users import router as users_router
-from routers.items import router as items_router
-from routers.tables import router as tables_router
-from routers.imports import router as imports_router
-from routers.analysis import router as analysis_router
-from routers.collections import router as collections_router
-from routers.maps import router as maps_router
+from qwikgeo_api import db
+from qwikgeo_api import config
+from qwikgeo_api.routers.authentication import router as authentication_router
+from qwikgeo_api.routers.groups import router as groups_router
+from qwikgeo_api.routers.users import router as users_router
+from qwikgeo_api.routers.items import router as items_router
+from qwikgeo_api.routers.tables import router as tables_router
+from qwikgeo_api.routers.imports import router as imports_router
+from qwikgeo_api.routers.analysis import router as analysis_router
+from qwikgeo_api.routers.collections import router as collections_router
+from qwikgeo_api.routers.maps import router as maps_router
 
 DESCRIPTION = """A python api to create a geoportal."""
 
@@ -25,7 +25,7 @@ DB_CONFIG = {
     },
     "apps": {
         "models": {
-            "models": ["db_models", "aerich.models"],
+            "models": ["qwikgeo_api.db_models", "aerich.models"],
             "default_connection": "default",
         },
     }
