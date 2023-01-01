@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 class BaseAnalysisModel(BaseModel):
     """Model for base analysis"""
 
-    table: str = Field(
+    table_id: str = Field(
         default=None, title="Name of the table to perform analysis on."
     )
 
@@ -35,7 +35,7 @@ class BadResponseModel(BaseModel):
 class BufferModel(BaseModel):
     """Model for buffer analysis"""
 
-    table: str = Field(
+    table_id: str = Field(
         default=None, title="Name of the table to perform analysis on."
     )
     distance_in_kilometers: float = Field(
@@ -45,7 +45,7 @@ class BufferModel(BaseModel):
 class DissolveByValueModel(BaseModel):
     """Model for dissolve by value analysis"""
 
-    table: str = Field(
+    table_id: str = Field(
         default=None, title="Name of the table to perform analysis on."
     )
     column: str = Field(
@@ -55,7 +55,7 @@ class DissolveByValueModel(BaseModel):
 class GridModel(BaseModel):
     """Model for grid analysis"""
 
-    table: str = Field(
+    table_id: str = Field(
         default=None, title="Name of the table to perform analysis on."
     )
     grid_size_in_kilometers: float = Field(
@@ -65,7 +65,7 @@ class GridModel(BaseModel):
 class KMeansModel(BaseModel):
     """Model for k means cluster analysis"""
 
-    table: str = Field(
+    table_id: str = Field(
         default=None, title="Name of the table to perform analysis on."
     )
     number_of_clusters: int = Field(
@@ -75,7 +75,7 @@ class KMeansModel(BaseModel):
 class FindWithinDistanceModel(BaseModel):
     """Model for find within distance analysis"""
 
-    table: str = Field(
+    table_id: str = Field(
         default=None, title="Name of the table to perform analysis on."
     )
     latitude: float = Field(
@@ -91,7 +91,7 @@ class FindWithinDistanceModel(BaseModel):
 class PolygonsModel(BaseModel):
     """Model for polygon based analyses"""
 
-    table: str = Field(
+    table_id: str = Field(
         default=None, title="Name of the table to perform analysis on."
     )
     polygons: str = Field(
@@ -101,7 +101,7 @@ class PolygonsModel(BaseModel):
 class AggregatePointsByGridsModel(BaseModel):
     """Model for aggregate points by grid analysis"""
 
-    table: str = Field(
+    table_id: str = Field(
         default=None, title="Name of the table to perform analysis on."
     )
     distance_in_kilometers: float = Field(

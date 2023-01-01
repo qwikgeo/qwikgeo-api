@@ -386,7 +386,7 @@ async def authenticate_user(
     return user
 
 async def get_tile(
-    table: str,
+    table_id: str,
     tile_matrix_set_id: str,
     z: int,
     x: int,
@@ -400,7 +400,7 @@ async def get_tile(
 
     """
 
-    cache_file = f'{os.getcwd()}/cache/user_data_{table}/{tile_matrix_set_id}/{z}/{x}/{y}'
+    cache_file = f'{os.getcwd()}/cache/user_data_{table_id}/{tile_matrix_set_id}/{z}/{x}/{y}'
 
     if os.path.exists(cache_file):
         return '', True
@@ -413,7 +413,7 @@ async def get_tile(
         sql_field_query = f"""
         SELECT column_name
         FROM information_schema.columns
-        WHERE table_name = '{table}'
+        WHERE table_name = '{table_id}'
         AND column_name != 'geom';
         """
 
@@ -434,7 +434,7 @@ async def get_tile(
             field_list = f',"{fields}"'
 
         sql_vector_query = f"""
-        SELECT ST_AsMVT(tile, 'user_data.{table}', 4096)
+        SELECT ST_AsMVT(tile, 'user_data.{table_id}', 4096)
         FROM (
             WITH
             bounds AS (
@@ -445,7 +445,7 @@ async def get_tile(
                     ST_Transform("table".geom, 3857)
                     ,bounds.geom
                 ) AS mvtgeom {field_list}
-            FROM user_data.{table} as "table", bounds
+            FROM user_data.{table_id} as "table", bounds
             WHERE ST_Intersects(
                 ST_Transform("table".geom, 4326),
                 ST_Transform(bounds.geom, 4326)
@@ -463,7 +463,7 @@ async def get_tile(
 
         if fields is None and cql_filter is None and config.CACHE_AGE_IN_SECONDS > 0:
 
-            cache_file_dir = f'{os.getcwd()}/cache/user_data_{table}/{tile_matrix_set_id}/{z}/{x}'
+            cache_file_dir = f'{os.getcwd()}/cache/user_data_{table_id}/{tile_matrix_set_id}/{z}/{x}'
 
             if not os.path.exists(cache_file_dir):
                 try:
@@ -477,39 +477,8 @@ async def get_tile(
 
         return tile, False
 
-async def get_table_columns_list(
-    scheme: str,
-    table: str,
-    app: FastAPI
-) -> list:
-    """
-    Method used to retrieve columns for a given table.
-
-    """
-
-    pool = app.state.database
-
-    async with pool.acquire() as con:
-        column_query = f"""
-        SELECT
-            jsonb_agg(
-                jsonb_build_object(
-                    'name', attname,
-                    'type', format_type(atttypid, null),
-                    'description', col_description(attrelid, attnum)
-                )
-            )
-        FROM pg_attribute
-        WHERE attnum>0
-        AND attrelid=format('%I.%I', '{scheme}', '{table}')::regclass
-        """
-        columns = await con.fetchval(column_query)
-
-        return json.loads(columns)
-
 async def get_table_geometry_type(
-    scheme: str,
-    table: str,
+    table_id: str,
     app: FastAPI
 ) -> list:
     """
@@ -522,7 +491,7 @@ async def get_table_geometry_type(
     async with pool.acquire() as con:
         geometry_query = f"""
         SELECT ST_GeometryType(geom) as geom_type
-        FROM {scheme}.{table}
+        FROM user_data.{table_id}
         """
         try:
             geometry_type = await con.fetchval(geometry_query)
@@ -543,8 +512,7 @@ async def get_table_geometry_type(
         return geom_type
 
 async def get_table_center(
-    scheme: str,
-    table: str,
+    table_id: str,
     app: FastAPI
 ) -> list:
     """
@@ -558,7 +526,7 @@ async def get_table_center(
         query = f"""
         SELECT ST_X(ST_Centroid(ST_Union(geom))) as x,
         ST_Y(ST_Centroid(ST_Union(geom))) as y
-        FROM {scheme}.{table}
+        FROM user_data.{table_id}
         """
         center = await con.fetch(query)
 
@@ -895,15 +863,20 @@ async def get_arcgis_data(
                             file_path=f'{table_id}.geojson'
                         )
 
-                await create_table(
-                    username=username,
-                    table_id=table_id,
-                    title=title,
-                    tags=tags,
-                    description=description,
-                    read_access_list=read_access_list,
-                    write_access_list=write_access_list,
-                    searchable=searchable
+                item = {
+                    "username": username,
+                    "table_id": table_id,
+                    "title": title,
+                    "tags": tags,
+                    "description": description,
+                    "read_access_list": read_access_list,
+                    "write_access_list": write_access_list,
+                    "searchable": searchable
+                }
+
+                await create_single_item_in_database(
+                    item=item,
+                    model_name="Table"
                 )
 
                 load_geographic_data_to_server(
@@ -952,15 +925,20 @@ async def upload_geographic_file(
         for file in media_directory:
             if new_table_id in file:
                 os.remove(f"{os.getcwd()}/media/{file}")
-        await create_table(
-            username=username,
-            table_id=new_table_id,
-            title=title,
-            tags=tags,
-            description=description,
-            read_access_list=read_access_list,
-            write_access_list=write_access_list,
-            searchable=searchable
+        item = {
+            "username": username,
+            "table_id": new_table_id,
+            "title": title,
+            "tags": tags,
+            "description": description,
+            "read_access_list": read_access_list,
+            "write_access_list": write_access_list,
+            "searchable": searchable
+        }
+
+        await create_single_item_in_database(
+            item=item,
+            model_name="Table"
         )
         import_processes[process_id]['status'] = "SUCCESS"
         import_processes[process_id]['new_table_id'] = new_table_id
@@ -1017,15 +995,20 @@ async def import_geographic_data_from_csv(
         for file in media_directory:
             if new_table_id in file:
                 os.remove(f"{os.getcwd()}/media/{file}")
-        await create_table(
-            username=username,
-            table_id=new_table_id,
-            title=title,
-            tags=tags,
-            description=description,
-            read_access_list=read_access_list,
-            write_access_list=write_access_list,
-            searchable=searchable
+        item = {
+            "username": username,
+            "table_id": new_table_id,
+            "title": title,
+            "tags": tags,
+            "description": description,
+            "read_access_list": read_access_list,
+            "write_access_list": write_access_list,
+            "searchable": searchable
+        }
+
+        await create_single_item_in_database(
+            item=item,
+            model_name="Table"
         )
         import_processes[process_id]['status'] = "SUCCESS"
         import_processes[process_id]['new_table_id'] = new_table_id
@@ -1078,15 +1061,20 @@ async def import_point_data_from_csv(
         for file in media_directory:
             if new_table_id in file:
                 os.remove(f"{os.getcwd()}/media/{file}")
-        await create_table(
-            username=username,
-            table_id=new_table_id,
-            title=title,
-            tags=tags,
-            description=description,
-            read_access_list=read_access_list,
-            write_access_list=write_access_list,
-            searchable=searchable
+        item = {
+            "username": username,
+            "table_id": new_table_id,
+            "title": title,
+            "tags": tags,
+            "description": description,
+            "read_access_list": read_access_list,
+            "write_access_list": write_access_list,
+            "searchable": searchable
+        }
+
+        await create_single_item_in_database(
+            item=item,
+            model_name="Table"
         )
         import_processes[process_id]['status'] = "SUCCESS"
         import_processes[process_id]['new_table_id'] = new_table_id
@@ -1143,15 +1131,20 @@ async def import_point_data_from_json_file(
         for file in media_directory:
             if new_table_id in file:
                 os.remove(f"{os.getcwd()}/media/{file}")
-        await create_table(
-            username=username,
-            table_id=new_table_id,
-            title=title,
-            tags=tags,
-            description=description,
-            read_access_list=read_access_list,
-            write_access_list=write_access_list,
-            searchable=searchable
+        item = {
+            "username": username,
+            "table_id": new_table_id,
+            "title": title,
+            "tags": tags,
+            "description": description,
+            "read_access_list": read_access_list,
+            "write_access_list": write_access_list,
+            "searchable": searchable
+        }
+
+        await create_single_item_in_database(
+            item=item,
+            model_name="Table"
         )
         import_processes[process_id]['status'] = "SUCCESS"
         import_processes[process_id]['new_table_id'] = new_table_id
@@ -1212,15 +1205,20 @@ async def import_geographic_data_from_json_file(
         for file in media_directory:
             if new_table_id in file:
                 os.remove(f"{os.getcwd()}/media/{file}")
-        await create_table(
-            username=username,
-            table_id=new_table_id,
-            title=title,
-            tags=tags,
-            description=description,
-            read_access_list=read_access_list,
-            write_access_list=write_access_list,
-            searchable=searchable
+        item = {
+            "username": username,
+            "table_id": new_table_id,
+            "title": title,
+            "tags": tags,
+            "description": description,
+            "read_access_list": read_access_list,
+            "write_access_list": write_access_list,
+            "searchable": searchable
+        }
+
+        await create_single_item_in_database(
+            item=item,
+            model_name="Table"
         )
         import_processes[process_id]['status'] = "SUCCESS"
         import_processes[process_id]['new_table_id'] = new_table_id
@@ -1251,7 +1249,7 @@ def load_geographic_data_to_server(
     subprocess.call(f'ogr2ogr -f "PostgreSQL" "PG:host={host} user={username} dbname={database} password={password} port={config.DB_PORT}" "{file_path}" -lco GEOMETRY_NAME=geom -lco FID=gid -lco PRECISION=no -nln user_data.{table_id} -overwrite', shell=True)
 
 async def get_table_columns(
-    table: str,
+    table_id: str,
     app: FastAPI,
     new_table_name: str=None
 ) -> list:
@@ -1268,7 +1266,7 @@ async def get_table_columns(
         sql_field_query = f"""
         SELECT column_name
         FROM information_schema.columns
-        WHERE table_name = '{table}'
+        WHERE table_name = '{table_id}'
         AND column_name != 'geom';
         """
 
@@ -1286,8 +1284,7 @@ async def get_table_columns(
         return fields
 
 async def get_table_geojson(
-    scheme: str,
-    table: str,
+    table_id: str,
     app: FastAPI,
     filter: str=None,
     bbox :str=None,
@@ -1328,9 +1325,9 @@ async def get_table_geojson(
             else:
                 query = f"SELECT gid"
 
-        query += f" FROM {scheme}.{table} "
+        query += f" FROM user_data.{table_id} "
 
-        count_query = f"""SELECT COUNT(*) FROM {scheme}.{table} """
+        count_query = f"""SELECT COUNT(*) FROM user_data.{table_id} """
 
         if filter != "" :
             query += f"WHERE {filter}"
@@ -1414,8 +1411,7 @@ async def get_table_geojson(
         return formatted_geojson
 
 async def get_table_bounds(
-    scheme: str,
-    table: str,
+    table_id: str,
     app: FastAPI
 ) -> list:
     """
@@ -1429,7 +1425,7 @@ async def get_table_bounds(
 
         query = f"""
         SELECT ST_Extent(geom)
-        FROM {scheme}.{table}
+        FROM user_data.{table_id}
         """
 
         table_extent = []
@@ -1451,15 +1447,15 @@ async def get_table_bounds(
         return table_extent
 
 def delete_user_tile_cache(
-    table: str
+    table_id: str
 ) -> None:
     """
     Method to remove tile cache for a user's table    
 
     """
 
-    if os.path.exists(f'{os.getcwd()}/cache/user_data_{table}'):
-        shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table}')
+    if os.path.exists(f'{os.getcwd()}/cache/user_data_{table_id}'):
+        shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table_id}')
 
 def check_if_username_in_access_list(
     user_name: str,

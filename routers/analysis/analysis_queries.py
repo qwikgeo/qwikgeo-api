@@ -10,7 +10,7 @@ from routers.analysis import router as analysis_router
 
 async def buffer(
     username: str,
-    table: str,
+    table_id: str,
     distance_in_kilometers: float,
     new_table_id: str,
     process_id: str
@@ -26,7 +26,7 @@ async def buffer(
         pool = main.app.state.database
 
         fields = await utilities.get_table_columns(
-            table=table,
+            table_id=table_id,
             app=main.app
         )
 
@@ -80,7 +80,7 @@ async def buffer(
 
 async def dissolve(
     username: str,
-    table: str,
+    table_id: str,
     new_table_id: str,
     process_id: str
 ):
@@ -134,7 +134,7 @@ async def dissolve(
 
 async def dissolve_by_value(
     username: str,
-    table: str,
+    table_id: str,
     new_table_id: str,
     column: str,
     process_id: str
@@ -190,7 +190,7 @@ async def dissolve_by_value(
 
 async def square_grids(
     username: str,
-    table: str,
+    table_id: str,
     new_table_id: str,
     grid_size_in_kilometers: int,
     process_id: str
@@ -253,7 +253,7 @@ async def square_grids(
 
 async def hexagon_grids(
     username: str,
-    table: str,
+    table_id: str,
     new_table_id: str,
     grid_size_in_kilometers: int,
     process_id: str
@@ -316,7 +316,7 @@ async def hexagon_grids(
 
 async def bounding_box(
     username: str,
-    table: str,
+    table_id: str,
     new_table_id: str,
     process_id: str
 ):
@@ -370,7 +370,7 @@ async def bounding_box(
 
 async def k_means_cluster(
     username: str,
-    table: str,
+    table_id: str,
     new_table_id: str,
     number_of_clusters: int,
     process_id: str
@@ -386,7 +386,7 @@ async def k_means_cluster(
         pool = main.app.state.database
 
         fields = await utilities.get_table_columns(
-            table=table,
+            table_id=table_id,
             app=main.app
         )
 
@@ -432,7 +432,7 @@ async def k_means_cluster(
 
 async def center_of_each_polygon(
     username: str,
-    table: str,
+    table_id: str,
     new_table_id: str,
     process_id: str
 ):
@@ -447,7 +447,7 @@ async def center_of_each_polygon(
         pool = main.app.state.database
 
         fields = await utilities.get_table_columns(
-            table=table,
+            table_id=table_id,
             app=main.app
         )
 
@@ -493,7 +493,7 @@ async def center_of_each_polygon(
 
 async def center_of_dataset(
     username: str,
-    table: str,
+    table_id: str,
     new_table_id: str,
     process_id: str
 ):
@@ -547,7 +547,7 @@ async def center_of_dataset(
 
 async def find_within_distance(
     username: str,
-    table: str,
+    table_id: str,
     new_table_id: str,
     latitude: float,
     longitude: float,
@@ -605,7 +605,7 @@ async def find_within_distance(
 
 async def convex_hull(
     username: str,
-    table: str,
+    table_id: str,
     new_table_id: str,
     process_id: str
 ):
@@ -659,7 +659,7 @@ async def convex_hull(
 
 async def aggregate_points_by_grids(
     username: str,
-    table: str,
+    table_id: str,
     new_table_id: str,
     distance_in_kilometers: float,
     grid_type: str,
@@ -723,7 +723,7 @@ async def aggregate_points_by_grids(
 
 async def aggregate_points_by_polygons(
     username: str,
-    table: str,
+    table_id: str,
     new_table_id: str,
     polygons: str,
     process_id: str
@@ -781,7 +781,7 @@ async def aggregate_points_by_polygons(
 
 async def select_inside(
     username: str,
-    table: str,
+    table_id: str,
     new_table_id: str,
     polygons: str,
     process_id: str
@@ -846,7 +846,7 @@ async def select_inside(
 
 async def select_outside(
     username: str,
-    table: str,
+    table_id: str,
     new_table_id: str,
     polygons: str,
     process_id: str
@@ -912,7 +912,7 @@ async def select_outside(
 
 async def clip(
     username: str,
-    table: str,
+    table_id: str,
     new_table_id: str,
     polygons: str,
     process_id: str
@@ -928,7 +928,7 @@ async def clip(
         pool = main.app.state.database
 
         fields = await utilities.get_table_columns(
-            table=table,
+            table_id=table_id,
             new_table_name="a",
             app=main.app
         )

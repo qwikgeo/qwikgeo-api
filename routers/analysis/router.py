@@ -86,7 +86,7 @@ async def buffer(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=info.table),
+        query_filter=Q(table_id=info.table_id),
         user_name=user_name
     )
 
@@ -105,7 +105,7 @@ async def buffer(
     background_tasks.add_task(
         analysis_queries.buffer,
         username=user_name,
-        table=info.table,
+        table_id=info.table_id,
         distance_in_kilometers=info.distance_in_kilometers,
         new_table_id=new_table_id,
         process_id=process_id
@@ -159,7 +159,7 @@ async def dissolve(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=info.table),
+        query_filter=Q(table_id=info.table_id),
         user_name=user_name
     )
 
@@ -178,7 +178,7 @@ async def dissolve(
     background_tasks.add_task(
         analysis_queries.dissolve,
         username=user_name,
-        table=info.table,
+        table_id=info.table_id,
         new_table_id=new_table_id,
         process_id=process_id
     )
@@ -231,7 +231,7 @@ async def dissolve_by_value(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=info.table),
+        query_filter=Q(table_id=info.table_id),
         user_name=user_name
     )
 
@@ -250,7 +250,7 @@ async def dissolve_by_value(
     background_tasks.add_task(
         analysis_queries.dissolve_by_value,
         username=user_name,
-        table=info.table,
+        table_id=info.table_id,
         new_table_id=new_table_id,
         column=info.column,
         process_id=process_id
@@ -304,7 +304,7 @@ async def square_grids(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=info.table),
+        query_filter=Q(table_id=info.table_id),
         user_name=user_name
     )
 
@@ -323,7 +323,7 @@ async def square_grids(
     background_tasks.add_task(
         analysis_queries.square_grids,
         username=user_name,
-        table=info.table,
+        table_id=info.table_id,
         new_table_id=new_table_id,
         grid_size_in_kilometers=info.grid_size_in_kilometers,
         process_id=process_id
@@ -377,7 +377,7 @@ async def hexagon_grids(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=info.table),
+        query_filter=Q(table_id=info.table_id),
         user_name=user_name
     )
 
@@ -396,7 +396,7 @@ async def hexagon_grids(
     background_tasks.add_task(
         analysis_queries.hexagon_grids,
         username=user_name,
-        table=info.table,
+        table_id=info.table_id,
         new_table_id=new_table_id,
         grid_size_in_kilometers=info.grid_size_in_kilometers,
         process_id=process_id
@@ -450,7 +450,7 @@ async def bounding_box(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=info.table),
+        query_filter=Q(table_id=info.table_id),
         user_name=user_name
     )
 
@@ -469,7 +469,7 @@ async def bounding_box(
     background_tasks.add_task(
         analysis_queries.bounding_box,
         username=user_name,
-        table=info.table,
+        table_id=info.table_id,
         new_table_id=new_table_id,
         process_id=process_id
     )
@@ -522,7 +522,7 @@ async def k_means_cluster(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=info.table),
+        query_filter=Q(table_id=info.table_id),
         user_name=user_name
     )
 
@@ -541,7 +541,7 @@ async def k_means_cluster(
     background_tasks.add_task(
         analysis_queries.k_means_cluster,
         username=user_name,
-        table=info.table,
+        table_id=info.table_id,
         new_table_id=new_table_id,
         number_of_clusters=info.number_of_clusters,
         process_id=process_id
@@ -595,7 +595,7 @@ async def center_of_each_polygon(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=info.table),
+        query_filter=Q(table_id=info.table_id),
         user_name=user_name
     )
 
@@ -614,7 +614,7 @@ async def center_of_each_polygon(
     background_tasks.add_task(
         analysis_queries.center_of_each_polygon,
         username=user_name,
-        table=info.table,
+        table_id=info.table_id,
         new_table_id=new_table_id,
         process_id=process_id
     )
@@ -667,7 +667,7 @@ async def center_of_dataset(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=info.table),
+        query_filter=Q(table_id=info.table_id),
         user_name=user_name
     )
 
@@ -686,7 +686,7 @@ async def center_of_dataset(
     background_tasks.add_task(
         analysis_queries.center_of_dataset,
         username=user_name,
-        table=info.table,
+        table_id=info.table_id,
         new_table_id=new_table_id,
         process_id=process_id
     )
@@ -739,7 +739,7 @@ async def find_within_distance(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=info.table),
+        query_filter=Q(table_id=info.table_id),
         user_name=user_name
     )
 
@@ -758,7 +758,7 @@ async def find_within_distance(
     background_tasks.add_task(
         analysis_queries.find_within_distance,
         username=user_name,
-        table=info.table,
+        table_id=info.table_id,
         new_table_id=new_table_id,
         latitude=info.latitude,
         longitude=info.longitude,
@@ -814,7 +814,7 @@ async def convex_hull(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=info.table),
+        query_filter=Q(table_id=info.table_id),
         user_name=user_name
     )
 
@@ -833,7 +833,7 @@ async def convex_hull(
     background_tasks.add_task(
         analysis_queries.convex_hull,
         username=user_name,
-        table=info.table,
+        table_id=info.table_id,
         new_table_id=new_table_id,
         process_id=process_id
     )
@@ -886,7 +886,7 @@ async def aggregate_points_by_grids(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=info.table),
+        query_filter=Q(table_id=info.table_id),
         user_name=user_name
     )
 
@@ -905,7 +905,7 @@ async def aggregate_points_by_grids(
     background_tasks.add_task(
         analysis_queries.aggregate_points_by_grids,
         username=user_name,
-        table=info.table,
+        table_id=info.table_id,
         new_table_id=new_table_id,
         distance_in_kilometers=info.distance_in_kilometers,
         grid_type=info.grid_type,
@@ -960,7 +960,7 @@ async def aggregate_points_by_polygons(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=info.table),
+        query_filter=Q(table_id=info.table_id),
         user_name=user_name
     )
 
@@ -985,7 +985,7 @@ async def aggregate_points_by_polygons(
     background_tasks.add_task(
         analysis_queries.aggregate_points_by_polygons,
         username=user_name,
-        table=info.table,
+        table_id=info.table_id,
         new_table_id=new_table_id,
         polygons=info.polygons,
         process_id=process_id
@@ -1039,7 +1039,7 @@ async def select_inside(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=info.table),
+        query_filter=Q(table_id=info.table_id),
         user_name=user_name
     )
 
@@ -1064,7 +1064,7 @@ async def select_inside(
     background_tasks.add_task(
         analysis_queries.select_inside,
         username=user_name,
-        table=info.table,
+        table_id=info.table_id,
         new_table_id=new_table_id,
         polygons=info.polygons,
         process_id=process_id
@@ -1118,7 +1118,7 @@ async def select_outside(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=info.table),
+        query_filter=Q(table_id=info.table_id),
         user_name=user_name
     )
 
@@ -1143,7 +1143,7 @@ async def select_outside(
     background_tasks.add_task(
         analysis_queries.select_outside,
         username=user_name,
-        table=info.table,
+        table_id=info.table_id,
         new_table_id=new_table_id,
         polygons=info.polygons,
         process_id=process_id
@@ -1197,7 +1197,7 @@ async def clip(
 
     await utilities.validate_item_access(
         model_name="Table",
-        query_filter=Q(table_id=info.table),
+        query_filter=Q(table_id=info.table_id),
         user_name=user_name
     )
 
@@ -1222,7 +1222,7 @@ async def clip(
     background_tasks.add_task(
         analysis_queries.clip,
         username=user_name,
-        table=info.table,
+        table_id=info.table_id,
         new_table_id=new_table_id,
         polygons=info.polygons,
         process_id=process_id
