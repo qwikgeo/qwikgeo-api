@@ -4,7 +4,7 @@
 | ------ | -------------------------------------------------------------------------------- | ------------------------------------------- |
 | `GET`  | `https://api.qwikgeo.com/api/v1/tables`                                                           | [Tables](#table)                   |
 | `GET`  | `https://api.qwikgeo.com/api/v1/tables/{table_id}`                                                | [Table](#table)                   |
-| `POST`  | `https://api.qwikgeo.com/api/v1/tables/create_table`                                             | [Create Table](#create-table)               |
+| `POST`  | `https://api.qwikgeo.com/api/v1/tables/`                                             | [Create Table](#create-table)               |
 | `DELETE`  | `https://api.qwikgeo.com/api/v1/tables/{table_id}`                                             | [Delete Table](#delete-table)               |
 | `POST`  | `https://api.qwikgeo.com/api/v1/tables/{table_id}/add_column`                                    | [Add Column](#add-column)                   |
 | `DELETE`  | `https://api.qwikgeo.com/api/v1/tables/{table_id}/delete_column`                               | [Delete Column](#delete-column)             |
@@ -154,7 +154,7 @@ In the example below, we are deleting a column called `test` from the table `vcc
 ### Description
 The create table endpoints allow you to create a new table inside of a database.
 
-Create Table endpoint is available at `https://api.qwikgeo.com/api/v1/tables/create_table`
+Create Table endpoint is available at `https://api.qwikgeo.com/api/v1/tables/`
 
 ### Example
 
