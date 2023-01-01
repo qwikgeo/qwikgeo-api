@@ -1,6 +1,6 @@
 # QwikGeo API
 
-![QwikGeo Image](/docs/docs/assests/images/qwikgeo.png)
+![QwikGeo Image](https://raw.githubusercontent.com/qwikgeo/qwikgeo-api/main/docs/docs/assets/images/qwikgeo.png)
 
 QwikGeo API is a enterprise scale api for a GIS portal. QwikGeo API is written in [Python](https://www.python.org/) using the [FastAPI](https://fastapi.tiangolo.com/) web framework. 
 
