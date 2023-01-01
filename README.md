@@ -39,7 +39,7 @@ JWT_TOKEN_EXPIRE_IN_MIUNTES=60000
 
 ### Running Locally
 
-To run the app locally `uvicorn main:app --reload`
+To run the app locally `uvicorn qwikgeo_api.main:app --reload`
 
 To run the docs locally `mkdocs serve`
 

@@ -23,8 +23,8 @@ from tortoise.expressions import Q
 from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError, DecodeError
 import asyncpg
 
-import db_models
-import config
+from qwikgeo_api import db_models
+from qwikgeo_api import config
 
 import_processes = {}
 

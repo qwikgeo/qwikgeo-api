@@ -5,9 +5,9 @@ from passlib.hash import bcrypt
 from fastapi import APIRouter, HTTPException, Depends
 from tortoise import exceptions
 
-import db_models
-import routers.users.models as models
-import authentication_handler
+from qwikgeo_api import db_models
+import qwikgeo_api.routers.users.models as models
+from qwikgeo_api import authentication_handler
 
 router = APIRouter()
 

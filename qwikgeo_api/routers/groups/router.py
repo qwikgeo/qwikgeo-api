@@ -7,9 +7,9 @@ from tortoise import exceptions
 from tortoise.query_utils import Prefetch
 from tortoise.expressions import Q
 
-import db_models
-import utilities
-import authentication_handler
+from qwikgeo_api import db_models
+from qwikgeo_api import utilities
+from qwikgeo_api import authentication_handler
 
 router = APIRouter()
 

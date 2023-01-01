@@ -7,9 +7,9 @@ from fastapi import File, UploadFile, Depends, HTTPException, APIRouter, Backgro
 import requests
 import aiofiles
 
-import utilities
-import routers.imports.models as models
-import authentication_handler
+from qwikgeo_api import utilities
+import qwikgeo_api.routers.imports.models as models
+from qwikgeo_api import authentication_handler
 
 DEFAULT_CHUNK_SIZE = 1024 * 1024 * 50  # 50 megabytes
 

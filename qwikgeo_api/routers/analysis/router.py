@@ -3,10 +3,10 @@
 from fastapi import APIRouter, BackgroundTasks, Request, Depends
 from tortoise.expressions import Q
 
-import utilities
-import routers.analysis.analysis_queries as analysis_queries
-import routers.analysis.models as models
-import authentication_handler
+from qwikgeo_api import utilities
+import qwikgeo_api.routers.analysis.analysis_queries as analysis_queries
+import qwikgeo_api.routers.analysis.models as models
+from qwikgeo_api import authentication_handler
 
 router = APIRouter()
 
