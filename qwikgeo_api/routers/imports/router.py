@@ -3,13 +3,15 @@
 import os
 import json
 from typing import List
-from fastapi import File, UploadFile, Depends, HTTPException, APIRouter, BackgroundTasks, Request, Form
-import requests
+from fastapi import File, UploadFile, Depends, HTTPException, APIRouter, BackgroundTasks, Request, Form, status
 import aiofiles
+import aiohttp
+from tortoise.expressions import Q
 
-from qwikgeo_api import utilities
+import qwikgeo_api.routers.imports.utilities as utilities
 import qwikgeo_api.routers.imports.models as models
 from qwikgeo_api import authentication_handler
+from qwikgeo_api import utilities as qwikgeo_api_utilities
 
 DEFAULT_CHUNK_SIZE = 1024 * 1024 * 50  # 50 megabytes
 
@@ -33,7 +35,7 @@ router = APIRouter()
         },
     }
 )
-def status(
+def import_status(
     process_id: str,
     user_name: int=Depends(authentication_handler.JWTBearer())
 ):
@@ -61,37 +63,88 @@ async def import_arcgis_service(
     https://docs.qwikgeo.com/imports/#arcgis-service
     """
 
-    table_id = utilities.get_new_table_id()
+    service_url = f"{info.url}?f=json"
 
-    process_id = utilities.get_new_process_id()
+    if info.token is not None:
+        service_url += f"&token={info.token}"
 
-    process_url = str(request.base_url)
+    async with aiohttp.ClientSession() as session:
 
-    process_url += f"api/v1/imports/status/{process_id}"
+        try:
 
-    utilities.import_processes[process_id] = {
-        "status": "PENDING"
-    }
+            async with session.get(service_url) as resp:
 
-    background_tasks.add_task(
-        utilities.get_arcgis_data,
-        url=info.url,
-        token=info.token,
-        table_id=table_id,
-        process_id=process_id,
-        username=user_name,
-        title=info.title,
-        description=info.description,
-        tags=info.tags,
-        read_access_list=info.read_access_list,
-        write_access_list=info.write_access_list,
-        searchable=info.searchable
-    )
+                if resp.status == 200:
 
-    return {
-        "process_id": process_id,
-        "url": process_url
-    }
+                    data = await resp.json()
+
+                    if 'error' in data:
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=data['error']['message']
+                        )
+
+                    if 'layers' in data:
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"Please select a sublayer of {info.url}"
+                        )
+                    
+                    if 'supportedExportFormats' not in data:
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="The following ArcGIS url does not have an export endpoint. Please provide a different url."
+                        )
+                    
+                    if 'supportedExportFormats' in data:
+                        if 'geojson' not in data['supportedExportFormats'].lower():
+                            raise HTTPException(
+                                status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="The following ArcGIS url does not allow an export of geojson. Qwikgeo API cannot fetch data from this endpoint."
+                            )
+
+                    table_id = qwikgeo_api_utilities.get_new_table_id()
+
+                    process_id = qwikgeo_api_utilities.get_new_process_id()
+
+                    process_url = str(request.base_url)
+
+                    process_url += f"api/v1/imports/status/{process_id}"
+
+                    utilities.import_processes[process_id] = {
+                        "status": "PENDING"
+                    }
+
+                    background_tasks.add_task(
+                        utilities.get_arcgis_data,
+                        url=info.url,
+                        token=info.token,
+                        filter=info.filter,
+                        table_id=table_id,
+                        process_id=process_id,
+                        username=user_name,
+                        title=info.title,
+                        description=info.description,
+                        tags=info.tags,
+                        read_access_list=info.read_access_list,
+                        write_access_list=info.write_access_list,
+                        searchable=info.searchable,
+                        app=request.app
+                    )
+
+                    return {
+                        "process_id": process_id,
+                        "url": process_url
+                    }
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid URL"
+                )
+        except aiohttp.client_exceptions.ClientConnectorError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid URL"
+            ) from exc
 
 @router.post(
     path="/geographic_data_from_geographic_file",
@@ -124,9 +177,9 @@ async def import_geographic_data_from_geographic_file(
     https://docs.qwikgeo.com/imports/#geographic-data-from-geographic-file
     """
 
-    new_table_id = utilities.get_new_table_id()
+    new_table_id = qwikgeo_api_utilities.get_new_table_id()
 
-    process_id = utilities.get_new_process_id()
+    process_id = qwikgeo_api_utilities.get_new_process_id()
 
     process_url = str(request.base_url)
 
@@ -134,10 +187,25 @@ async def import_geographic_data_from_geographic_file(
 
     file_path = ""
 
+    valid_file_type = False
+
+    valid_file_types = ["geojson", "shp", "tab", "kml"]
+
+    for new_file in files:
+        if new_file.filename.split(".")[1] in valid_file_types:
+            file_path = f"{os.getcwd()}/media/{new_table_id}_{new_file.filename}"
+            valid_file_type = True
+    
+    if valid_file_type is False:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f'Please upload a valid file type. {" ,".join(valid_file_types)}'
+        )
+
     for new_file in files:
         try:
-            file_path = f"{os.getcwd()}/media/{new_table_id}_{new_file.filename}"
-            async with aiofiles.open(file_path, "wb") as file:
+            write_file_path = f"{os.getcwd()}/media/{new_table_id}_{new_file.filename}"
+            async with aiofiles.open(write_file_path, "wb") as file:
                 while chunk := await new_file.read(DEFAULT_CHUNK_SIZE):
                     await file.write(chunk)
         except Exception:
@@ -165,7 +233,8 @@ async def import_geographic_data_from_geographic_file(
         tags=tags,
         read_access_list=read_access_list,
         write_access_list=write_access_list,
-        searchable=searchable
+        searchable=searchable,
+        app=request.app
     )
 
     return models.BaseResponseModel(
@@ -211,14 +280,29 @@ async def import_geographic_data_from_csv(
     https://docs.qwikgeo.com/imports/#geographic-data-from-csv
     """
 
-    await utilities.validate_table_access(
-        table=map_name,
+    valid_file_type = False
+
+    valid_file_types = ["csv"]
+
+    for new_file in files:
+        if new_file.filename.split(".")[1] in valid_file_types:
+            valid_file_type = True
+    
+    if valid_file_type is False:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f'Please upload a valid csv file'
+        )
+
+    await qwikgeo_api_utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=map_name),
         user_name=user_name
     )
 
-    new_table_id = utilities.get_new_table_id()
+    new_table_id = qwikgeo_api_utilities.get_new_table_id()
 
-    process_id = utilities.get_new_process_id()
+    process_id = qwikgeo_api_utilities.get_new_process_id()
 
     process_url = str(request.base_url)
 
@@ -305,9 +389,23 @@ async def import_point_data_from_csv(
     https://docs.qwikgeo.com/imports/#point-data-from-csv
     """
 
-    new_table_id = utilities.get_new_table_id()
+    valid_file_type = False
 
-    process_id = utilities.get_new_process_id()
+    valid_file_types = ["csv"]
+
+    for new_file in files:
+        if new_file.filename.split(".")[1] in valid_file_types:
+            valid_file_type = True
+    
+    if valid_file_type is False:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f'Please upload a valid csv file'
+        )
+
+    new_table_id = qwikgeo_api_utilities.get_new_table_id()
+
+    process_id = qwikgeo_api_utilities.get_new_process_id()
 
     process_url = str(request.base_url)
 
@@ -395,14 +493,29 @@ async def import_geographic_data_from_json_file(
     https://docs.qwikgeo.com/imports/#geographic-data-from-json-file
     """
 
-    await utilities.validate_table_access(
-        table=map_name,
+    valid_file_type = False
+
+    valid_file_types = ["json"]
+
+    for new_file in files:
+        if new_file.filename.split(".")[1] in valid_file_types:
+            valid_file_type = True
+    
+    if valid_file_type is False:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f'Please upload a valid json file'
+        )
+
+    await qwikgeo_api_utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=map_name),
         user_name=user_name
     )
 
-    new_table_id = utilities.get_new_table_id()
+    new_table_id = qwikgeo_api_utilities.get_new_table_id()
 
-    process_id = utilities.get_new_process_id()
+    process_id = qwikgeo_api_utilities.get_new_process_id()
 
     process_url = str(request.base_url)
 
@@ -489,9 +602,23 @@ async def import_point_data_from_json_file(
     https://docs.qwikgeo.com/imports/#point-data-from-json-file
     """
 
-    new_table_id = utilities.get_new_table_id()
+    valid_file_type = False
 
-    process_id = utilities.get_new_process_id()
+    valid_file_types = ["json"]
+
+    for new_file in files:
+        if new_file.filename.split(".")[1] in valid_file_types:
+            valid_file_type = True
+    
+    if valid_file_type is False:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f'Please upload a valid json file'
+        )
+
+    new_table_id = qwikgeo_api_utilities.get_new_table_id()
+
+    process_id = qwikgeo_api_utilities.get_new_process_id()
 
     process_url = str(request.base_url)
 
@@ -557,54 +684,70 @@ async def import_geographic_data_from_json_url(
     https://docs.qwikgeo.com/imports/#geographic-data-from-json-url
     """
 
-    await utilities.validate_table_access(
-        table=info.map_name,
+    await qwikgeo_api_utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=info.map_name),
         user_name=user_name
     )
 
-    new_table_id = utilities.get_new_table_id()
+    new_table_id = qwikgeo_api_utilities.get_new_table_id()
 
-    process_id = utilities.get_new_process_id()
+    process_id = qwikgeo_api_utilities.get_new_process_id()
 
     process_url = str(request.base_url)
 
     process_url += f"api/v1/imports/status/{process_id}"
 
-    resp = requests.get(info.url, timeout=120)
+    async with aiohttp.ClientSession() as session:
 
-    file_path = f"{os.getcwd()}/media/{new_table_id}.json"
+        try:
 
-    with open(f"{os.getcwd()}/media/{new_table_id}.json", "w") as my_file:
-        my_file.write(resp.text)
+            async with session.get(info.url) as resp:
 
-    utilities.import_processes[process_id] = {
-        "status": "PENDING"
-    }
+                if resp.status == 200:
 
-    background_tasks.add_task(
-        utilities.import_geographic_data_from_json_file,
-        file_path=file_path,
-        new_table_id=new_table_id,
-        map_column=info.map_column,
-        table_column=info.table_column,
-        map_columns=info.map_columns,
-        table_columns=info.table_columns,
-        map_name=info.map_name,
-        process_id=process_id,
-        app=request.app,
-        username=user_name,
-        title=info.title,
-        description=info.description,
-        tags=info.tags,
-        read_access_list=info.read_access_list,
-        write_access_list=info.write_access_list,
-        searchable=info.searchable
-    )
+                    file_path = f"{os.getcwd()}/media/{new_table_id}.json"
 
-    return {
-        "process_id": process_id,
-        "url": process_url
-    }
+                    with open(f"{os.getcwd()}/media/{new_table_id}.json", "w") as my_file:
+                        my_file.write(await resp.text())
+
+                    utilities.import_processes[process_id] = {
+                        "status": "PENDING"
+                    }
+
+                    background_tasks.add_task(
+                        utilities.import_geographic_data_from_json_file,
+                        file_path=file_path,
+                        new_table_id=new_table_id,
+                        map_column=info.map_column,
+                        table_column=info.table_column,
+                        map_columns=info.map_columns,
+                        table_columns=info.table_columns,
+                        map_name=info.map_name,
+                        process_id=process_id,
+                        app=request.app,
+                        username=user_name,
+                        title=info.title,
+                        description=info.description,
+                        tags=info.tags,
+                        read_access_list=info.read_access_list,
+                        write_access_list=info.write_access_list,
+                        searchable=info.searchable
+                    )
+
+                    return {
+                        "process_id": process_id,
+                        "url": process_url
+                    }
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid URL"
+                )
+        except aiohttp.client_exceptions.ClientConnectorError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid URL"
+            ) from exc
 
 @router.post(
     path="/point_data_from_json_url",
@@ -621,47 +764,62 @@ async def import_point_data_from_json_url(
     https://docs.qwikgeo.com/imports/#point-data-from-json-url
     """
 
-    new_table_id = utilities.get_new_table_id()
+    new_table_id = qwikgeo_api_utilities.get_new_table_id()
 
-    process_id = utilities.get_new_process_id()
+    process_id = qwikgeo_api_utilities.get_new_process_id()
 
     process_url = str(request.base_url)
 
     process_url += f"api/v1/imports/status/{process_id}"
 
-    resp = requests.get(info.url, timeout=120)
+    async with aiohttp.ClientSession() as session:
 
-    file_path = f"{os.getcwd()}/media/{new_table_id}.json"
+        try:
 
-    with open(f"{os.getcwd()}/media/{new_table_id}.json", "w") as my_file:
-        my_file.write(resp.text)
+            async with session.get(info.url) as resp:
 
-    utilities.import_processes[process_id] = {
-        "status": "PENDING"
-    }
+                if resp.status == 200:
 
-    background_tasks.add_task(
-        utilities.import_point_data_from_json_file,
-        file_path=file_path,
-        new_table_id=new_table_id,
-        latitude=info.latitude,
-        longitude=info.longitude,
-        table_columns=info.table_columns,
-        process_id=process_id,
-        app=request.app,
-        username=user_name,
-        title=info.title,
-        description=info.description,
-        tags=info.tags,
-        read_access_list=info.read_access_list,
-        write_access_list=info.write_access_list,
-        searchable=info.searchable
-    )
+                    file_path = f"{os.getcwd()}/media/{new_table_id}.json"
 
-    return {
-        "process_id": process_id,
-        "url": process_url
-    }
+                    with open(f"{os.getcwd()}/media/{new_table_id}.json", "w") as my_file:
+                        my_file.write(await resp.text())
+
+                    utilities.import_processes[process_id] = {
+                        "status": "PENDING"
+                    }
+
+                    background_tasks.add_task(
+                        utilities.import_point_data_from_json_file,
+                        file_path=file_path,
+                        new_table_id=new_table_id,
+                        latitude=info.latitude,
+                        longitude=info.longitude,
+                        table_columns=info.table_columns,
+                        process_id=process_id,
+                        app=request.app,
+                        username=user_name,
+                        title=info.title,
+                        description=info.description,
+                        tags=info.tags,
+                        read_access_list=info.read_access_list,
+                        write_access_list=info.write_access_list,
+                        searchable=info.searchable
+                    )
+
+                    return {
+                        "process_id": process_id,
+                        "url": process_url
+                    }
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid URL"
+                )
+        except aiohttp.client_exceptions.ClientConnectorError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid URL"
+            ) from exc
 
 @router.post("/geojson_from_url", response_model=models.BaseResponseModel)
 async def import_geojson_from_url(
@@ -675,40 +833,56 @@ async def import_geojson_from_url(
     https://docs.qwikgeo.com/imports/#geojson-from-url
     """
 
-    new_table_id = utilities.get_new_table_id()
+    new_table_id = qwikgeo_api_utilities.get_new_table_id()
 
-    process_id = utilities.get_new_process_id()
+    process_id = qwikgeo_api_utilities.get_new_process_id()
 
     process_url = str(request.base_url)
 
     process_url += f"api/v1/imports/status/{process_id}"
 
-    resp = requests.get(info.url, timeout=120)
+    async with aiohttp.ClientSession() as session:
 
-    file_path = f"{os.getcwd()}/media/{new_table_id}.geojson"
+        try:
 
-    with open(f"{os.getcwd()}/media/{new_table_id}.geojson", "w") as my_file:
-        my_file.write(resp.text)
+            async with session.get(info.url) as resp:
 
-    utilities.import_processes[process_id] = {
-        "status": "PENDING"
-    }
+                if resp.status_code == 200:
 
-    background_tasks.add_task(
-        utilities.upload_geographic_file,
-        file_path=file_path,
-        new_table_id=new_table_id,
-        process_id=process_id,
-        username=user_name,
-        title=info.title,
-        description=info.description,
-        tags=info.tags,
-        read_access_list=info.read_access_list,
-        write_access_list=info.write_access_list,
-        searchable=info.searchable
-    )
+                    file_path = f"{os.getcwd()}/media/{new_table_id}.geojson"
 
-    return {
-        "process_id": process_id,
-        "url": process_url
-    }
+                    with open(f"{os.getcwd()}/media/{new_table_id}.geojson", "w") as my_file:
+                        my_file.write(await resp.text())
+
+                    utilities.import_processes[process_id] = {
+                        "status": "PENDING"
+                    }
+
+                    background_tasks.add_task(
+                        utilities.upload_geographic_file,
+                        file_path=file_path,
+                        new_table_id=new_table_id,
+                        process_id=process_id,
+                        username=user_name,
+                        title=info.title,
+                        description=info.description,
+                        tags=info.tags,
+                        read_access_list=info.read_access_list,
+                        write_access_list=info.write_access_list,
+                        searchable=info.searchable,
+                        app=request.app
+                    )
+
+                    return {
+                        "process_id": process_id,
+                        "url": process_url
+                    }
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid URL"
+                )
+        except aiohttp.client_exceptions.ClientConnectorError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid URL"
+            ) from exc

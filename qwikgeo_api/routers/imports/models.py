@@ -21,6 +21,9 @@ class ArcgisModel(BaseModel):
     token: str = Field(
         default=None, title="If endpoint is authenticated, token will be used to download the service."
     )
+    filter: str = Field(
+        default="1=1", title="Add a filter to limit results back from a service."
+    )
     title: str = Field(
         title="The name of the dataset within GeoPortal."
     )

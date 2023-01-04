@@ -30,7 +30,7 @@ analysis_processes = {}
         },
     }
 )
-def status(
+def analysis_status(
     process_id: str,
     user_name: int=Depends(authentication_handler.JWTBearer())
 ):
