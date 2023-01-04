@@ -28,7 +28,7 @@ router = APIRouter()
     }
 )
 async def tables(
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     List all tables.
@@ -36,7 +36,7 @@ async def tables(
     """
 
     items = await utilities.get_multiple_items_in_database(
-        user_name=user_name,
+        username=username,
         model_name="Table"
     )
 
@@ -74,7 +74,7 @@ async def tables(
 )
 async def table(
     table_id: str,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get a table.
@@ -84,11 +84,11 @@ async def table(
     await utilities.validate_item_access(
         model_name="Table",
         query_filter=Q(table_id=table_id),
-        user_name=user_name
+        username=username
     )
 
     item = await utilities.get_item_in_database(
-        user_name=user_name,
+        username=username,
         model_name="Table",
         query_filter=Q(table_id=table_id)
     )
@@ -136,7 +136,7 @@ async def add_column(
     request: Request,
     table_id: str,
     info: models.AddColumn,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a new column for a table.
@@ -146,7 +146,7 @@ async def add_column(
     await utilities.validate_item_access(
         model_name="Table",
         query_filter=Q(table_id=table_id),
-        user_name=user_name,
+        username=username,
         write_access=True
     )
 
@@ -207,7 +207,7 @@ async def delete_column(
     request: Request,
     table_id: str,
     column: str,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Delete a column for a table.
@@ -217,7 +217,7 @@ async def delete_column(
     await utilities.validate_item_access(
         model_name="Table",
         query_filter=Q(table_id=table_id),
-        user_name=user_name,
+        username=username,
         write_access=True
     )
 
@@ -264,7 +264,7 @@ async def delete_column(
 async def create_table(
     request: Request,
     info: models.CreateTable,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a new table.
@@ -295,12 +295,12 @@ async def create_table(
 
         await con.fetch(geom_query)
 
-        utilities.check_if_username_in_access_list(user_name, info.read_access_list, "read")
+        utilities.check_if_username_in_access_list(username, info.read_access_list, "read")
 
-        utilities.check_if_username_in_access_list(user_name, info.write_access_list, "write")
+        utilities.check_if_username_in_access_list(username, info.write_access_list, "write")
 
         item = {
-            "user_name": user_name,
+            "username": username,
             "table_id": new_table_id,
             "title": info.title,
             "tags": info.tags,
@@ -357,7 +357,7 @@ async def create_table(
 async def delete_table(
     request: Request,
     table_id: str,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Delete a table.
@@ -365,7 +365,7 @@ async def delete_table(
     """
 
     await utilities.delete_single_item_in_database(
-        user_name=user_name,
+        username=username,
         model_name="Table",
         query_filter=Q(table_id=table_id)
     )

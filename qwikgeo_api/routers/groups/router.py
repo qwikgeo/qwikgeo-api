@@ -31,7 +31,7 @@ async def groups(
     q: str="",
     limit: int=10,
     offset: int=0,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """Return a list of all groups."""
 
@@ -41,7 +41,7 @@ async def groups(
         query_filter = Q(name__icontains=q)
 
     items = await utilities.get_multiple_items_in_database(
-        user_name=user_name,
+        username=username,
         model_name="Group",
         query_filter=query_filter,
         limit=limit,
@@ -74,7 +74,7 @@ async def groups(
 )
 async def create_group(
     group: db_models.Group_Pydantic,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """Create a group."""
 
@@ -83,7 +83,7 @@ async def create_group(
         user_in_group_admins = False
 
         for name in group.group_users:
-            if name.username == user_name:
+            if name.username == username:
                 user_in_group_users = True
             try:
                 await db_models.User.get(username=name.username)
@@ -94,7 +94,7 @@ async def create_group(
                 ) from exc
         
         for name in group.group_admins:
-            if name.username == user_name:
+            if name.username == username:
                 user_in_group_admins = True
         
         if user_in_group_users is False:
@@ -149,7 +149,7 @@ async def create_group(
 )
 async def get_group(
     group_id: str,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """Retrieve a group."""
 
@@ -159,7 +159,7 @@ async def get_group(
         )
         access = False
         for user in group.group_users:
-            if user.username == user_name:
+            if user.username == username:
                 access = True
         if access is False:
             raise HTTPException(status_code=403, detail="You do not have access to this group.")
@@ -200,7 +200,7 @@ async def get_group(
 async def update_group(
     group_id: uuid.UUID,
     new_group: db_models.Group_Pydantic,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """Update a group."""
 
@@ -210,7 +210,7 @@ async def update_group(
         )
         access = False
         for user in group.group_admins:
-            if user.username == user_name:
+            if user.username == username:
                 access = True
         if access is False:
             raise HTTPException(status_code=403, detail="You do not have admin access to this group.")
@@ -264,7 +264,7 @@ async def update_group(
 )
 async def delete_group(
     group_id: uuid.UUID,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """Delete a group."""
 
@@ -274,7 +274,7 @@ async def delete_group(
         )
         access = False
         for user in group.group_admins:
-            if user.username == user_name:
+            if user.username == username:
                 access = True
         if access is False:
             raise HTTPException(status_code=403, detail="You do not have admin access to this group.")

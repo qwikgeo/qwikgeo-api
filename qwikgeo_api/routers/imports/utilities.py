@@ -329,7 +329,7 @@ async def get_arcgis_data(
                     )
 
                     item = {
-                        "user_name": username,
+                        "username": username,
                         "table_id": table_id,
                         "title": title,
                         "tags": tags,
@@ -398,7 +398,7 @@ async def upload_geographic_file(
             )
             
             item = {
-                "user_name": username,
+                "username": username,
                 "table_id": new_table_id,
                 "title": title,
                 "tags": tags,
@@ -468,7 +468,7 @@ async def import_geographic_data_from_csv(
         )
 
         item = {
-            "user_name": username,
+            "username": username,
             "table_id": new_table_id,
             "title": title,
             "tags": tags,
@@ -530,7 +530,7 @@ async def import_point_data_from_csv(
         )
 
         item = {
-            "user_name": username,
+            "username": username,
             "table_id": new_table_id,
             "title": title,
             "tags": tags,
@@ -596,7 +596,7 @@ async def import_point_data_from_json_file(
         )
     
         item = {
-            "user_name": username,
+            "username": username,
             "table_id": new_table_id,
             "title": title,
             "tags": tags,
@@ -666,7 +666,7 @@ async def import_geographic_data_from_json_file(
         )
 
         item = {
-            "user_name": username,
+            "username": username,
             "table_id": new_table_id,
             "title": title,
             "tags": tags,
