@@ -42,7 +42,7 @@ router = APIRouter()
 )
 async def get_map(
     map_id: str,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get a map.
@@ -50,7 +50,7 @@ async def get_map(
     """
 
     map_information = await utilities.get_item_in_database(
-        user_name=user_name,
+        username=username,
         model_name="Map",
         query_filter=Q(map_id=map_id)
     )
@@ -73,7 +73,7 @@ async def get_map(
 )
 async def create_map(
     item: db_models.Map_Pydantic,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a new map.
@@ -82,9 +82,9 @@ async def create_map(
 
     
 
-    utilities.check_if_username_in_access_list(user_name, item.read_access_list, "read")
+    utilities.check_if_username_in_access_list(username, item.read_access_list, "read")
 
-    utilities.check_if_username_in_access_list(user_name, item.write_access_list, "write")
+    utilities.check_if_username_in_access_list(username, item.write_access_list, "write")
 
     new_map = await utilities.create_single_item_in_database(
         item=item,

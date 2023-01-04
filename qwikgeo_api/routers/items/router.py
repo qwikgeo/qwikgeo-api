@@ -25,7 +25,7 @@ router = APIRouter()
     }
 )
 async def items(
-    user_name: int=Depends(authentication_handler.JWTBearer()),
+    username: int=Depends(authentication_handler.JWTBearer()),
     q: str="",
     limit: int=10,
     offset: int=0,
@@ -39,14 +39,14 @@ async def items(
     if q == "":
         if item_type:
             portal_items = await utilities.get_multiple_items_in_database(
-                user_name=user_name,
+                username=username,
                 model_name=item_type,
                 limit=limit,
                 offset=offset
             )
         else:
             portal_items = await utilities.get_multiple_items_in_database(
-                user_name=user_name,
+                username=username,
                 model_name="Item",
                 limit=limit,
                 offset=offset
@@ -55,7 +55,7 @@ async def items(
     else:
         if item_type:
             portal_items = await utilities.get_multiple_items_in_database(
-                user_name=user_name,
+                username=username,
                 model_name=item_type,
                 query_filter=Q(Q(title__icontains=q) | Q(description__icontains=q)),
                 limit=limit,
@@ -63,7 +63,7 @@ async def items(
             )
         else:
             portal_items = await utilities.get_multiple_items_in_database(
-                user_name=user_name,
+                username=username,
                 model_name="Item",
                 query_filter=Q(Q(title__icontains=q) | Q(description__icontains=q)),
                 limit=limit,
@@ -88,7 +88,7 @@ async def items(
 )
 async def item(
     portal_id: str,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get an item.
@@ -96,7 +96,7 @@ async def item(
     """
 
     return await utilities.get_item_in_database(
-        user_name=user_name,
+        username=username,
         model_name="Item",
         query_filter=Q(portal_id=portal_id)
     )

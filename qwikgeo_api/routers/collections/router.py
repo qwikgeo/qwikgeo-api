@@ -82,7 +82,7 @@ router = APIRouter()
 
 async def collections(
     request: Request,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get a list of collections available to query.
@@ -94,7 +94,7 @@ async def collections(
     db_tables = []
     
     tables = await utilities.get_multiple_items_in_database(
-        user_name=user_name,
+        username=username,
         model_name="Table"
     )
     if len(tables) > 0:
@@ -229,7 +229,7 @@ async def collections(
 async def collection(
     table_id: str,
     request: Request,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get information about a collection.
@@ -237,7 +237,7 @@ async def collection(
     """
 
     item_metadata = await utilities.get_item_in_database(
-        user_name=user_name,
+        username=username,
         model_name="Table",
         query_filter=Q(table_id=table_id)
     )
@@ -342,7 +342,7 @@ async def collection(
 async def queryables(
     table_id: str,
     request: Request,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get queryable information about a collection.
@@ -350,7 +350,7 @@ async def queryables(
     """
 
     item_metadata = await utilities.get_item_in_database(
-        user_name=user_name,
+        username=username,
         model_name="Table",
         query_filter=Q(table_id=table_id)
     )
@@ -476,7 +476,7 @@ async def items(
     filter: str=None,
     srid: int=4326,
     return_geometry: bool=True,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get geojson from a collection.
@@ -488,7 +488,7 @@ async def items(
     await utilities.validate_item_access(
         model_name="Table",
         query_filter=Q(table_id=table_id),
-        user_name=user_name
+        username=username
     )
 
     blacklist_query_parameters = ["bbox","limit","offset","properties","sortby","sortdesc","filter","srid"]
@@ -682,7 +682,7 @@ async def create_item(
     table_id: str,
     info: models.Geojson,
     request: Request,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a new item to a collection.
@@ -692,7 +692,7 @@ async def create_item(
     await utilities.validate_item_access(
         model_name="Table",
         query_filter=Q(table_id=table_id),
-        user_name=user_name,
+        username=username,
         write_access=True
     )
 
@@ -856,7 +856,7 @@ async def item(
     properties: str="*",
     return_geometry: bool=True,
     srid: int=4326,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get geojson for one item of a collection.
@@ -868,7 +868,7 @@ async def item(
     await utilities.validate_item_access(
         model_name="Table",
         query_filter=Q(table_id=table_id),
-        user_name=user_name
+        username=username
     )
 
     pool = request.app.state.database
@@ -976,7 +976,7 @@ async def update_item(
     id: int,
     info: models.Geojson,
     request: Request,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Update an item in a collection.
@@ -986,7 +986,7 @@ async def update_item(
     await utilities.validate_item_access(
         model_name="Table",
         query_filter=Q(table_id=table_id),
-        user_name=user_name,
+        username=username,
         write_access=True
     )
 
@@ -1134,7 +1134,7 @@ async def modify_item(
     id: int,
     info: models.Geojson,
     request: Request,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Modify an item in a collection.
@@ -1144,7 +1144,7 @@ async def modify_item(
     await utilities.validate_item_access(
         model_name="Table",
         query_filter=Q(table_id=table_id),
-        user_name=user_name,
+        username=username,
         write_access=True
     )
 
@@ -1272,7 +1272,7 @@ async def delete_item(
     table_id: str,
     id: int,
     request: Request,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Delete an item in a collection.
@@ -1282,7 +1282,7 @@ async def delete_item(
     await utilities.validate_item_access(
         model_name="Table",
         query_filter=Q(table_id=table_id),
-        user_name=user_name,
+        username=username,
         write_access=True
     )
 
@@ -1373,7 +1373,7 @@ async def delete_item(
 async def tiles(
     table_id: str,
     request: Request,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get tile information about a collection.
@@ -1381,7 +1381,7 @@ async def tiles(
     """
 
     item_metadata = await utilities.get_item_in_database(
-        user_name=user_name,
+        username=username,
         model_name="Table",
         query_filter=Q(table_id=table_id)
     )
@@ -1476,7 +1476,7 @@ async def tile(
     request: Request,
     fields: Optional[str] = None,
     cql_filter: Optional[str] = None,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get a vector tile for a given table.
@@ -1486,7 +1486,7 @@ async def tile(
     await utilities.validate_item_access(
         model_name="Table",
         query_filter=Q(table_id=table_id),
-        user_name=user_name
+        username=username
     )
 
     pbf, tile_cache = await utilities.get_tile(
@@ -1589,7 +1589,7 @@ async def tiles_metadata(
     table_id: str,
     tile_matrix_set_id: str,
     request: Request,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get tile metadata for a given table.
@@ -1597,7 +1597,7 @@ async def tiles_metadata(
     """
 
     item_metadata = await utilities.get_item_in_database(
-        user_name=user_name,
+        username=username,
         model_name="Table",
         query_filter=Q(table_id=table_id)
     )
@@ -1665,7 +1665,7 @@ async def tiles_metadata(
 )
 async def get_tile_cache_size(
     table_id: str,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Get size of cache for table.
@@ -1675,7 +1675,7 @@ async def get_tile_cache_size(
     await utilities.validate_item_access(
         model_name="Table",
         query_filter=Q(table_id=table_id),
-        user_name=user_name
+        username=username
     )
 
     size = 0
@@ -1731,7 +1731,7 @@ async def get_tile_cache_size(
 )
 async def delete_tile_cache(
     table_id: str,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Delete cache for a table.
@@ -1741,7 +1741,7 @@ async def delete_tile_cache(
     await utilities.validate_item_access(
         model_name="Table",
         query_filter=Q(table_id=table_id),
-        user_name=user_name
+        username=username
     )
 
     utilities.delete_user_tile_cache(table_id)
@@ -1817,7 +1817,7 @@ async def statistics(
     table_id: str,
     info: models.StatisticsModel,
     request: Request,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Retrieve statistics for a table.
@@ -1827,7 +1827,7 @@ async def statistics(
     await utilities.validate_item_access(
         model_name="Table",
         query_filter=Q(table_id=table_id),
-        user_name=user_name
+        username=username
     )
     pool = request.app.state.database
 
@@ -1964,7 +1964,7 @@ async def bins(
     table_id: str,
     info: models.BinsModel,
     request: Request,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Retrieve a numerical column's bins for a table.
@@ -1974,7 +1974,7 @@ async def bins(
     await utilities.validate_item_access(
         model_name="Table",
         query_filter=Q(table_id=table_id),
-        user_name=user_name
+        username=username
     )
 
     pool = request.app.state.database
@@ -2093,7 +2093,7 @@ async def numeric_breaks(
     table_id: str,
     info: models.NumericBreaksModel,
     request: Request,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Retrieve a numerical column's breaks for a table.
@@ -2103,7 +2103,7 @@ async def numeric_breaks(
     await utilities.validate_item_access(
         model_name="Table",
         query_filter=Q(table_id=table_id),
-        user_name=user_name
+        username=username
     )
 
     pool = request.app.state.database
@@ -2236,7 +2236,7 @@ async def custom_break_values(
     table_id: str,
     info: models.CustomBreaksModel,
     request: Request,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Retrieve custom break values for a column for a table.
@@ -2246,7 +2246,7 @@ async def custom_break_values(
     await utilities.validate_item_access(
         model_name="Table",
         query_filter=Q(table_id=table_id),
-        user_name=user_name
+        username=username
     )
 
     pool = request.app.state.database
@@ -2340,7 +2340,7 @@ async def autocomplete(
     q: str,
     request: Request,
     limit: int=10,
-    user_name: int=Depends(authentication_handler.JWTBearer()),
+    username: int=Depends(authentication_handler.JWTBearer()),
 
 ):
     """
@@ -2351,7 +2351,7 @@ async def autocomplete(
     await utilities.validate_item_access(
         model_name="Table",
         query_filter=Q(table_id=table_id),
-        user_name=user_name
+        username=username
     )
 
     pool = request.app.state.database

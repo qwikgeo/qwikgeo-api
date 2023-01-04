@@ -37,7 +37,7 @@ router = APIRouter()
 )
 def import_status(
     process_id: str,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Return status of an import.
@@ -56,7 +56,7 @@ async def import_arcgis_service(
     info: models.ArcgisModel,
     request: Request,
     background_tasks: BackgroundTasks,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a new dataset from an arcgis service.
@@ -122,7 +122,7 @@ async def import_arcgis_service(
                         filter=info.filter,
                         table_id=table_id,
                         process_id=process_id,
-                        username=user_name,
+                        username=username,
                         title=info.title,
                         description=info.description,
                         tags=info.tags,
@@ -166,7 +166,7 @@ async def import_geographic_data_from_geographic_file(
     title: str = Form(...),
     description: str= Form(...),
     files: List[UploadFile] = File(...),
-    user_name: int=Depends(authentication_handler.JWTBearer()),
+    username: int=Depends(authentication_handler.JWTBearer()),
     tags: list=[],
     read_access_list: list=[],
     write_access_list: list=[],
@@ -227,7 +227,7 @@ async def import_geographic_data_from_geographic_file(
         file_path=file_path,
         new_table_id=new_table_id,
         process_id=process_id,
-        username=user_name,
+        username=username,
         title=title,
         description=description,
         tags=tags,
@@ -269,7 +269,7 @@ async def import_geographic_data_from_csv(
     map_columns: List = Form(...),
     table_columns: List = Form(...),
     files: List[UploadFile] = File(...),
-    user_name: int=Depends(authentication_handler.JWTBearer()),
+    username: int=Depends(authentication_handler.JWTBearer()),
     tags: list=[],
     read_access_list: list=[],
     write_access_list: list=[],
@@ -297,7 +297,7 @@ async def import_geographic_data_from_csv(
     await qwikgeo_api_utilities.validate_item_access(
         model_name="Table",
         query_filter=Q(table_id=map_name),
-        user_name=user_name
+        username=username
     )
 
     new_table_id = qwikgeo_api_utilities.get_new_table_id()
@@ -341,7 +341,7 @@ async def import_geographic_data_from_csv(
         map_name=map_name,
         process_id=process_id,
         app=request.app,
-        username=user_name,
+        username=username,
         title=title,
         description=description,
         tags=tags,
@@ -376,7 +376,7 @@ async def import_point_data_from_csv(
     longitude: str = Form(...),
     table_columns: List = Form(...),
     files: List[UploadFile] = File(...),
-    user_name: int=Depends(authentication_handler.JWTBearer()),
+    username: int=Depends(authentication_handler.JWTBearer()),
     title: str = Form(...),
     description: str = Form(...),
     tags: list=[],
@@ -443,7 +443,7 @@ async def import_point_data_from_csv(
         table_columns=json.loads(table_columns[0]),
         process_id=process_id,
         app=request.app,
-        username=user_name,
+        username=username,
         title=title,
         description=description,
         tags=tags,
@@ -480,7 +480,7 @@ async def import_geographic_data_from_json_file(
     table_column: str = Form(...),
     table_columns: List = Form(...),
     files: List[UploadFile] = File(...),
-    user_name: int=Depends(authentication_handler.JWTBearer()),
+    username: int=Depends(authentication_handler.JWTBearer()),
     title: str = Form(...),
     description: str = Form(...),
     tags: list=[],
@@ -510,7 +510,7 @@ async def import_geographic_data_from_json_file(
     await qwikgeo_api_utilities.validate_item_access(
         model_name="Table",
         query_filter=Q(table_id=map_name),
-        user_name=user_name
+        username=username
     )
 
     new_table_id = qwikgeo_api_utilities.get_new_table_id()
@@ -554,7 +554,7 @@ async def import_geographic_data_from_json_file(
         map_name=map_name,
         process_id=process_id,
         app=request.app,
-        username=user_name,
+        username=username,
         title=title,
         description=description,
         tags=tags,
@@ -589,7 +589,7 @@ async def import_point_data_from_json_file(
     longitude: str = Form(...),
     table_columns: List = Form(...),
     files: List[UploadFile] = File(...),
-    user_name: int=Depends(authentication_handler.JWTBearer()),
+    username: int=Depends(authentication_handler.JWTBearer()),
     title: str = Form(...),
     description: str = Form(...),
     tags: list=[],
@@ -655,7 +655,7 @@ async def import_point_data_from_json_file(
         table_columns=json.loads(table_columns[0]),
         process_id=process_id,
         app=request.app,
-        username=user_name,
+        username=username,
         title=title,
         description=description,
         tags=tags,
@@ -677,7 +677,7 @@ async def import_geographic_data_from_json_url(
     request: Request,
     background_tasks: BackgroundTasks,
     info: models.GeographicJsonUrl,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a new dataset from a json url with geographic file.
@@ -687,7 +687,7 @@ async def import_geographic_data_from_json_url(
     await qwikgeo_api_utilities.validate_item_access(
         model_name="Table",
         query_filter=Q(table_id=info.map_name),
-        user_name=user_name
+        username=username
     )
 
     new_table_id = qwikgeo_api_utilities.get_new_table_id()
@@ -726,7 +726,7 @@ async def import_geographic_data_from_json_url(
                         map_name=info.map_name,
                         process_id=process_id,
                         app=request.app,
-                        username=user_name,
+                        username=username,
                         title=info.title,
                         description=info.description,
                         tags=info.tags,
@@ -757,7 +757,7 @@ async def import_point_data_from_json_url(
     request: Request,
     background_tasks: BackgroundTasks,
     info: models.PointJsonUrl,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a new dataset from a json url with point data.
@@ -798,7 +798,7 @@ async def import_point_data_from_json_url(
                         table_columns=info.table_columns,
                         process_id=process_id,
                         app=request.app,
-                        username=user_name,
+                        username=username,
                         title=info.title,
                         description=info.description,
                         tags=info.tags,
@@ -826,7 +826,7 @@ async def import_geojson_from_url(
     request: Request,
     background_tasks: BackgroundTasks,
     info: models.GeojsonUrl,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Create a new dataset from a url with geojson data.
@@ -863,7 +863,7 @@ async def import_geojson_from_url(
                         file_path=file_path,
                         new_table_id=new_table_id,
                         process_id=process_id,
-                        username=user_name,
+                        username=username,
                         title=info.title,
                         description=info.description,
                         tags=info.tags,

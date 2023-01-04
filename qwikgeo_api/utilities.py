@@ -79,7 +79,7 @@ def get_database_serializer_name(model_name):
 async def validate_item_access(
     query_filter,
     model_name: str,
-    user_name: str,
+    username: str,
     write_access: bool=False,
 ) -> bool:
     """
@@ -105,7 +105,7 @@ async def validate_item_access(
                 db_models.Item.get(portal_id=table.portal_id.portal_id)
             )
 
-        user_groups = await get_user_groups(user_name)
+        user_groups = await get_user_groups(username)
 
         access = False
 
@@ -140,7 +140,7 @@ async def validate_item_access(
         ) from exc
 
 async def get_multiple_items_in_database(
-    user_name: str,
+    username: str,
     model_name: str,
     query_filter="",
     limit: int=10,
@@ -154,7 +154,7 @@ async def get_multiple_items_in_database(
     database_model_name = get_database_model_name(model_name)
     database_model_serializer = get_database_serializer_name(model_name)
 
-    user_groups = await get_user_groups(user_name)
+    user_groups = await get_user_groups(username)
 
     portal_items = await db_models.ItemReadAccessListPydantic.from_queryset(db_models.ItemReadAccessList.filter(
         reduce(lambda x, y: x | y, [Q(name=group) for group in user_groups])
@@ -196,7 +196,7 @@ async def get_multiple_items_in_database(
     return items
 
 async def get_item_in_database(
-    user_name: str,
+    username: str,
     model_name: str,
     query_filter,
     write_access: bool=False
@@ -209,7 +209,7 @@ async def get_item_in_database(
     await validate_item_access(
         query_filter=query_filter,
         model_name=model_name,
-        user_name=user_name,
+        username=username,
         write_access=write_access
     )
 
@@ -247,7 +247,7 @@ async def create_single_item_in_database(
     database_model_name = get_database_model_name(model_name)
 
     db_item = await db_models.Item.create(
-        username_id=item['user_name'],
+        username_id=item['username'],
         title=item['title'],
         tags=item['tags'],
         description=item['description'],
@@ -257,10 +257,10 @@ async def create_single_item_in_database(
     )
 
     if item['read_access_list'] == []:
-        item['read_access_list'] = [item['user_name']]
+        item['read_access_list'] = [item['username']]
     
     if item['write_access_list'] == []:
-        item['write_access_list'] = [item['user_name']]
+        item['write_access_list'] = [item['username']]
 
     for name in item['read_access_list']:
         await db_models.ItemReadAccessList.create(name=name, portal_id_id=db_item.portal_id)
@@ -292,7 +292,7 @@ async def update_single_item_in_database(
     return await database_model_serializer.from_queryset_single(database_model_name.get(query_filter))
 
 async def delete_single_item_in_database(
-    user_name: str,
+    username: str,
     query_filter,
     model_name: str
 ) -> object:
@@ -304,7 +304,7 @@ async def delete_single_item_in_database(
     await validate_item_access(
         query_filter=query_filter,
         model_name=model_name,
-        user_name=user_name,
+        username=username,
         write_access=True
     )
     
@@ -826,12 +826,12 @@ def delete_user_tile_cache(
         shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table_id}')
 
 def check_if_username_in_access_list(
-    user_name: str,
+    username: str,
     access_list: list,
     type: str
 ):
-    if user_name not in access_list:
+    if username not in access_list:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f'{user_name} is not in {type}_access_list, add {user_name} to {type}_access_list.'
+            detail=f'{username} is not in {type}_access_list, add {username} to {type}_access_list.'
         )

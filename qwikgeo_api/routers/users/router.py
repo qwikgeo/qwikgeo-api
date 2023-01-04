@@ -77,7 +77,7 @@ async def create_user(
     }
 )
 async def get_user(
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Retrieve information about user.
@@ -86,7 +86,7 @@ async def get_user(
 
     try:
         user = await models.User_Pydantic.from_queryset_single(
-            db_models.User.get(username=user_name)
+            db_models.User.get(username=username)
         )
         return user
     except exceptions.DoesNotExist as exc:
@@ -116,7 +116,7 @@ async def get_user(
 )
 async def update_user(
     user: models.UserIn_Pydantic,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Update information about user.
@@ -124,9 +124,9 @@ async def update_user(
     """
 
     try:
-        await db_models.User.filter(username=user_name).update(**user.dict(exclude_unset=True))
+        await db_models.User.filter(username=username).update(**user.dict(exclude_unset=True))
         return await models.User_Pydantic.from_queryset_single(
-            db_models.User.get(username=user_name)
+            db_models.User.get(username=username)
         )
     except exceptions.DoesNotExist as exc:
         raise HTTPException(status_code=404, detail="User not found.") from exc
@@ -162,14 +162,14 @@ async def update_user(
     }
 )
 async def delete_user(
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Delete a user.
     More information at https://docs.qwikgeo.com/users/#delete-user
     """
 
-    deleted_count = await db_models.User.filter(username=user_name).delete()
+    deleted_count = await db_models.User.filter(username=username).delete()
     if not deleted_count:
         raise HTTPException(status_code=404, detail="User not found.")
     return models.Status(message="Deleted user.")
@@ -189,8 +189,8 @@ async def delete_user(
     }
 )
 async def get_users(
-    username: str,
-    user_name: int=Depends(authentication_handler.JWTBearer())
+    q: str,
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     Return a list of users based off of searching via username.
@@ -198,7 +198,7 @@ async def get_users(
     """
 
     users= (
-        await db_models.User.filter(username__icontains=username)
+        await db_models.User.filter(username__icontains=q)
     )
 
     return users
