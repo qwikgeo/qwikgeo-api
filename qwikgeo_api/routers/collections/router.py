@@ -139,7 +139,7 @@ async def collections(
                     "extent": {
                         "spatial": {
                             "bbox": await utilities.get_table_bounds(
-                                table=table.table_id,
+                                table_id=table.table_id,
                                 app=request.app
                             ),
                             "crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
@@ -235,8 +235,6 @@ async def collection(
     Get information about a collection.
     More information at https://docs.qwikgeo.com/collections/#collection
     """
-
-    print(user_name)
 
     item_metadata = await utilities.get_item_in_database(
         user_name=user_name,
