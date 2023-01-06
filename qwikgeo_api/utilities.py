@@ -692,7 +692,7 @@ async def get_table_geojson(
                 query = f"SELECT {properties}, gid"
             else:
                 query = f"SELECT gid"
-
+        
         query += f" FROM user_data.{table_id} "
 
         count_query = f"""SELECT COUNT(*) FROM user_data.{table_id} """
@@ -747,6 +747,10 @@ async def get_table_geojson(
 
             if formatted_geojson['features'] is not None:
                 for feature in formatted_geojson['features']:
+                    if 'st_transform' in feature['properties']:
+                        del feature['properties']['st_transform']
+                    if 'geom' in feature['properties']:
+                        del feature['properties']['geom']
                     feature['id'] = feature['properties']['gid']
                     if properties == "":
                         feature['properties'].pop("gid")
@@ -766,7 +770,8 @@ async def get_table_geojson(
                 }
                 featureProperties = dict(feature)
                 for property in featureProperties:
-                    geojsonFeature['properties'][property] = featureProperties[property]
+                    if property not in ['geom', 'st_transform']:
+                        geojsonFeature['properties'][property] = featureProperties[property]
                 if properties == "":
                     geojsonFeature['properties'].pop("gid")
                 formatted_geojson['features'].append(geojsonFeature)
