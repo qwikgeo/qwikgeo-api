@@ -2474,8 +2474,6 @@ async def closest_features(
             app=request.app
         )
 
-        print(db_fields)
-
         field_mapping = {}
 
         for field in db_fields:
