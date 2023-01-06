@@ -20,7 +20,8 @@
 | `POST`  | `https://api.qwikgeo.com/api/v1/collections/{table_id}/bins`                                          | [Bins](#bins)                               |
 | `POST`  | `https://api.qwikgeo.com/api/v1/collections/{table_id}/numeric_breaks`                                | [Numeric Breaks](#numeric-breaks)           |
 | `POST`  | `https://api.qwikgeo.com/api/v1/collections/{table_id}/custom_break_values`                           | [Custom Break Values](#custom-break-values) |
-| `GET`   | `https://api.qwikgeo.com/api/v1/collections/{table_id}/autocomplete`                                     | [Table Autocomplete](#table-autocomplete) |
+| `GET`   | `https://api.qwikgeo.com/api/v1/collections/{table_id}/autocomplete`                                     | [Autocomplete](#autocomplete) |
+| `GET`   | `https://api.qwikgeo.com/api/v1/collections/{table_id}/closest_features`                                     | [Closest Features](#nearest-features) |
 
 ## Endpoint Description's
 
@@ -901,7 +902,7 @@ off of the column `population` for the table `vccvnkvhrmzsqqbbcacvjrlspfpdhbcthv
 }
 ```
 
-## Table Autocomplete
+## Autocomplete
 
 ### Description
 Return a list of possible values from a column in a table in alphabetical order.
@@ -930,4 +931,66 @@ curl https://api.qwikgeo.com/api/v1/collections/{table_id}/autocomplete?q=bi&col
     "David Crockett Birthplace State Park",
     "Seven Islands State Birding Park"
 ]
+```
+
+## Closest Features
+
+### Description
+Find the closest features for a collection from a latitude and longitude.
+
+### Parameters
+* `latitude=LAT` - The starting latitude
+* `longitude=LNG` - The starting longitude
+
+### Example
+
+Search for closest wildfires to latitude and longitude `-88, 40`.
+
+### Example Input
+```shell
+curl https://api.qwikgeo.com/api/v1/collections/{table_id}/closest_features?latitude=40&longitude=-88
+```
+
+### Example Output
+```json
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": null,
+            "properties": {
+                "gid": 4,
+                "objectid": 4,
+                "incidentname": "Ocmulgee Bluffs",
+                "featurecategory": "Wildfire Final Fire Perimeter",
+                "mapmethod": "Hand Sketch",
+                "comments": null,
+                "gisacres": 100.0,
+                "label": null,
+                "createdate": 1669989640000,
+                "datecurrent": 1669989640000,
+                "polygondatetime": 1669989640000,
+                "complexname": null,
+                "complexid": null,
+                "gacc": "SACC",
+                "imtname": null,
+                "unitid": "GACHF",
+                "localincidentid": "220103",
+                "irwinid": "{6A18E672-4A6C-4A4B-8BD3-84704366D743}",
+                "geometryid": "{6A61C502-F3B1-4785-9925-27E2C34051E9}",
+                "globalid": null,
+                "currentdateage": 30,
+                "createdateage": 30,
+                "incidenttypecategory": "WF",
+                "shape__area": 5.03938449583075e-05,
+                "shape__length": 0.036150960126245,
+                "distance_in_kilometers": 8168.4830821382
+            },
+            "id": 4
+        }
+    ],
+    "numberMatched": 1,
+    "numberReturned": 1
+}
 ```

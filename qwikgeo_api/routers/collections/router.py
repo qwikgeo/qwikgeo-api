@@ -2381,3 +2381,132 @@ async def autocomplete(
             results.append(row[column])
 
         return results
+
+@router.get(
+    path="/{table_id}/closest_features",
+    responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "type": "FeatureCollection",
+                        "features": [
+                            {
+                                "type": "Feature",
+                                "geometry": {
+                                    "type": "Point",
+                                    "coordinates": [
+                                        -88.8892,
+                                        36.201015
+                                    ]
+                                },
+                                "properties": {
+                                    "distance_in_kilometers": 2796.834025793089
+                                },
+                                "id": 1
+                            }
+                        ],
+                        "numberMatched": 56,
+                        "numberReturned": 10,
+                    }
+                }
+            }
+        },
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def closest_features(
+    table_id: str,
+    request: Request,
+    latitude: float,
+    longitude: float,
+    limit: int=10,
+    offset: int=0,
+    properties: str="*",
+    filter: str="",
+    srid: int=4326,
+    return_geometry: bool=True,
+    username: int=Depends(authentication_handler.JWTBearer())
+):
+    """
+    Get geojson from a collection.
+    More information at https://docs.qwikgeo.com/collections/#items
+    """
+
+    url = str(request.base_url)
+
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=table_id),
+        username=username
+    )
+
+    properties += f", (geom <-> ST_SetSRID(ST_MakePoint( {longitude}, {latitude} ), 4326)) * 1000 AS distance_in_kilometers"
+
+    if filter is not None:
+
+        db_fields = await utilities.get_table_columns(
+            table_id=table_id,
+            app=request.app
+        )
+
+        print(db_fields)
+
+        field_mapping = {}
+
+        for field in db_fields:
+            field_mapping[field] = field
+        try:
+            ast = parse(filter)
+        except lark.exceptions.UnexpectedToken as exc:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid operator used in filter."
+            ) from exc
+        try:
+            filter = to_sql_where(ast, field_mapping)
+        except KeyError as exc:
+            raise HTTPException(
+                status_code=400,
+                detail=f"""Invalid column in filter parameter for {table_id}."""
+            ) from exc
+
+    results = await utilities.get_table_geojson(
+        table_id=table_id,
+        limit=limit,
+        offset=offset,
+        properties=properties,
+        sortby="distance_in_kilometers",
+        sortdesc=1,
+        bbox=None,
+        filter=filter,
+        srid=srid,
+        return_geometry=return_geometry,
+        app=request.app
+    )    
+
+    return results
