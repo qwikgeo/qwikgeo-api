@@ -21,7 +21,7 @@
 | `POST`  | `https://api.qwikgeo.com/api/v1/collections/{table_id}/numeric_breaks`                                | [Numeric Breaks](#numeric-breaks)           |
 | `POST`  | `https://api.qwikgeo.com/api/v1/collections/{table_id}/custom_break_values`                           | [Custom Break Values](#custom-break-values) |
 | `GET`   | `https://api.qwikgeo.com/api/v1/collections/{table_id}/autocomplete`                                     | [Autocomplete](#autocomplete) |
-| `GET`   | `https://api.qwikgeo.com/api/v1/collections/{table_id}/closest_features`                                     | [Closest Features](#nearest-features) |
+| `GET`   | `https://api.qwikgeo.com/api/v1/collections/{table_id}/closest_features`                                     | [Closest Features](#closest-features) |
 
 ## Endpoint Description's
 
