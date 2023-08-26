@@ -1,0 +1,2370 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Tech docs for QwikGeo">
+      
+      
+        <meta name="author" content="Michael Keller">
+      
+      
+        <link rel="canonical" href="https://docs.qwikgeo.com/analysis/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.4.2">
+    
+    
+      
+        <title>Analysis Endpoints - QwikGeo API Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.69437709.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.cbb835fc.min.css">
+        
+      
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+
+  <script id="__analytics">function __md_analytics(){function n(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],n("js",new Date),n("config","G-2LXJZ67GEV"),document.addEventListener("DOMContentLoaded",function(){document.forms.search&&document.forms.search.query.addEventListener("blur",function(){this.value&&n("event","search",{search_term:this.value})}),document$.subscribe(function(){var a=document.forms.feedback;if(void 0!==a)for(var e of a.querySelectorAll("[type=submit]"))e.addEventListener("click",function(e){e.preventDefault();var t=document.location.pathname,e=this.getAttribute("data-md-value");n("event","feedback",{page:t,data:e}),a.firstElementChild.disabled=!0;e=a.querySelector(".md-feedback__note [data-md-value='"+e+"']");e&&(e.hidden=!1)}),a.hidden=!1}),location$.subscribe(function(e){n("config","G-2LXJZ67GEV",{page_path:e.pathname})})});var e=document.createElement("script");e.async=!0,e.src="https://www.googletagmanager.com/gtag/js?id=G-2LXJZ67GEV",document.getElementById("__analytics").insertAdjacentElement("afterEnd",e)}</script>
+
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#analysis-endpoints" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="QwikGeo API Docs" class="md-header__button md-logo" aria-label="QwikGeo API Docs" data-md-component="logo">
+      
+  <img src="../assets/images/favicon.ico" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            QwikGeo API Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Analysis Endpoints
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/qwikgeo/qwikgeo-api" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    QwikGeo API
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="QwikGeo API Docs" class="md-nav__button md-logo" aria-label="QwikGeo API Docs" data-md-component="logo">
+      
+  <img src="../assets/images/favicon.ico" alt="logo">
+
+    </a>
+    QwikGeo API Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/qwikgeo/qwikgeo-api" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    QwikGeo API
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        QwikGeo API
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Analysis
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Analysis" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Analysis
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Analysis Endpoints
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Analysis Endpoints
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#endpoint-descriptions" class="md-nav__link">
+    Endpoint Description's
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#analysis-status" class="md-nav__link">
+    Analysis Status
+  </a>
+  
+    <nav class="md-nav" aria-label="Analysis Status">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-call" class="md-nav__link">
+    Example Call
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output-still-running" class="md-nav__link">
+    Example Output - Still Running
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output-complete" class="md-nav__link">
+    Example Output - Complete
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output-error" class="md-nav__link">
+    Example Output - Error
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#buffer" class="md-nav__link">
+    Buffer
+  </a>
+  
+    <nav class="md-nav" aria-label="Buffer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dissolve" class="md-nav__link">
+    Dissolve
+  </a>
+  
+    <nav class="md-nav" aria-label="Dissolve">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_1" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_1" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_1" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dissolve-by-value" class="md-nav__link">
+    Dissolve By Value
+  </a>
+  
+    <nav class="md-nav" aria-label="Dissolve By Value">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_2" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_2" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_2" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#square-grids" class="md-nav__link">
+    Square Grids
+  </a>
+  
+    <nav class="md-nav" aria-label="Square Grids">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_3" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_3" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_3" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hexagon-grids" class="md-nav__link">
+    Hexagon Grids
+  </a>
+  
+    <nav class="md-nav" aria-label="Hexagon Grids">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_4" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_4" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_4" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bounding-box" class="md-nav__link">
+    Bounding Box
+  </a>
+  
+    <nav class="md-nav" aria-label="Bounding Box">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_5" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_5" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_5" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#k-means-cluster" class="md-nav__link">
+    K Means Cluster
+  </a>
+  
+    <nav class="md-nav" aria-label="K Means Cluster">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_6" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_6" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_6" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#center-of-each-polygon" class="md-nav__link">
+    Center Of Each Polygon
+  </a>
+  
+    <nav class="md-nav" aria-label="Center Of Each Polygon">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_7" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_7" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_7" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#center-of-dataset" class="md-nav__link">
+    Center Of Dataset
+  </a>
+  
+    <nav class="md-nav" aria-label="Center Of Dataset">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_8" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_8" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_8" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#find-within-distance" class="md-nav__link">
+    Find Within Distance
+  </a>
+  
+    <nav class="md-nav" aria-label="Find Within Distance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_9" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_9" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_9" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#convex-hull" class="md-nav__link">
+    Convex Hull
+  </a>
+  
+    <nav class="md-nav" aria-label="Convex Hull">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_10" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_10" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_10" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aggregate-points-by-grid" class="md-nav__link">
+    Aggregate Points By Grid
+  </a>
+  
+    <nav class="md-nav" aria-label="Aggregate Points By Grid">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_11" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_11" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_11" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aggregate-points-by-polygons" class="md-nav__link">
+    Aggregate Points By Polygons
+  </a>
+  
+    <nav class="md-nav" aria-label="Aggregate Points By Polygons">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_12" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_12" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_12" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#select-inside" class="md-nav__link">
+    Select Inside
+  </a>
+  
+    <nav class="md-nav" aria-label="Select Inside">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_13" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_13" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_13" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#select-outside" class="md-nav__link">
+    Select Outside
+  </a>
+  
+    <nav class="md-nav" aria-label="Select Outside">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_14" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_14" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_14" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#clip" class="md-nav__link">
+    Clip
+  </a>
+  
+    <nav class="md-nav" aria-label="Clip">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_15" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_15" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_15" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          Authentication
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Authentication" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Authentication
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../authentication/" class="md-nav__link">
+        Authentication Endpoints
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4">
+          Collections
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Collections" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Collections
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../collections/" class="md-nav__link">
+        Collections Endpoints
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Groups
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Groups" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Groups
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../groups/" class="md-nav__link">
+        Groups Endpoints
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6">
+          Imports
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Imports" data-md-level="1">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          Imports
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../imports/" class="md-nav__link">
+        Imports Endpoints
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7">
+          Items
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Items" data-md-level="1">
+        <label class="md-nav__title" for="__nav_7">
+          <span class="md-nav__icon md-icon"></span>
+          Items
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../items/" class="md-nav__link">
+        Items Endpoints
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" type="checkbox" id="__nav_8" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8">
+          Tables
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Tables" data-md-level="1">
+        <label class="md-nav__title" for="__nav_8">
+          <span class="md-nav__icon md-icon"></span>
+          Tables
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tables/" class="md-nav__link">
+        Tables Endpoints
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_9" type="checkbox" id="__nav_9" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_9">
+          Users
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Users" data-md-level="1">
+        <label class="md-nav__title" for="__nav_9">
+          <span class="md-nav__icon md-icon"></span>
+          Users
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../users/" class="md-nav__link">
+        Users Endpoints
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#endpoint-descriptions" class="md-nav__link">
+    Endpoint Description's
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#analysis-status" class="md-nav__link">
+    Analysis Status
+  </a>
+  
+    <nav class="md-nav" aria-label="Analysis Status">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-call" class="md-nav__link">
+    Example Call
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output-still-running" class="md-nav__link">
+    Example Output - Still Running
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output-complete" class="md-nav__link">
+    Example Output - Complete
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output-error" class="md-nav__link">
+    Example Output - Error
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#buffer" class="md-nav__link">
+    Buffer
+  </a>
+  
+    <nav class="md-nav" aria-label="Buffer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dissolve" class="md-nav__link">
+    Dissolve
+  </a>
+  
+    <nav class="md-nav" aria-label="Dissolve">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_1" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_1" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_1" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dissolve-by-value" class="md-nav__link">
+    Dissolve By Value
+  </a>
+  
+    <nav class="md-nav" aria-label="Dissolve By Value">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_2" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_2" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_2" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#square-grids" class="md-nav__link">
+    Square Grids
+  </a>
+  
+    <nav class="md-nav" aria-label="Square Grids">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_3" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_3" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_3" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hexagon-grids" class="md-nav__link">
+    Hexagon Grids
+  </a>
+  
+    <nav class="md-nav" aria-label="Hexagon Grids">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_4" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_4" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_4" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bounding-box" class="md-nav__link">
+    Bounding Box
+  </a>
+  
+    <nav class="md-nav" aria-label="Bounding Box">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_5" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_5" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_5" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#k-means-cluster" class="md-nav__link">
+    K Means Cluster
+  </a>
+  
+    <nav class="md-nav" aria-label="K Means Cluster">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_6" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_6" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_6" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#center-of-each-polygon" class="md-nav__link">
+    Center Of Each Polygon
+  </a>
+  
+    <nav class="md-nav" aria-label="Center Of Each Polygon">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_7" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_7" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_7" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#center-of-dataset" class="md-nav__link">
+    Center Of Dataset
+  </a>
+  
+    <nav class="md-nav" aria-label="Center Of Dataset">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_8" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_8" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_8" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#find-within-distance" class="md-nav__link">
+    Find Within Distance
+  </a>
+  
+    <nav class="md-nav" aria-label="Find Within Distance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_9" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_9" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_9" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#convex-hull" class="md-nav__link">
+    Convex Hull
+  </a>
+  
+    <nav class="md-nav" aria-label="Convex Hull">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_10" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_10" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_10" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aggregate-points-by-grid" class="md-nav__link">
+    Aggregate Points By Grid
+  </a>
+  
+    <nav class="md-nav" aria-label="Aggregate Points By Grid">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_11" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_11" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_11" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aggregate-points-by-polygons" class="md-nav__link">
+    Aggregate Points By Polygons
+  </a>
+  
+    <nav class="md-nav" aria-label="Aggregate Points By Polygons">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_12" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_12" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_12" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#select-inside" class="md-nav__link">
+    Select Inside
+  </a>
+  
+    <nav class="md-nav" aria-label="Select Inside">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_13" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_13" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_13" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#select-outside" class="md-nav__link">
+    Select Outside
+  </a>
+  
+    <nav class="md-nav" aria-label="Select Outside">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_14" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_14" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_14" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#clip" class="md-nav__link">
+    Clip
+  </a>
+  
+    <nav class="md-nav" aria-label="Clip">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_15" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-input_15" class="md-nav__link">
+    Example Input
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-output_15" class="md-nav__link">
+    Example Output
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+  <a href="https://github.com/qwikgeo/qwikgeo-api/blob/main/docs/analysis/index.md" title="Edit this page" class="md-content__button md-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+
+<h1 id="analysis-endpoints">Analysis Endpoints<a class="headerlink" href="#analysis-endpoints" title="Permanent link"></a></h1>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>URL</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/analysis/status/{process_id}</code></td>
+<td><a href="#analysis-status">Analysis Status</a></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/analysis/buffer</code></td>
+<td><a href="#buffer">Buffer</a></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/analysis/dissolve</code></td>
+<td><a href="#dissolve">Dissolve</a></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/analysis/dissolve_by_value</code></td>
+<td><a href="#dissolve-by-value">Dissolve By Value</a></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/analysis/square_grids</code></td>
+<td><a href="#square-grids">Square Grids</a></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/analysis/hexagon_grids</code></td>
+<td><a href="#hexagon-grids">Hexagon Grids</a></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/analysis/bounding_box</code></td>
+<td><a href="#bounding-box]">Bounding Box</a></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/analysis/k_means_cluster</code></td>
+<td><a href="#k-means-cluster">K Means Cluster</a></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/analysis/center_of_each_polygon</code></td>
+<td><a href="#center-of-each-polygon">Center Of Each Polygon</a></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/analysis/center_of_dataset</code></td>
+<td><a href="#center-of-dataset">Center Of Dataset</a></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/analysis/find_within_distance</code></td>
+<td><a href="#find-within-distance">Find Within Distance</a></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/analysis/convex_hull</code></td>
+<td><a href="#convex-hull">Convex Hull</a></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/analysis/aggregate_points_by_grids</code></td>
+<td><a href="#aggregate-points-by-grid">Aggregate Points By Grid</a></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/analysis/aggregate_points_by_polygons</code></td>
+<td><a href="#aggregate-points-by-polygons">Aggregate Points By Polygons</a></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/analysis/select_inside</code></td>
+<td><a href="#select-inside">Select Inside</a></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/analysis/select_outside</code></td>
+<td><a href="#select-outside">Select Outside</a></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/analysis/clip</code></td>
+<td><a href="#clip">Clip</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="endpoint-descriptions">Endpoint Description's<a class="headerlink" href="#endpoint-descriptions" title="Permanent link"></a></h2>
+<h2 id="analysis-status">Analysis Status<a class="headerlink" href="#analysis-status" title="Permanent link"></a></h2>
+<p>Any time an analysis is submitted it given a process_id to have the analysis run in the background using <a href="https://fastapi.tiangolo.com/tutorial/background-tasks/">FastAPI's Background Tasks</a>. To check the
+status of an analysis, you can call this endpoint with the process_id.</p>
+<h3 id="example-call">Example Call<a class="headerlink" href="#example-call" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>https://api.qwikgeo.com/api/v1/analysis/status/472e29dc-91a8-41d3-b05f-cee34006e3f7
+</code></pre></div>
+<h3 id="example-output-still-running">Example Output - Still Running<a class="headerlink" href="#example-output-still-running" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PENDING&quot;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="example-output-complete">Example Output - Complete<a class="headerlink" href="#example-output-complete" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SUCCESS&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">&quot;new_table_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;shnxppipxrppsdkozuroilkubktfodibtqorhucjvxlcdrqyhh&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nt">&quot;completion_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-07-06T19:33:17.950059&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="nt">&quot;run_time_in_seconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.78599</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="example-output-error">Example Output - Error<a class="headerlink" href="#example-output-error" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;FAILURE&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ERROR HERE&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="nt">&quot;completion_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-07-08T13:39:47.961389&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span><span class="nt">&quot;run_time_in_seconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.040892</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="buffer">Buffer<a class="headerlink" href="#buffer" title="Permanent link"></a></h2>
+<p><img alt="Buffer Image" src="images/buffer.png" title="Buffer Image" /></p>
+<h3 id="description">Description<a class="headerlink" href="#description" title="Permanent link"></a></h3>
+<p>Buffer an geometric table with a buffer in kilometers.</p>
+<p>Example: Buffer zip centroids by one kilometer.</p>
+<h3 id="example-input">Example Input<a class="headerlink" href="#example-input" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span><span class="nt">&quot;table_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;zip_centroids&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nt">&quot;database&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="nt">&quot;distance_in_kilometers&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="example-output">Example Output<a class="headerlink" href="#example-output" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">&quot;process_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="dissolve">Dissolve<a class="headerlink" href="#dissolve" title="Permanent link"></a></h2>
+<p><img alt="Dissolve Image" src="images/dissolve.png" title="Dissolve Image" /></p>
+<h3 id="description_1">Description<a class="headerlink" href="#description_1" title="Permanent link"></a></h3>
+<p>Dissolve any geometric table into one single geometry.</p>
+<p>Example: Dissolve all the US States into one single geometry.</p>
+<h3 id="example-input_1">Example Input<a class="headerlink" href="#example-input_1" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">    </span><span class="nt">&quot;table_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;states&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span><span class="nt">&quot;database&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data&quot;</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="example-output_1">Example Output<a class="headerlink" href="#example-output_1" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">&quot;process_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="dissolve-by-value">Dissolve By Value<a class="headerlink" href="#dissolve-by-value" title="Permanent link"></a></h2>
+<p><img alt="Dissolve By Value Image" src="images/dissolve_by_value.png" title="Dissolve By Value Image" /></p>
+<h3 id="description_2">Description<a class="headerlink" href="#description_2" title="Permanent link"></a></h3>
+<p>Dissolve any geometric table into geometries based off a column in the table.</p>
+<p>Example: Dissolve US States based off a column in the table called <code>sub_region</code>.</p>
+<h3 id="example-input_2">Example Input<a class="headerlink" href="#example-input_2" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">    </span><span class="nt">&quot;table_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;states&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="nt">&quot;database&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="nt">&quot;column&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sub_region&quot;</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="example-output_2">Example Output<a class="headerlink" href="#example-output_2" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">{</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="nt">&quot;process_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="square-grids">Square Grids<a class="headerlink" href="#square-grids" title="Permanent link"></a></h2>
+<p><img alt="Square Grids Image" src="images/square_grids.png" title="Square Grids Image" /></p>
+<h3 id="description_3">Description<a class="headerlink" href="#description_3" title="Permanent link"></a></h3>
+<p>Generate square grids of any size based off of a tables geometry.</p>
+<p>Example: Generate 100 kilometers square grids based off of a table containing US States.</p>
+<h3 id="example-input_3">Example Input<a class="headerlink" href="#example-input_3" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">{</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">    </span><span class="nt">&quot;table_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;states&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">    </span><span class="nt">&quot;database&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">    </span><span class="nt">&quot;grid_size_in_kilometers&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="example-output_3">Example Output<a class="headerlink" href="#example-output_3" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="p">{</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="nt">&quot;process_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">  </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="hexagon-grids">Hexagon Grids<a class="headerlink" href="#hexagon-grids" title="Permanent link"></a></h2>
+<p><img alt="Hexagon Grids Image" src="images/hexagon_grids.png" title="Hexagon Grids Image" /></p>
+<h3 id="description_4">Description<a class="headerlink" href="#description_4" title="Permanent link"></a></h3>
+<p>Generate hexagon grids of any size based off of a tables geometry.</p>
+<p>Example: Generate 100 kilometers hexagon grids based off of a table containing US States.</p>
+<h3 id="example-input_4">Example Input<a class="headerlink" href="#example-input_4" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="p">{</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">    </span><span class="nt">&quot;table_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;states&quot;</span><span class="p">,</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">    </span><span class="nt">&quot;database&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data&quot;</span><span class="p">,</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">    </span><span class="nt">&quot;grid_size_in_kilometers&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="example-output_4">Example Output<a class="headerlink" href="#example-output_4" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="p">{</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span><span class="nt">&quot;process_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span><span class="p">,</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">  </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="bounding-box">Bounding Box<a class="headerlink" href="#bounding-box" title="Permanent link"></a></h2>
+<p><img alt="Bounding Box Image" src="images/bounding_box.png" title="Bounding Box Image" /></p>
+<h3 id="description_5">Description<a class="headerlink" href="#description_5" title="Permanent link"></a></h3>
+<p>Generate a bounding box of a table.</p>
+<p>Example: Find the bounding box of a table that contains all of the US States.</p>
+<h3 id="example-input_5">Example Input<a class="headerlink" href="#example-input_5" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="p">{</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">    </span><span class="nt">&quot;table_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;states&quot;</span><span class="p">,</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">    </span><span class="nt">&quot;database&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data&quot;</span><span class="p">,</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="example-output_5">Example Output<a class="headerlink" href="#example-output_5" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="p">{</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">  </span><span class="nt">&quot;process_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span><span class="p">,</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">  </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="k-means-cluster">K Means Cluster<a class="headerlink" href="#k-means-cluster" title="Permanent link"></a></h2>
+<p><img alt="K Means Cluster Image" src="images/k_means_cluster.png" title="K Means Cluster Image" /></p>
+<p>Example: Group all US zip centroids into  5 groups based off of k means clusters.</p>
+<h3 id="description_6">Description<a class="headerlink" href="#description_6" title="Permanent link"></a></h3>
+<p>Use <a href="https://en.wikipedia.org/wiki/K-means_clustering">K Means Clustering</a> to group points based on their location.</p>
+<h3 id="example-input_6">Example Input<a class="headerlink" href="#example-input_6" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="p">{</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="w">    </span><span class="nt">&quot;table_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;zip_centroids&quot;</span><span class="p">,</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">    </span><span class="nt">&quot;database&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data&quot;</span><span class="p">,</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">    </span><span class="nt">&quot;number_of_clusters&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="example-output_6">Example Output<a class="headerlink" href="#example-output_6" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="p">{</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">  </span><span class="nt">&quot;process_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span><span class="p">,</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">  </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="center-of-each-polygon">Center Of Each Polygon<a class="headerlink" href="#center-of-each-polygon" title="Permanent link"></a></h2>
+<p><img alt="Center of Each Polygon Image" src="images/center_of_each_polygon.png" title="Center of Each Polygon Image" /></p>
+<h3 id="description_7">Description<a class="headerlink" href="#description_7" title="Permanent link"></a></h3>
+<p>Find the center of each polygon for a given table.</p>
+<p>Example: Find the center of each US State.</p>
+<h3 id="example-input_7">Example Input<a class="headerlink" href="#example-input_7" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="p">{</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">    </span><span class="nt">&quot;table_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;states&quot;</span><span class="p">,</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">    </span><span class="nt">&quot;database&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data&quot;</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="example-output_7">Example Output<a class="headerlink" href="#example-output_7" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="p">{</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="w">  </span><span class="nt">&quot;process_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span><span class="p">,</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="w">  </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="center-of-dataset">Center Of Dataset<a class="headerlink" href="#center-of-dataset" title="Permanent link"></a></h2>
+<p><img alt="Center of Dataset Image" src="images/center_of_dataset.png" title="Center of Dataset Image" /></p>
+<h3 id="description_8">Description<a class="headerlink" href="#description_8" title="Permanent link"></a></h3>
+<p>Find the center of all geometries based off a given table.</p>
+<p>Example: Find the geomeric center of a table that contains all of the US States.</p>
+<h3 id="example-input_8">Example Input<a class="headerlink" href="#example-input_8" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="p">{</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="w">    </span><span class="nt">&quot;table_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;states&quot;</span><span class="p">,</span>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="w">    </span><span class="nt">&quot;database&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data&quot;</span>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="example-output_8">Example Output<a class="headerlink" href="#example-output_8" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="p">{</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="w">  </span><span class="nt">&quot;process_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span><span class="p">,</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="w">  </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="find-within-distance">Find Within Distance<a class="headerlink" href="#find-within-distance" title="Permanent link"></a></h2>
+<p><img alt="Find Within Distance Image" src="images/find_within_distance.png" title="Find Within Distance Image" /></p>
+<h3 id="description_9">Description<a class="headerlink" href="#description_9" title="Permanent link"></a></h3>
+<p>Find all geometries within a given distance from a given point.</p>
+<p>Example: Find all states within <code>500</code> kilometers of latitude <code>40.45</code> and latitude <code>-88.95</code>.</p>
+<h3 id="example-input_9">Example Input<a class="headerlink" href="#example-input_9" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="p">{</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="w">    </span><span class="nt">&quot;table_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;states&quot;</span><span class="p">,</span>
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="w">    </span><span class="nt">&quot;database&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data&quot;</span><span class="p">,</span>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="w">    </span><span class="nt">&quot;latitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">40.45</span><span class="p">,</span>
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="w">    </span><span class="nt">&quot;longitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-88.95</span><span class="p">,</span>
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="w">    </span><span class="nt">&quot;distance_in_kilometers&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">500</span>
+<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="example-output_9">Example Output<a class="headerlink" href="#example-output_9" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="p">{</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="w">  </span><span class="nt">&quot;process_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span><span class="p">,</span>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="w">  </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span>
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="convex-hull">Convex Hull<a class="headerlink" href="#convex-hull" title="Permanent link"></a></h2>
+<p><img alt="Convex Hull Image" src="images/convex_hull.png" title="Convex Hull Image" /></p>
+<h3 id="description_10">Description<a class="headerlink" href="#description_10" title="Permanent link"></a></h3>
+<p>Find the smallest convex hull around a given table.</p>
+<p>Example: Find the smallest convex hull around all the US States.</p>
+<h3 id="example-input_10">Example Input<a class="headerlink" href="#example-input_10" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="p">{</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="w">    </span><span class="nt">&quot;table_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;states&quot;</span><span class="p">,</span>
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="w">    </span><span class="nt">&quot;database&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data&quot;</span>
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="example-output_10">Example Output<a class="headerlink" href="#example-output_10" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="p">{</span>
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="w">  </span><span class="nt">&quot;process_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span><span class="p">,</span>
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="w">  </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span>
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="aggregate-points-by-grid">Aggregate Points By Grid<a class="headerlink" href="#aggregate-points-by-grid" title="Permanent link"></a></h2>
+<p><img alt="Aggregate Points By Grid Image" src="images/aggregate_points_by_grids.png" title="Aggregate Points By Grid Image" /></p>
+<h3 id="description_11">Description<a class="headerlink" href="#description_11" title="Permanent link"></a></h3>
+<p>Aggregate a table of points into grids and determine how points are in each grid.</p>
+<p>Example: Determine how many zip centroids are each 1000 kilometer hexagon grid.</p>
+<h3 id="example-input_11">Example Input<a class="headerlink" href="#example-input_11" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="p">{</span>
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="w">    </span><span class="nt">&quot;table_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;zip_centroids&quot;</span><span class="p">,</span>
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="w">    </span><span class="nt">&quot;database&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data&quot;</span><span class="p">,</span>
+<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a><span class="w">    </span><span class="nt">&quot;distance_in_kilometers&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span>
+<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a><span class="w">    </span><span class="nt">&quot;grid_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hexagon&quot;</span>
+<a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="example-output_11">Example Output<a class="headerlink" href="#example-output_11" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="p">{</span>
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="w">  </span><span class="nt">&quot;process_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span><span class="p">,</span>
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a><span class="w">  </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span>
+<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="aggregate-points-by-polygons">Aggregate Points By Polygons<a class="headerlink" href="#aggregate-points-by-polygons" title="Permanent link"></a></h2>
+<p><img alt="Aggregate Points By Polygons Image" src="images/aggregate_points_by_polygons.png" title="Aggregate Points By Polygons Image" /></p>
+<h3 id="description_12">Description<a class="headerlink" href="#description_12" title="Permanent link"></a></h3>
+<p>Aggregate a table of points into a table of polygons and determine how points are in each polygon.</p>
+<p>Example: Determine how many zip centroids are within each US State.</p>
+<h3 id="example-input_12">Example Input<a class="headerlink" href="#example-input_12" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="p">{</span>
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="w">    </span><span class="nt">&quot;table_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;zip_centroids&quot;</span><span class="p">,</span>
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a><span class="w">    </span><span class="nt">&quot;database&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data&quot;</span><span class="p">,</span>
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="w">    </span><span class="nt">&quot;polygons&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;states&quot;</span>
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="example-output_12">Example Output<a class="headerlink" href="#example-output_12" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="p">{</span>
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="w">  </span><span class="nt">&quot;process_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span><span class="p">,</span>
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="w">  </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span>
+<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="select-inside">Select Inside<a class="headerlink" href="#select-inside" title="Permanent link"></a></h2>
+<p><img alt="Select Inside Image" src="images/select_inside.png" title="Select Inside Image" /></p>
+<h3 id="description_13">Description<a class="headerlink" href="#description_13" title="Permanent link"></a></h3>
+<p>Find all geometries within a given polygon table.</p>
+<p>Example: Find all zip centroids within the US States table.</p>
+<h3 id="example-input_13">Example Input<a class="headerlink" href="#example-input_13" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="p">{</span>
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="w">    </span><span class="nt">&quot;table_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;zip_centroids&quot;</span><span class="p">,</span>
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a><span class="w">    </span><span class="nt">&quot;database&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data&quot;</span><span class="p">,</span>
+<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a><span class="w">    </span><span class="nt">&quot;polygons&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;states&quot;</span>
+<a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="example-output_13">Example Output<a class="headerlink" href="#example-output_13" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="p">{</span>
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="w">  </span><span class="nt">&quot;process_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span><span class="p">,</span>
+<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a><span class="w">  </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span>
+<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="select-outside">Select Outside<a class="headerlink" href="#select-outside" title="Permanent link"></a></h2>
+<p><img alt="Select Outside Image" src="images/select_outside.png" title="Select Outside Image" /></p>
+<h3 id="description_14">Description<a class="headerlink" href="#description_14" title="Permanent link"></a></h3>
+<p>Find all geomtries outside a given polygon table.</p>
+<p>Example: Find all the zip centroids outside of the table with US States.</p>
+<h3 id="example-input_14">Example Input<a class="headerlink" href="#example-input_14" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="p">{</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="w">    </span><span class="nt">&quot;table_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;zip_centroids&quot;</span><span class="p">,</span>
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a><span class="w">    </span><span class="nt">&quot;database&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data&quot;</span><span class="p">,</span>
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a><span class="w">    </span><span class="nt">&quot;polygons&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;states&quot;</span>
+<a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="example-output_14">Example Output<a class="headerlink" href="#example-output_14" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="p">{</span>
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a><span class="w">  </span><span class="nt">&quot;process_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span><span class="p">,</span>
+<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a><span class="w">  </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span>
+<a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="clip">Clip<a class="headerlink" href="#clip" title="Permanent link"></a></h2>
+<p><img alt="Clip Image" src="images/clip.png" title="Clip Image" /></p>
+<h3 id="description_15">Description<a class="headerlink" href="#description_15" title="Permanent link"></a></h3>
+<p>Clip any geometric table based of a polygon table.</p>
+<p>Example: Clip the US States table to a large polygon.</p>
+<h3 id="example-input_15">Example Input<a class="headerlink" href="#example-input_15" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="p">{</span>
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a><span class="w">    </span><span class="nt">&quot;table_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;states&quot;</span><span class="p">,</span>
+<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a><span class="w">    </span><span class="nt">&quot;database&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data&quot;</span><span class="p">,</span>
+<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a><span class="w">    </span><span class="nt">&quot;polygons&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;big_polygon&quot;</span>
+<a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="example-output_15">Example Output<a class="headerlink" href="#example-output_15" title="Permanent link"></a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="p">{</span>
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a><span class="w">  </span><span class="nt">&quot;process_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span><span class="p">,</span>
+<a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a><span class="w">  </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://api.qwikgeo.com/api/v1/analysis/status/c8d7b8d8-3e82-4f93-b441-55a5f51c4171&quot;</span>
+<a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a><span class="p">}</span>
+</code></pre></div>
+
+
+  
+
+
+
+              
+            </article>
+            
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href=".." class="md-footer__link md-footer__link--prev" aria-label="Previous: QwikGeo API" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              QwikGeo API
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../authentication/" class="md-footer__link md-footer__link--next" aria-label="Next: Authentication Endpoints" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Authentication Endpoints
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.ecf98df9.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.9c69f0bc.min.js"></script>
+      
+    
+  </body>
+</html>
