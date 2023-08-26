@@ -59,18 +59,34 @@ async def get_all_tables_from_db(
 def get_database_model_name(model_name):
     if model_name == "Table":
         return db_models.Table
+    elif model_name == "TableOut":
+        return db_models.Table
     elif model_name == "Item":
+        return db_models.Item
+    elif model_name == "ItemOut":
         return db_models.Item
     elif model_name == "Map":
         return db_models.Map
+    elif model_name == "MapOut":
+        return db_models.Map
     elif model_name == "Group":
         return db_models.Group
+    elif model_name == "ItemReadAccessList":
+        return db_models.ItemReadAccessList
+    elif model_name == "ItemWriteAccessList":
+        return db_models.ItemWriteAccessList
 
 def get_database_serializer_name(model_name):
     if model_name == "Table":
         return db_models.Table_Pydantic
+    elif model_name == "TableOut":
+        return db_models.TableOut_Pydantic
     elif model_name == "Item":
         return db_models.Item_Pydantic
+    elif model_name == "ItemOut":
+        return db_models.ItemOut_Pydantic
+    elif model_name == "MapOut":
+        return db_models.MapOut_Pydantic
     elif model_name == "Map":
         return db_models.Map_Pydantic
     elif model_name == "Group":
@@ -91,7 +107,7 @@ async def validate_item_access(
     database_model_serializer = get_database_serializer_name(model_name)
 
     try:
-        if model_name == 'Item':
+        if model_name in ['Item','ItemOut']:
             item = await db_models.Item_Pydantic.from_queryset_single(
                 db_models.Item.get(query_filter)
             )
@@ -102,7 +118,7 @@ async def validate_item_access(
             )
 
             item = await db_models.Item_Pydantic.from_queryset_single(
-                db_models.Item.get(portal_id=table.portal_id.portal_id)
+                db_models.Item.get(portal_id=table.item.portal_id)
             )
 
         user_groups = await get_user_groups(username)
@@ -162,14 +178,14 @@ async def get_multiple_items_in_database(
 
     default_filter = None
 
-    if model_name != "Group":
+    if model_name not in ["Group","ItemOut"]:
 
         portal_ids = []
 
         for portal_item in portal_items:
             portal_ids.append(portal_item.portal_id.portal_id)
         
-        default_filter = Q(portal_id_id__in=portal_ids)
+        default_filter = Q(item_id__in=portal_ids)
 
         if model_name == "Item":
             default_filter = Q(portal_id__in=portal_ids)
@@ -220,13 +236,13 @@ async def get_item_in_database(
         database_model_name.get(query_filter)
     )
 
-    if model_name != 'Item':
+    if model_name not in ['Item','ItemOut']:
         item = await db_models.Item_Pydantic.from_queryset_single(
-            db_models.Item.get(portal_id=portal_item.portal_id.portal_id)
+            db_models.Item.get(portal_id=portal_item.item.portal_id)
         )
 
         await db_models.Item.filter(
-            portal_id=portal_item.portal_id.portal_id
+            portal_id=portal_item.item.portal_id
         ).update(views=item.views+1)
     else:
         await db_models.Item.filter(
@@ -247,7 +263,7 @@ async def create_single_item_in_database(
     database_model_name = get_database_model_name(model_name)
 
     db_item = await db_models.Item.create(
-        username_id=item['username'],
+        user_id=item['user_id'],
         title=item['title'],
         tags=item['tags'],
         description=item['description'],
@@ -268,7 +284,7 @@ async def create_single_item_in_database(
     for name in item['write_access_list']:
         await db_models.ItemWriteAccessList.create(name=name, portal_id_id=db_item.portal_id)
 
-    item['portal_id_id'] = db_item.portal_id
+    item['item_id'] = db_item.portal_id
 
     await database_model_name.create(**item)
 
@@ -287,7 +303,7 @@ async def update_single_item_in_database(
     database_model_name = get_database_model_name(model_name)
     database_model_serializer = get_database_serializer_name(model_name)
 
-    await database_model_name.filter(query_filter).update(**item.dict(exclude_unset=True))
+    await database_model_name.filter(query_filter).update(**item)
 
     return await database_model_serializer.from_queryset_single(database_model_name.get(query_filter))
 
@@ -322,6 +338,24 @@ async def delete_single_item_in_database(
     await db_models.Item.filter(portal_id=item_metadata.portal_id).delete()
 
     await database_model_name.filter(query_filter).delete()
+
+async def update_read_and_write_access_list(
+    portal_id: str,
+    read_access_list: list,
+    write_access_list: list
+):
+    """
+    Method to update the read and write access list for an item.
+    
+    """
+    await db_models.ItemReadAccessList.filter(portal_id=portal_id).delete()
+    await db_models.ItemWriteAccessList.filter(portal_id=portal_id).delete()
+
+    for name in read_access_list:
+        await db_models.ItemReadAccessList.create(name=name, portal_id_id=portal_id)
+
+    for name in write_access_list:
+        await db_models.ItemWriteAccessList.create(name=name, portal_id_id=portal_id)
 
 async def get_token_header(
     token: str=Depends(oauth2_scheme)

@@ -6,7 +6,7 @@ from typing import List
 from fastapi import APIRouter, Request, Depends
 from tortoise.expressions import Q
 
-import qwikgeo_api.routers.tables.models as models
+import qwikgeo_api.routers.items.tables.models as models
 from qwikgeo_api import utilities
 from qwikgeo_api import db_models
 from qwikgeo_api import authentication_handler
@@ -15,7 +15,7 @@ router = APIRouter()
 
 @router.get(
     path="/",
-    response_model=List[db_models.Table_Pydantic],
+    response_model=List[db_models.TableOut_Pydantic],
     responses={
         500: {
             "description": "Internal Server Error",
@@ -37,14 +37,16 @@ async def tables(
 
     items = await utilities.get_multiple_items_in_database(
         username=username,
-        model_name="Table"
+        model_name="TableOut"
     )
+
+    print(items)
 
     return items
 
 @router.get(
     path="/{table_id}",
-    response_model=db_models.Table_Pydantic,
+    response_model=db_models.TableOut_Pydantic,
     responses={
         403: {
             "description": "Forbidden",
@@ -89,153 +91,13 @@ async def table(
 
     item = await utilities.get_item_in_database(
         username=username,
-        model_name="Table",
+        model_name="TableOut",
         query_filter=Q(table_id=table_id)
     )
 
     return item
 
-@router.post(
-    path="/{table_id}/add_column",
-    responses={
-        200: {
-            "description": "Successful Response",
-            "content": {
-                "application/json": {
-                    "example": {"status": True}
-                }
-            }
-        },
-        403: {
-            "description": "Forbidden",
-            "content": {
-                "application/json": {
-                    "example": {"detail": "No access to table."}
-                }
-            }
-        },
-        404: {
-            "description": "Not Found",
-            "content": {
-                "application/json": {
-                    "example": {"detail": "Table does not exist."}
-                }
-            }
-        },
-        500: {
-            "description": "Internal Server Error",
-            "content": {
-                "application/json": {
-                    "Internal Server Error"
-                }
-            }
-        }
-    }
-)
-async def add_column(
-    request: Request,
-    table_id: str,
-    info: models.AddColumn,
-    username: int=Depends(authentication_handler.JWTBearer())
-):
-    """
-    Create a new column for a table.
-    More information at https://docs.qwikgeo.com/tables/#add-column
-    """
 
-    await utilities.validate_item_access(
-        model_name="Table",
-        query_filter=Q(table_id=table_id),
-        username=username,
-        write_access=True
-    )
-
-    pool = request.app.state.database
-
-    async with pool.acquire() as con:
-
-        query = f"""
-            ALTER TABLE user_data."{table_id}"
-            ADD COLUMN "{info.column_name}" {info.column_type};
-        """
-
-        await con.fetch(query)
-
-        if os.path.exists(f'{os.getcwd()}/cache/user_data_{table_id}'):
-            shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table_id}')
-
-        return {"status": True}
-
-@router.delete(
-    path="/{table_id}/delete_column/{column}",
-    responses={
-        200: {
-            "description": "Successful Response",
-            "content": {
-                "application/json": {
-                    "example": {"status": True}
-                }
-            }
-        },
-        403: {
-            "description": "Forbidden",
-            "content": {
-                "application/json": {
-                    "example": {"detail": "No access to table."}
-                }
-            }
-        },
-        404: {
-            "description": "Not Found",
-            "content": {
-                "application/json": {
-                    "example": {"detail": "Table does not exist."}
-                }
-            }
-        },
-        500: {
-            "description": "Internal Server Error",
-            "content": {
-                "application/json": {
-                    "Internal Server Error"
-                }
-            }
-        }
-    }
-)
-async def delete_column(
-    request: Request,
-    table_id: str,
-    column: str,
-    username: int=Depends(authentication_handler.JWTBearer())
-):
-    """
-    Delete a column for a table.
-    More information at https://docs.qwikgeo.com/tables/#delete-column
-    """
-
-    await utilities.validate_item_access(
-        model_name="Table",
-        query_filter=Q(table_id=table_id),
-        username=username,
-        write_access=True
-    )
-
-    pool = request.app.state.database
-
-    async with pool.acquire() as con:
-
-        query = f"""
-            ALTER TABLE user_data."{table_id}"
-            DROP COLUMN IF EXISTS "{column}";
-        """
-
-        await con.fetch(query)
-
-        if os.path.exists(f'{os.getcwd()}/cache/user_data_{table_id}'):
-            shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table_id}')
-
-        return {"status": True}
 
 @router.post(
     path="/",

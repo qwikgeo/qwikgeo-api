@@ -3,17 +3,6 @@
 from typing import Literal, List
 from pydantic import BaseModel, Field
 
-class AddColumn(BaseModel):
-    """Model for adding a column to a table"""
-
-    column_name: str
-    column_type: Literal['text','integer','bigint','double precision','boolean','time','uuid']
-
-class DeleteColumn(BaseModel):
-    """Model for deleting a column from a table"""
-
-    column_name: str
-
 class Column(BaseModel):
     """Model for adding a column"""
 

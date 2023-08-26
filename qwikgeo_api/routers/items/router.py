@@ -12,7 +12,7 @@ router = APIRouter()
 
 @router.get(
     path="/",
-    response_model=List[db_models.Item_Pydantic],
+    response_model=List[db_models.ItemOut_Pydantic],
     responses={
         500: {
             "description": "Internal Server Error",
@@ -25,56 +25,23 @@ router = APIRouter()
     }
 )
 async def items(
-    username: int=Depends(authentication_handler.JWTBearer()),
-    q: str="",
-    limit: int=10,
-    offset: int=0,
-    item_type: str="",
+    username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
     List all items.
     More information at https://docs.qwikgeo.com/items/#items
     """
 
-    if q == "":
-        if item_type:
-            portal_items = await utilities.get_multiple_items_in_database(
-                username=username,
-                model_name=item_type,
-                limit=limit,
-                offset=offset
-            )
-        else:
-            portal_items = await utilities.get_multiple_items_in_database(
-                username=username,
-                model_name="Item",
-                limit=limit,
-                offset=offset
-            )
+    db_items = await utilities.get_multiple_items_in_database(
+        username=username,
+        model_name="ItemOut"
+    )
 
-    else:
-        if item_type:
-            portal_items = await utilities.get_multiple_items_in_database(
-                username=username,
-                model_name=item_type,
-                query_filter=Q(Q(title__icontains=q) | Q(description__icontains=q)),
-                limit=limit,
-                offset=offset
-            )
-        else:
-            portal_items = await utilities.get_multiple_items_in_database(
-                username=username,
-                model_name="Item",
-                query_filter=Q(Q(title__icontains=q) | Q(description__icontains=q)),
-                limit=limit,
-                offset=offset
-            )
-
-    return portal_items
+    return db_items
 
 @router.get(
-    path="/{portal_id}",
-    response_model=db_models.Item_Pydantic,
+    path="/{item_id}",
+    response_model=db_models.ItemOut_Pydantic,
     responses={
         500: {
             "description": "Internal Server Error",
@@ -87,7 +54,7 @@ async def items(
     }
 )
 async def item(
-    portal_id: str,
+    item_id: str,
     username: int=Depends(authentication_handler.JWTBearer())
 ):
     """
@@ -95,8 +62,10 @@ async def item(
     More information at https://docs.qwikgeo.com/items/#item
     """
 
-    return await utilities.get_item_in_database(
+    db_item = await utilities.get_item_in_database(
         username=username,
-        model_name="Item",
-        query_filter=Q(portal_id=portal_id)
+        model_name="ItemOut",
+        query_filter=Q(portal_id=item_id)
     )
+
+    return db_item

@@ -8,14 +8,14 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from qwikgeo_api import db
 from qwikgeo_api import config
 from qwikgeo_api.routers.authentication import router as authentication_router
-from qwikgeo_api.routers.groups import router as groups_router
-from qwikgeo_api.routers.users import router as users_router
-from qwikgeo_api.routers.items import router as items_router
-from qwikgeo_api.routers.tables import router as tables_router
+from qwikgeo_api.routers.items.groups import router as groups_router
+from qwikgeo_api.routers.items.users import router as users_router
+from qwikgeo_api.routers.items.tables import router as tables_router
 from qwikgeo_api.routers.imports import router as imports_router
 from qwikgeo_api.routers.analysis import router as analysis_router
 from qwikgeo_api.routers.collections import router as collections_router
-from qwikgeo_api.routers.maps import router as maps_router
+from qwikgeo_api.routers.items.maps import router as maps_router
+from qwikgeo_api.routers.items import router as items_router
 
 DESCRIPTION = """A python api to create a geoportal."""
 
@@ -60,26 +60,26 @@ app.include_router(
 )
 
 app.include_router(
-    groups_router.router,
-    prefix="/api/v1/groups",
-    tags=["Groups"],
-)
-
-app.include_router(
-    users_router.router,
-    prefix="/api/v1/users",
-    tags=["Users"],
-)
-
-app.include_router(
     items_router.router,
     prefix="/api/v1/items",
     tags=["Items"],
 )
 
 app.include_router(
+    groups_router.router,
+    prefix="/api/v1/items/groups",
+    tags=["Groups"],
+)
+
+app.include_router(
+    users_router.router,
+    prefix="/api/v1/items/users",
+    tags=["Users"],
+)
+
+app.include_router(
     tables_router.router,
-    prefix="/api/v1/tables",
+    prefix="/api/v1/items/tables",
     tags=["Tables"],
 )
 
@@ -103,7 +103,7 @@ app.include_router(
 
 app.include_router(
     maps_router.router,
-    prefix="/api/v1/maps",
+    prefix="/api/v1/items/maps",
     tags=["Maps"],
 )
 

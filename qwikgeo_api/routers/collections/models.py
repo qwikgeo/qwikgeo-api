@@ -4,6 +4,17 @@ from typing import NamedTuple, Union, Literal, Optional, List
 from pydantic import BaseModel, Field
 from typing_extensions import Annotated
 
+class AddColumn(BaseModel):
+    """Model for adding a column to a table"""
+
+    column_name: str
+    column_type: Literal['text','integer','bigint','double precision','boolean','time','uuid']
+
+class DeleteColumn(BaseModel):
+    """Model for deleting a column from a table"""
+
+    column_name: str
+
 LonField = Annotated[
     Union[float, int],
     Field(

@@ -6,14 +6,14 @@ from fastapi import APIRouter, HTTPException, Depends
 from tortoise import exceptions
 
 from qwikgeo_api import db_models
-import qwikgeo_api.routers.users.models as models
+import qwikgeo_api.routers.items.users.models as models
 from qwikgeo_api import authentication_handler
 
 router = APIRouter()
 
 @router.post(
     path="/",
-    response_model=models.User_Pydantic,
+    response_model=models.UserOut_Pydantic,
     responses={
         400: {
             "description": "Bad Request",
@@ -50,13 +50,13 @@ async def create_user(
             email=user.email,
         )
         await user_obj.save()
-        return await models.User_Pydantic.from_tortoise_orm(user_obj)
+        return await models.UserOut_Pydantic.from_tortoise_orm(user_obj)
     except exceptions.IntegrityError as exc:
         raise HTTPException(status_code=400, detail="Username already exist.") from exc
 
 @router.get(
     "/me",
-    response_model=models.User_Pydantic,
+    response_model=models.UserOut_Pydantic,
     responses={
         404: {
             "description": "Not Found",
@@ -85,7 +85,7 @@ async def get_user(
     """
 
     try:
-        user = await models.User_Pydantic.from_queryset_single(
+        user = await models.UserOut_Pydantic.from_queryset_single(
             db_models.User.get(username=username)
         )
         return user
@@ -94,7 +94,7 @@ async def get_user(
 
 @router.put(
     path="/me",
-    response_model=models.User_Pydantic,
+    response_model=models.UserOut_Pydantic,
     responses={
         404: {
             "description": "Not Found",
@@ -125,7 +125,7 @@ async def update_user(
 
     try:
         await db_models.User.filter(username=username).update(**user.dict(exclude_unset=True))
-        return await models.User_Pydantic.from_queryset_single(
+        return await models.UserOut_Pydantic.from_queryset_single(
             db_models.User.get(username=username)
         )
     except exceptions.DoesNotExist as exc:

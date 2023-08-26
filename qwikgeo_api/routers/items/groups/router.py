@@ -4,7 +4,6 @@ import uuid
 from typing import List
 from fastapi import APIRouter, HTTPException, Depends, status
 from tortoise import exceptions
-from tortoise.query_utils import Prefetch
 from tortoise.expressions import Q
 
 from qwikgeo_api import db_models

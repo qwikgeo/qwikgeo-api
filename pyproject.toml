@@ -1,4 +1,4 @@
 [tool.aerich]
-tortoise_orm = "main.DB_CONFIG"
+tortoise_orm = "qwikgeo_api.main.DB_CONFIG"
 location = "migrations"
 src_folder = "./."

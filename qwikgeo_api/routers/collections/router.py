@@ -103,9 +103,9 @@ async def collections(
             db_tables.append(
                 {
                     "id" : f"{table.table_id}",
-                    "title" : table.portal_id.title,
-                    "description" : table.portal_id.description,
-                    "keywords": table.portal_id.tags,
+                    "title" : table.item.title,
+                    "description" : table.item.description,
+                    "keywords": table.item.tags,
                     "links": [
                         {
                             "type": "application/json",
@@ -246,9 +246,9 @@ async def collection(
 
     return {
         "id": f"{table_id}",
-        "title" : item_metadata.portal_id.title,
-        "description" : item_metadata.portal_id.description,
-        "keywords": item_metadata.portal_id.tags,
+        "title" : item_metadata.item.title,
+        "description" : item_metadata.item.description,
+        "keywords": item_metadata.item.tags,
         "links": [
             {
                 "type": "application/json",
@@ -359,7 +359,7 @@ async def queryables(
 
     queryable = {
         "$id": f"{url}api/v1/collections/{table_id}/queryables",
-        "title": item_metadata.portal_id.title,
+        "title": item_metadata.title,
         "type": "object",
         "$schema": "http://json-schema.org/draft/2019-09/schema",
         "properties": {}
@@ -1392,8 +1392,8 @@ async def tiles(
 
     tile_info = {
         "id": f"{table_id}",
-        "title": item_metadata.portal_id.title,
-        "description": item_metadata.portal_id.description,
+        "title": item_metadata.title,
+        "description": item_metadata.description,
         "links": [
             {
                 "type": "application/json",
@@ -1615,11 +1615,11 @@ async def tiles_metadata(
         # "bounds": "-124.953634,-16.536406,109.929807,66.969298",
         # "center": "-84.375000,44.951199,5",
         "attribution": None,
-        "description": item_metadata.portal_id.description,
+        "description": item_metadata.description,
         "vector_layers": [
             {
                 "id": f"{table_id}",
-                "description": item_metadata.portal_id.description,
+                "description": item_metadata.description,
                 "minzoom": 0,
                 "maxzoom": 22,
                 "fields": {}
@@ -2144,10 +2144,22 @@ async def numeric_breaks(
 
         min_number = await con.fetchrow(min_query)
 
+        max_query = f"""
+            SELECT MAX("{info.column}")
+            FROM user_data."{table_id}"
+        """
+
+        max_query += await utilities.generate_where_clause(info, con)
+
+        max_table_number = await con.fetchrow(max_query)
+
         for index, max_number in enumerate(break_points[f"{info.break_type}_bins"]):
             if index == 0:
                 minimum = min_number['min']
                 maximum = max_number
+            elif index+1 == len(break_points[f"{info.break_type}_bins"]):
+                minimum = break_points[f"{info.break_type}_bins"][index-1]
+                maximum = max_table_number['max']
             else:
                 minimum = break_points[f"{info.break_type}_bins"][index-1]
                 maximum = max_number
@@ -2508,3 +2520,145 @@ async def closest_features(
     )    
 
     return results
+
+@router.post(
+    path="/{table_id}/add_column",
+    responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {"status": True}
+                }
+            }
+        },
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def add_column(
+    request: Request,
+    table_id: str,
+    info: models.AddColumn,
+    username: int=Depends(authentication_handler.JWTBearer())
+):
+    """
+    Create a new column for a table.
+    More information at https://docs.qwikgeo.com/tables/#add-column
+    """
+
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=table_id),
+        username=username,
+        write_access=True
+    )
+
+    pool = request.app.state.database
+
+    async with pool.acquire() as con:
+
+        query = f"""
+            ALTER TABLE user_data."{table_id}"
+            ADD COLUMN "{info.column_name}" {info.column_type};
+        """
+
+        await con.fetch(query)
+
+        if os.path.exists(f'{os.getcwd()}/cache/user_data_{table_id}'):
+            shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table_id}')
+
+        return {"status": True}
+
+@router.delete(
+    path="/{table_id}/delete_column/{column}",
+    responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "application/json": {
+                    "example": {"status": True}
+                }
+            }
+        },
+        403: {
+            "description": "Forbidden",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No access to table."}
+                }
+            }
+        },
+        404: {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Table does not exist."}
+                }
+            }
+        },
+        500: {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "Internal Server Error"
+                }
+            }
+        }
+    }
+)
+async def delete_column(
+    request: Request,
+    table_id: str,
+    column: str,
+    username: int=Depends(authentication_handler.JWTBearer())
+):
+    """
+    Delete a column for a table.
+    More information at https://docs.qwikgeo.com/tables/#delete-column
+    """
+
+    await utilities.validate_item_access(
+        model_name="Table",
+        query_filter=Q(table_id=table_id),
+        username=username,
+        write_access=True
+    )
+
+    pool = request.app.state.database
+
+    async with pool.acquire() as con:
+
+        query = f"""
+            ALTER TABLE user_data."{table_id}"
+            DROP COLUMN IF EXISTS "{column}";
+        """
+
+        await con.fetch(query)
+
+        if os.path.exists(f'{os.getcwd()}/cache/user_data_{table_id}'):
+            shutil.rmtree(f'{os.getcwd()}/cache/user_data_{table_id}')
+
+        return {"status": True}
