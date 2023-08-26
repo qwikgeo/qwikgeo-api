@@ -60,7 +60,7 @@ Shapely==1.8.4
 six==1.16.0
 sniffio==1.2.0
 soupsieve==2.3.2.post1
-starlette==0.25.0
+starlette==0.27.0
 tomlkit==0.11.4
 tortoise-orm==0.19.2
 typing-extensions==4.3.0
