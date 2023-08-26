@@ -21,3 +21,4 @@ class User(BaseModel):
 
 User_Pydantic = pydantic_model_creator(db_models.User, name="User", exclude=("password_hash", ))
 UserIn_Pydantic = pydantic_model_creator(db_models.User, name="UserIn", exclude_readonly=True)
+UserOut_Pydantic = pydantic_model_creator(db_models.User, name="UserOut_Pydantic", exclude=("password_hash", "items", "tables", "maps",))

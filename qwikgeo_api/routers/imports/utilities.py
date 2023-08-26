@@ -329,7 +329,7 @@ async def get_arcgis_data(
                     )
 
                     item = {
-                        "username": username,
+                        "user_id": username,
                         "table_id": table_id,
                         "title": title,
                         "tags": tags,

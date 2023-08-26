@@ -48,6 +48,6 @@ Build Dockerfile into a docker image to deploy to the cloud.
 
 ## Aerich Commmands
 
-`aerich init -t main.DB_CONFIG --location migrations -s .`
+`aerich init -t qwikgeo_api.main.DB_CONFIG --location migrations -s .`
 
 `aerich init-db`
